@@ -390,7 +390,7 @@ fun TypingTimeModeScreen(
 
 // Global invisible input overlay that follows the IME, keeping visible UI fixed
 @Composable
-private fun GlobalHiddenInputOverlay(
+fun GlobalHiddenInputOverlay(
     value: String,
     onValueChange: (String) -> Unit,
     enabled: Boolean,
@@ -429,7 +429,7 @@ private fun GlobalHiddenInputOverlay(
 
 
 @Composable
-private fun CleanTypingArea(
+fun CleanTypingArea(
     targetText: String,
     cumulativeInput: String,
     input: String,
@@ -496,7 +496,7 @@ private fun CleanTypingArea(
     }
 }
 
-private enum class CharStatus { Pending, Correct, Incorrect }
+enum class CharStatus { Pending, Correct, Incorrect }
 
 private fun compareText(target: String, typed: String): Pair<Int, Int> {
     var correct = 0
