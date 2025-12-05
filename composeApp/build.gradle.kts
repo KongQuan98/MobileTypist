@@ -35,6 +35,8 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.backdrop)
+            implementation(libs.capsule)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -49,7 +51,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.feather)
-            implementation("media.kamel:kamel-image-default:1.0.8")
+            implementation(libs.kamel.image.default)
             implementation(libs.multiplatform.settings)
             implementation(libs.kotlinx.serialization.json)
         }

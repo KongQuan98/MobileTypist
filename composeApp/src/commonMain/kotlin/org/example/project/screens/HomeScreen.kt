@@ -1,6 +1,5 @@
 package org.example.project.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +15,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,13 +31,15 @@ import compose.icons.feathericons.Activity
 import compose.icons.feathericons.BarChart2
 import compose.icons.feathericons.Clock
 import compose.icons.feathericons.FileText
-import compose.icons.feathericons.Settings
 import compose.icons.feathericons.Info
+import compose.icons.feathericons.Settings
 import org.example.project.ThemeColors
 import org.example.project.data.StorageManager
 import org.example.project.data.createSettings
 import org.example.project.navigation.NavigationManager
 import org.example.project.navigation.Screen
+import org.example.project.utils.LiquidBottomTabs
+import org.example.project.utils.TabListSettings
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -50,7 +50,7 @@ fun HomeScreen(
 ) {
     val bestWpm = storageManager.getBestWpm()
     val totalTests = storageManager.getTotalTests()
-    
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = ThemeColors.Background
@@ -62,112 +62,111 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-        // App Title
-        Text(
-            text = "Keyboard Warrior",
-            style = TextStyle(
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = ThemeColors.OnSurface
+            // App Title
+            Text(
+                text = "Keyboard Warrior",
+                style = TextStyle(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = ThemeColors.OnSurface
+                )
             )
-        )
-        
-        Spacer(Modifier.height(8.dp))
-        
-        Text(
-            text = "Master Your Typing Skills",
-            style = TextStyle(
-                fontSize = 16.sp,
-                color = ThemeColors.OnSurface.copy(alpha = 0.7f)
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = "Master Your Typing Skills",
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    color = ThemeColors.OnSurface.copy(alpha = 0.7f)
+                )
             )
-        )
-        
-        Spacer(Modifier.height(40.dp))
-        
-        // Statistics Cards
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                title = "Best WPM",
-                value = bestWpm.toString(),
-                icon = FeatherIcons.Activity,
-                modifier = Modifier.weight(1f)
+
+            Spacer(Modifier.height(40.dp))
+
+            // Statistics Cards
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    title = "Best WPM",
+                    value = bestWpm.toString(),
+                    icon = FeatherIcons.Activity,
+                    modifier = Modifier.weight(1f)
+                )
+                StatCard(
+                    title = "Tests",
+                    value = totalTests.toString(),
+                    icon = FeatherIcons.BarChart2,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            // Mode Selection
+            Text(
+                text = "Choose Your Challenge",
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = ThemeColors.OnSurface
+                )
             )
-            StatCard(
-                title = "Tests",
-                value = totalTests.toString(),
-                icon = FeatherIcons.BarChart2,
-                modifier = Modifier.weight(1f)
+
+            Spacer(Modifier.height(16.dp))
+
+            ModeButton(
+                title = "Time Mode",
+                description = "Type as much as you can in a set time",
+                icon = FeatherIcons.Clock,
+                onClick = { navigationManager.navigateTo(Screen.TimeModeScreen) },
+                modifier = Modifier.fillMaxWidth()
             )
-        }
-        
-        Spacer(Modifier.height(32.dp))
-        
-        // Mode Selection
-        Text(
-            text = "Choose Your Challenge",
-            style = TextStyle(
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = ThemeColors.OnSurface
+
+            Spacer(Modifier.height(12.dp))
+
+            ModeButton(
+                title = "Words Mode",
+                description = "Type a specific number of words",
+                icon = FeatherIcons.FileText,
+                onClick = { navigationManager.navigateTo(Screen.WordsMode) },
+                modifier = Modifier.fillMaxWidth()
             )
-        )
-        
-        Spacer(Modifier.height(16.dp))
-        
-        ModeButton(
-            title = "Time Mode",
-            description = "Type as much as you can in a set time",
-            icon = FeatherIcons.Clock,
-            onClick = { navigationManager.navigateTo(Screen.TimeModeScreen) },
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        Spacer(Modifier.height(12.dp))
-        
-        ModeButton(
-            title = "Words Mode",
-            description = "Type a specific number of words",
-            icon = FeatherIcons.FileText,
-            onClick = { navigationManager.navigateTo(Screen.WordsMode) },
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        Spacer(Modifier.height(12.dp))
-        
-        ModeButton(
-            title = "Quotes Mode",
-            description = "Type inspiring quotes and passages",
-            icon = FeatherIcons.FileText,
-            onClick = { navigationManager.navigateTo(Screen.QuotesMode) },
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        Spacer(Modifier.height(32.dp))
-        
-        // Bottom Navigation
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            IconButton(
-                icon = FeatherIcons.BarChart2,
-                label = "Stats",
-                onClick = { navigationManager.navigateTo(Screen.Statistics) }
+
+            Spacer(Modifier.height(12.dp))
+
+            ModeButton(
+                title = "Quotes Mode",
+                description = "Type inspiring quotes and passages",
+                icon = FeatherIcons.FileText,
+                onClick = { navigationManager.navigateTo(Screen.QuotesMode) },
+                modifier = Modifier.fillMaxWidth()
             )
-            IconButton(
-                icon = FeatherIcons.Settings,
-                label = "Settings",
-                onClick = { navigationManager.navigateTo(Screen.Settings) }
+
+            Spacer(Modifier.height(32.dp))
+
+            // Bottom Navigation
+            LiquidBottomTabs(
+                tabList = listOf(
+                    TabListSettings(
+                        icon = FeatherIcons.BarChart2,
+                        title = "Stats",
+                        onClick = { navigationManager.navigateTo(Screen.Statistics) }
+                    ),
+                    TabListSettings(
+                        icon = FeatherIcons.Settings,
+                        title = "Settings",
+                        onClick = { navigationManager.navigateTo(Screen.Settings) }
+                    ),
+                    TabListSettings(
+                        icon = FeatherIcons.Info,
+                        title = "About",
+                        onClick = { navigationManager.navigateTo(Screen.About) }
+                    ),
+                )
             )
-            IconButton(
-                icon = FeatherIcons.Info,
-                label = "About",
-                onClick = { navigationManager.navigateTo(Screen.About) }
-            )
-        }
         }
     }
 }
