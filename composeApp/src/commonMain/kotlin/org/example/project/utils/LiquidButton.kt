@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
-actual fun LiquidBottomTabs(
-    tabList: List<TabListSettings>,
-    selectedTabIndex: Int,
-) { }
+expect fun LiquidButton(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    onClick: () -> Unit,
+)

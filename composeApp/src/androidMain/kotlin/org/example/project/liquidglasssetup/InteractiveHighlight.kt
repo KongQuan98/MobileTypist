@@ -1,4 +1,4 @@
-package org.example.project.utils
+package org.example.project.liquidglasssetup
 
 import android.graphics.RuntimeShader
 import android.os.Build

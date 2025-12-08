@@ -32,7 +32,9 @@ import org.example.project.ThemeColors
 import org.example.project.data.AppSettings
 import org.example.project.data.StorageManager
 import org.example.project.data.createSettings
+import org.example.project.getPlatform
 import org.example.project.navigation.NavigationManager
+import org.example.project.utils.LiquidToggle
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -258,10 +260,20 @@ private fun SettingRow(
                 )
             )
         }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
+        when (getPlatform().name == "Android") {
+            true -> {
+                LiquidToggle(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange
+                )
+            }
+            else -> {
+                Switch(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange
+                )
+            }
+        }
     }
 }
 

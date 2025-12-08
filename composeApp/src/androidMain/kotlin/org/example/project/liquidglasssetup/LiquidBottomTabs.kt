@@ -1,4 +1,4 @@
-package org.example.project.utils
+package org.example.project.liquidglasssetup
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut

@@ -1,4 +1,4 @@
-package org.example.project.utils
+package org.example.project.liquidglasssetup
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown

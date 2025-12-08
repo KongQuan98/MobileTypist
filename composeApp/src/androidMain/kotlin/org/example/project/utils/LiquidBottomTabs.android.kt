@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults.contentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,20 +17,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import org.example.project.ThemeColors
+import org.example.project.liquidglasssetup.LiquidBottomTab
+import org.example.project.liquidglasssetup.LiquidBottomTabs
 
 @Composable
 actual fun LiquidBottomTabs(
-    tabList: List<TabListSettings>
+    tabList: List<TabListSettings>,
+    selectedTabIndex: Int,
 ) {
     val backdrop = rememberLayerBackdrop()
 
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    var selectedIndex by rememberSaveable { mutableIntStateOf(selectedTabIndex) }
+
+    LaunchedEffect(selectedTabIndex) {
+        selectedIndex = selectedTabIndex
+    }
 
     LiquidBottomTabs(
-        selectedTabIndex = { selectedTabIndex },
+        selectedTabIndex = { selectedIndex },
         onTabSelected = {
-            selectedTabIndex = it
-            tabList[it].onClick
+            tabList[it].onClick(it)
         },
         backdrop = backdrop,
         tabsCount = 3,
@@ -38,7 +45,10 @@ actual fun LiquidBottomTabs(
         tabList.forEachIndexed { index, item ->
             val (title, icon, onClicked) = item
             LiquidBottomTab(
-                onClick = { selectedTabIndex = index }
+                onClick = {
+                    selectedIndex = index
+                    onClicked(index)
+                }
             ) {
                 Icon(
                     imageVector = icon,

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.example.project.data.StorageManager
 import org.example.project.screens.*
+import org.example.project.ui.StarryBackground
 
 @Composable
 fun Navigation(
@@ -24,11 +25,13 @@ fun Navigation(
     
     when (currentScreen) {
         is Screen.Home -> {
-            HomeScreen(
-                navigationManager = navigationManager,
-                storageManager = storageManager,
-                modifier = modifier
-            )
+            StarryBackground {
+                HomeScreen(
+                    navigationManager = navigationManager,
+                    storageManager = storageManager,
+                    modifier = modifier
+                )
+            }
         }
         is Screen.TimeModeScreen -> {
             TimeModeScreen(
