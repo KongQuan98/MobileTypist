@@ -1,7 +1,7 @@
 package org.example.project
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,18 +23,18 @@ fun App(darkTheme: Boolean = false) {
     val storageManager = remember {
         StorageManager(settings = createSettings())
     }
-    
+
     // Load theme from settings and manage state
     val initialSettings = storageManager.getSettings()
     var isDarkTheme by remember { mutableStateOf(initialSettings.darkTheme) }
-    
+
     // Update theme if darkTheme parameter changes (for preview)
     LaunchedEffect(darkTheme) {
         if (darkTheme != initialSettings.darkTheme) {
             isDarkTheme = darkTheme
         }
     }
-    
+
     MobileTypistTheme(darkTheme = isDarkTheme) {
         Navigation(
             navigationManager = navigationManager,
@@ -42,7 +42,7 @@ fun App(darkTheme: Boolean = false) {
             onThemeChange = { newTheme ->
                 isDarkTheme = newTheme
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().safeDrawingPadding()
         )
     }
 }

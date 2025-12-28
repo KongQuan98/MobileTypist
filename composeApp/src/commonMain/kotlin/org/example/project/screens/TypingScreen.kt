@@ -24,20 +24,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -70,7 +71,8 @@ fun TypingScreen(
     wordOptions: List<Int>? = null,
     onTestComplete: (TypingTestResult) -> Unit,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isStarted: Boolean = false
 ) {
     val primary = Color(0xFF1E3A8A)
     val onBg = Color(0xFFE5E7EB)
@@ -98,7 +100,7 @@ fun TypingScreen(
     var currentWordStartIndex by remember { mutableIntStateOf(0) }
     var hasStartedCurrentWord by remember { mutableStateOf(false) }
     var startTime by remember { mutableStateOf(0L) }
-    
+
     val charStatuses = remember(targetText) {
         mutableStateListOf<CharStatus>().apply {
             repeat(targetText.length) { add(CharStatus.Pending) }
@@ -160,13 +162,21 @@ fun TypingScreen(
     fun startTest() {
         hasStarted = true
         scope.launch {
-            delay(500)
+            delay(100)
             showTypingScreen = true
             isTyping = true
             startTime = Clock.System.now().toEpochMilliseconds()
             delay(100)
             focusRequester.requestFocus()
             keyboardController?.show()
+        }
+    }
+
+    LaunchedEffect(isStarted) {
+        if (isStarted && !hasStarted) {
+            startTest()
+        } else if (!isStarted && hasStarted) {
+            resetTest()
         }
     }
 
@@ -177,7 +187,7 @@ fun TypingScreen(
         val elapsedSeconds = ((Clock.System.now().toEpochMilliseconds() - startTime) / 1000).toInt().coerceAtLeast(1)
         val wpm = calculateWpm(correctCount, elapsedSeconds)
         val accuracy = calculateAccuracy(correctCount, errorCount)
-        
+
         val result = TypingTestResult(
             mode = mode,
             wpm = wpm,
@@ -188,7 +198,7 @@ fun TypingScreen(
             wordsTyped = wordsTyped
         )
         onTestComplete(result)
-        
+
         scope.launch {
             delay(500)
             showResultsScreen = true
@@ -219,42 +229,46 @@ fun TypingScreen(
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            when (mode) {
-                TypingMode.TIME -> {
-                    StartMenu(
-                        visible = !hasStarted && !isFinished,
-                        timeOptions = timeOptions ?: listOf(15, 30, 60),
-                        selectedTime = selectedTime,
-                        onTimeSelected = { selectedTime = it; resetTest() },
-                        onStart = { startTest() },
-                        onSurface = onSurface,
-                        onBg = onBg,
-                        primary = primary,
-                        outline = outline
-                    )
-                }
-                TypingMode.WORDS -> {
-                    WordsStartMenu(
-                        visible = !hasStarted && !isFinished,
-                        wordOptions = wordOptions ?: listOf(10, 25, 50, 100),
-                        selectedWords = selectedWords,
-                        onWordsSelected = { selectedWords = it; resetTest() },
-                        onStart = { startTest() },
-                        onSurface = onSurface,
-                        onBg = onBg,
-                        primary = primary,
-                        outline = outline
-                    )
-                }
-                TypingMode.QUOTES -> {
-                    QuotesStartMenu(
-                        visible = !hasStarted && !isFinished,
-                        onStart = { startTest() },
-                        onSurface = onSurface,
-                        onBg = onBg,
-                        primary = primary,
-                        outline = outline
-                    )
+            if (!isStarted) { // Only show internal start menus if not started from outside
+                when (mode) {
+                    TypingMode.TIME -> {
+                        StartMenu(
+                            visible = !hasStarted && !isFinished,
+                            timeOptions = timeOptions ?: listOf(15, 30, 60),
+                            selectedTime = selectedTime,
+                            onTimeSelected = { selectedTime = it; resetTest() },
+                            onStart = { startTest() },
+                            onSurface = onSurface,
+                            onBg = onBg,
+                            primary = primary,
+                            outline = outline
+                        )
+                    }
+
+                    TypingMode.WORDS -> {
+                        WordsStartMenu(
+                            visible = !hasStarted && !isFinished,
+                            wordOptions = wordOptions ?: listOf(10, 25, 50, 100),
+                            selectedWords = selectedWords,
+                            onWordsSelected = { selectedWords = it; resetTest() },
+                            onStart = { startTest() },
+                            onSurface = onSurface,
+                            onBg = onBg,
+                            primary = primary,
+                            outline = outline
+                        )
+                    }
+
+                    TypingMode.QUOTES -> {
+                        QuotesStartMenu(
+                            visible = !hasStarted && !isFinished,
+                            onStart = { startTest() },
+                            onSurface = onSurface,
+                            onBg = onBg,
+                            primary = primary,
+                            outline = outline
+                        )
+                    }
                 }
             }
 
@@ -411,7 +425,7 @@ fun TypingScreen(
                                     }
                                 }
                             }
-                            
+
                             wordsTyped++
                             if (mode == TypingMode.WORDS && wordsTyped >= selectedWords) {
                                 finishTest()
@@ -437,7 +451,7 @@ fun TypingScreen(
                         }
                         currentCharIndex++
                         input = new
-                        
+
                         if (mode == TypingMode.QUOTES && currentCharIndex >= targetText.length) {
                             finishTest()
                             return@GlobalHiddenInputOverlay
@@ -601,4 +615,3 @@ private fun QuotesStartMenu(
         }
     }
 }
-

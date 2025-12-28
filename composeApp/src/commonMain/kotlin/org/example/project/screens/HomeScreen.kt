@@ -1,336 +1,206 @@
 package org.example.project.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.Activity
-import compose.icons.feathericons.BarChart2
-import compose.icons.feathericons.Clock
-import compose.icons.feathericons.FileText
-import compose.icons.feathericons.Home
-import compose.icons.feathericons.Info
+import compose.icons.feathericons.ArrowLeft
+import compose.icons.feathericons.ArrowRight
 import compose.icons.feathericons.Settings
-import org.example.project.Platform
+import kotlinx.coroutines.launch
 import org.example.project.ThemeColors
+import org.example.project.data.QuotesData
 import org.example.project.data.StorageManager
+import org.example.project.data.TypingMode
 import org.example.project.data.createSettings
-import org.example.project.getPlatform
 import org.example.project.navigation.NavigationManager
 import org.example.project.navigation.Screen
 import org.example.project.ui.StarryBackground
-import org.example.project.utils.LiquidBottomTabs
-import org.example.project.utils.LiquidButton
-import org.example.project.utils.TabListSettings
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     navigationManager: NavigationManager,
     storageManager: StorageManager,
     modifier: Modifier = Modifier
 ) {
-    val bestWpm = storageManager.getBestWpm()
-    val totalTests = storageManager.getTotalTests()
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    val modes = listOf(TypingMode.TIME, TypingMode.WORDS, TypingMode.QUOTES)
+    val pagerState = rememberPagerState(pageCount = { modes.size })
+    var showContent by remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
 
-    StarryBackground {
-        Surface(
-            modifier = modifier.fillMaxSize(),
-            color = Color.Transparent
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                // App Title
-                Text(
-                    text = "Keyboard Warrior",
-                    style = TextStyle(
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = ThemeColors.OnSurface
-                    )
-                )
+    val timeOptions = listOf(15, 30, 60)
+    val wordOptions = listOf(10, 25, 50, 100)
 
-                Spacer(Modifier.height(8.dp))
-
-                Text(
-                    text = "Master Your Typing Skills",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        color = ThemeColors.OnSurface.copy(alpha = 0.7f)
-                    )
-                )
-
-                Spacer(Modifier.height(40.dp))
-
-                // Statistics Cards
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    StatCard(
-                        title = "Best WPM",
-                        value = bestWpm.toString(),
-                        icon = FeatherIcons.Activity,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatCard(
-                        title = "Tests",
-                        value = totalTests.toString(),
-                        icon = FeatherIcons.BarChart2,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Spacer(Modifier.height(32.dp))
-
-                // Mode Selection
-                Text(
-                    text = "Choose Your Challenge",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = ThemeColors.OnSurface
-                    )
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                ModeButton(
-                    title = "Time Mode",
-                    description = "Type as much as you can in a set time",
-                    icon = FeatherIcons.Clock,
-                    onClick = { navigationManager.navigateTo(Screen.TimeModeScreen) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                ModeButton(
-                    title = "Words Mode",
-                    description = "Type a specific number of words",
-                    icon = FeatherIcons.FileText,
-                    onClick = { navigationManager.navigateTo(Screen.WordsMode) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                ModeButton(
-                    title = "Quotes Mode",
-                    description = "Type inspiring quotes and passages",
-                    icon = FeatherIcons.FileText,
-                    onClick = { navigationManager.navigateTo(Screen.QuotesMode) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(32.dp))
-
-                // Bottom Navigation
-                LiquidBottomTabs(
-                    tabList = listOf(
-                        TabListSettings(
-                            icon = FeatherIcons.Home,
-                            title = "Home",
-                            onClick = { navigationManager.navigateTo(Screen.Home) }
-                        ),
-                        TabListSettings(
-                            icon = FeatherIcons.BarChart2,
-                            title = "Stats",
-                            onClick = { navigationManager.navigateTo(Screen.Statistics) }
-                        ),
-                        TabListSettings(
-                            icon = FeatherIcons.Settings,
-                            title = "Settings",
-                            onClick = { navigationManager.navigateTo(Screen.Settings) }
-                        ),
-                        TabListSettings(
-                            icon = FeatherIcons.Info,
-                            title = "About",
-                            onClick = { navigationManager.navigateTo(Screen.About) }
-                        ),
-                    ),
-                    selectedTabIndex = selectedTabIndex
-                )
+    val typingTexts = remember {
+        modes.map {
+            when (it) {
+                TypingMode.TIME -> QuotesData.quotes.joinToString(" ")
+                TypingMode.WORDS -> QuotesData.getQuoteForWords(wordOptions.first())
+                TypingMode.QUOTES -> QuotesData.getRandomQuote()
             }
         }
     }
+    var currentTypingText by remember { mutableStateOf(typingTexts[0]) }
 
-}
-
-@Composable
-private fun StatCard(
-    title: String,
-    value: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = ThemeColors.Surface
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
-                modifier = Modifier.size(24.dp),
-                tint = ThemeColors.Primary
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = value,
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = ThemeColors.OnSurface
-                )
-            )
-            Text(
-                text = title,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    color = ThemeColors.OnSurface.copy(alpha = 0.7f)
-                )
-            )
-        }
+    LaunchedEffect(pagerState.currentPage) {
+        currentTypingText = typingTexts[pagerState.currentPage]
     }
-}
 
-@Composable
-private fun ModeButton(
-    title: String,
-    description: String,
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    when (getPlatform().name == "Android") {
-        true -> {
-            LiquidButton(
-                icon,
-                title,
-                description,
-                onClick,
-            )
-        }
-        else -> {
-            Button(
-                onClick = onClick,
-                modifier = modifier,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ThemeColors.Primary
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
+    StarryBackground {
+        Scaffold(
+            modifier = modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            topBar = {
+                AnimatedVisibility(
+                    visible = showContent,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
                 ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = title,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(Modifier.size(16.dp))
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.Start
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp)
                     ) {
                         Text(
-                            text = title,
-                            style = TextStyle(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            text = "Keyboard Warrior",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = ThemeColors.OnSurface
+                            ),
+                            modifier = Modifier.align(Alignment.Center)
                         )
-                        Text(
-                            text = description,
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                                color = Color.White.copy(alpha = 0.8f)
+                        IconButton(
+                            onClick = { navigationManager.navigateTo(Screen.Settings) },
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        ) {
+                            Icon(
+                                imageVector = FeatherIcons.Settings,
+                                contentDescription = "Settings",
+                                tint = Color.White
                             )
-                        )
+                        }
                     }
                 }
             }
-        }
-    }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    TypingScreen(
+                        mode = modes[page],
+                        targetText = currentTypingText,
+                        timeOptions = if (modes[page] == TypingMode.TIME) timeOptions else null,
+                        wordOptions = if (modes[page] == TypingMode.WORDS) wordOptions else null,
+                        onTestComplete = { result ->
+                            storageManager.saveResult(result)
+                        },
+                        onBack = { showContent = true },
+                        isStarted = !showContent
+                    )
+                }
 
-}
+                AnimatedVisibility(
+                    visible = showContent,
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            IconButton(onClick = { 
+                                if (pagerState.currentPage > 0) {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                    }
+                                }
+                            }) {
+                                Icon(FeatherIcons.ArrowLeft, contentDescription = "Previous")
+                            }
+                            Text(
+                                text = modes[pagerState.currentPage].name.lowercase().replaceFirstChar { it.uppercase() },
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                            IconButton(onClick = { 
+                                if (pagerState.currentPage < modes.size - 1) {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    }
+                                }
+                            }) {
+                                Icon(FeatherIcons.ArrowRight, contentDescription = "Next")
+                            }
+                        }
 
-@Composable
-private fun IconButton(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = ThemeColors.Surface
-        ),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                modifier = Modifier.size(20.dp),
-                tint = ThemeColors.OnSurface
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = label,
-                style = TextStyle(
-                    fontSize = 10.sp,
-                    color = ThemeColors.OnSurface
-                )
-            )
+                        Button(
+                            onClick = { showContent = false },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ThemeColors.Primary
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = "Start",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                ),
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -340,19 +210,10 @@ private fun IconButton(
 private fun HomeScreenPreview() {
     org.example.project.MobileTypistTheme(darkTheme = true) {
         HomeScreen(
-            navigationManager = org.example.project.navigation.NavigationManager(),
-            storageManager = org.example.project.data.StorageManager(
+            navigationManager = NavigationManager(),
+            storageManager = StorageManager(
                 settings = createSettings()
             )
         )
     }
 }
-
-
-
-
-
-
-
-
-
