@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -25,11 +26,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,15 +38,16 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowLeft
 import compose.icons.feathericons.ArrowRight
 import compose.icons.feathericons.Settings
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.example.project.ThemeColors
-import org.example.project.data.QuotesData
 import org.example.project.data.StorageManager
 import org.example.project.data.TypingMode
 import org.example.project.data.createSettings
 import org.example.project.navigation.NavigationManager
 import org.example.project.navigation.Screen
 import org.example.project.ui.StarryBackground
+import org.example.project.viewModel.HomeViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -58,36 +57,39 @@ fun HomeScreen(
     storageManager: StorageManager,
     modifier: Modifier = Modifier
 ) {
-    val modes = listOf(TypingMode.TIME, TypingMode.WORDS, TypingMode.QUOTES)
-    val pagerState = rememberPagerState(pageCount = { modes.size })
-    var showContent by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
+    val viewModel = remember { HomeViewModel(storageManager, coroutineScope) }
+    val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
 
-    val timeOptions = listOf(15, 30, 60)
-    val wordOptions = listOf(10, 25, 50, 100)
+    HomeScreenContent(
+        viewModel = viewModel,
+        pagerState = pagerState,
+        navigationManager = navigationManager,
+        coroutineScope = coroutineScope
+    )
+}
 
-    val typingTexts = remember {
-        modes.map {
-            when (it) {
-                TypingMode.TIME -> QuotesData.quotes.joinToString(" ")
-                TypingMode.WORDS -> QuotesData.getQuoteForWords(wordOptions.first())
-                TypingMode.QUOTES -> QuotesData.getRandomQuote()
-            }
-        }
-    }
-    var currentTypingText by remember { mutableStateOf(typingTexts[0]) }
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun HomeScreenContent(
+    viewModel: HomeViewModel,
+    pagerState: PagerState,
+    navigationManager: NavigationManager,
+    coroutineScope: CoroutineScope
+) {
+    var currentTypingText = viewModel.typingTexts[pagerState.currentPage]
 
     LaunchedEffect(pagerState.currentPage) {
-        currentTypingText = typingTexts[pagerState.currentPage]
+        currentTypingText = viewModel.typingTexts[pagerState.currentPage]
     }
 
     StarryBackground {
         Scaffold(
-            modifier = modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
             topBar = {
                 AnimatedVisibility(
-                    visible = showContent,
+                    visible = viewModel.showContent,
                     enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
                     exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
                 ) {
@@ -128,20 +130,20 @@ fun HomeScreen(
                     modifier = Modifier.weight(1f)
                 ) { page ->
                     TypingScreen(
-                        mode = modes[page],
+                        mode = viewModel.modes[page],
                         targetText = currentTypingText,
-                        timeOptions = if (modes[page] == TypingMode.TIME) timeOptions else null,
-                        wordOptions = if (modes[page] == TypingMode.WORDS) wordOptions else null,
+                        timeOptions = if (viewModel.modes[page] == TypingMode.TIME) viewModel.timeOptions else null,
+                        wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) viewModel.wordOptions else null,
                         onTestComplete = { result ->
-                            storageManager.saveResult(result)
+                            viewModel.onTestComplete(result)
                         },
-                        onBack = { showContent = true },
-                        isStarted = !showContent
+                        onBack = { viewModel.onBack() },
+                        isStarted = !viewModel.showContent
                     )
                 }
 
                 AnimatedVisibility(
-                    visible = showContent,
+                    visible = viewModel.showContent,
                     enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
@@ -155,7 +157,7 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            IconButton(onClick = { 
+                            IconButton(onClick = {
                                 if (pagerState.currentPage > 0) {
                                     coroutineScope.launch {
                                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
@@ -165,13 +167,14 @@ fun HomeScreen(
                                 Icon(FeatherIcons.ArrowLeft, contentDescription = "Previous")
                             }
                             Text(
-                                text = modes[pagerState.currentPage].name.lowercase().replaceFirstChar { it.uppercase() },
+                                text = viewModel.modes[pagerState.currentPage].name.lowercase()
+                                    .replaceFirstChar { it.uppercase() },
                                 style = MaterialTheme.typography.headlineSmall,
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 textAlign = TextAlign.Center
                             )
-                            IconButton(onClick = { 
-                                if (pagerState.currentPage < modes.size - 1) {
+                            IconButton(onClick = {
+                                if (pagerState.currentPage < viewModel.modes.size - 1) {
                                     coroutineScope.launch {
                                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                     }
@@ -182,7 +185,7 @@ fun HomeScreen(
                         }
 
                         Button(
-                            onClick = { showContent = false },
+                            onClick = { viewModel.onStartTapped() },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = ThemeColors.Primary
@@ -205,15 +208,21 @@ fun HomeScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
 private fun HomeScreenPreview() {
+    val coroutineScope = rememberCoroutineScope()
+    val storageManager = StorageManager(settings = createSettings())
+    val viewModel = HomeViewModel(storageManager, coroutineScope)
+    val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
+
     org.example.project.MobileTypistTheme(darkTheme = true) {
-        HomeScreen(
+        HomeScreenContent(
+            viewModel = viewModel,
+            pagerState = pagerState,
             navigationManager = NavigationManager(),
-            storageManager = StorageManager(
-                settings = createSettings()
-            )
+            coroutineScope = coroutineScope
         )
     }
 }

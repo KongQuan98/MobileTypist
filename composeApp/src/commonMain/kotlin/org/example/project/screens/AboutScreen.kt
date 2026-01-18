@@ -15,7 +15,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.example.project.ThemeColors
 import org.example.project.navigation.NavigationManager
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AboutScreen(
@@ -269,15 +267,5 @@ private fun FeatureItem(text: String) {
         ),
         modifier = Modifier.padding(vertical = 4.dp)
     )
-}
-
-@Preview
-@Composable
-private fun AboutScreenPreview() {
-    org.example.project.MobileTypistTheme(darkTheme = true) {
-        AboutScreen(
-            navigationManager = org.example.project.navigation.NavigationManager()
-        )
-    }
 }
 
