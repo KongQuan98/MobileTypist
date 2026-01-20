@@ -33,11 +33,13 @@ fun TimeModeScreen(
         mode = TypingMode.TIME,
         targetText = targetText,
         timeOptions = timeOptions,
-        onTestComplete = { result ->
-            storageManager.saveResult(result)
-        },
-        onBack = {
-            navigationManager.navigateBack()
+        action = {
+            when (it) {
+                is TypingScreenAction.OnTestComplete -> storageManager.saveResult(it.result)
+                TypingScreenAction.OnNavigateBack -> {
+                    navigationManager.navigateBack()
+                }
+            }
         },
         modifier = modifier
     )

@@ -40,7 +40,6 @@ import compose.icons.feathericons.ArrowRight
 import compose.icons.feathericons.Settings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.example.project.ThemeColors
 import org.example.project.data.StorageManager
 import org.example.project.data.TypingMode
 import org.example.project.data.createSettings
@@ -100,7 +99,7 @@ fun HomeScreenContent(
                             text = "Keyboard Warrior",
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = ThemeColors.OnSurface
+                                color = MaterialTheme.colorScheme.onSurface
                             ),
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -111,7 +110,7 @@ fun HomeScreenContent(
                             Icon(
                                 imageVector = FeatherIcons.Settings,
                                 contentDescription = "Settings",
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -134,10 +133,14 @@ fun HomeScreenContent(
                         targetText = currentTypingText,
                         timeOptions = if (viewModel.modes[page] == TypingMode.TIME) viewModel.timeOptions else null,
                         wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) viewModel.wordOptions else null,
-                        onTestComplete = { result ->
-                            viewModel.onTestComplete(result)
+                        action = {
+                            when (it) {
+                                is TypingScreenAction.OnTestComplete -> viewModel.onTestComplete(it.result)
+                                TypingScreenAction.OnNavigateBack -> {
+                                    viewModel.onBack()
+                                }
+                            }
                         },
-                        onBack = { viewModel.onBack() },
                         isStarted = !viewModel.showContent
                     )
                 }
@@ -164,12 +167,18 @@ fun HomeScreenContent(
                                     }
                                 }
                             }) {
-                                Icon(FeatherIcons.ArrowLeft, contentDescription = "Previous")
+                                Icon(
+                                    FeatherIcons.ArrowLeft,
+                                    contentDescription = "Previous",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
                             }
                             Text(
                                 text = viewModel.modes[pagerState.currentPage].name.lowercase()
                                     .replaceFirstChar { it.uppercase() },
-                                style = MaterialTheme.typography.headlineSmall,
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                ),
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 textAlign = TextAlign.Center
                             )
@@ -180,7 +189,11 @@ fun HomeScreenContent(
                                     }
                                 }
                             }) {
-                                Icon(FeatherIcons.ArrowRight, contentDescription = "Next")
+                                Icon(
+                                    FeatherIcons.ArrowRight,
+                                    contentDescription = "Next",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
                             }
                         }
 
@@ -188,15 +201,15 @@ fun HomeScreenContent(
                             onClick = { viewModel.onStartTapped() },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = ThemeColors.Primary
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
                                 text = "Start",
                                 style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    fontWeight = FontWeight.Bold
                                 ),
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )

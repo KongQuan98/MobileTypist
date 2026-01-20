@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,9 +32,7 @@ data class Star(
 )
 
 /**
- * StarryBackground that draws twinkling stars on a dark gradient, then places [content] on top.
- *
- * Put this composable in shared/commonMain and call it from platform entrypoints.
+ * StarryBackground that draws twinkling stars on a theme-aware gradient, then places [content] on top.
  */
 @Composable
 fun StarryBackground(
@@ -41,9 +40,18 @@ fun StarryBackground(
     starCount: Int = 120,
     minRadiusPx: Float = 0.6f,
     maxRadiusPx: Float = 3.2f,
-    mainColorTop: Color = Color(0xFF07080A),
-    mainColorBottom: Color = Color(0xFF0b1220),
-    starColor: Color = Color(0xFFFFFFFF),
+    // Use MaterialTheme colors by default
+    mainColorTop: Color = MaterialTheme.colorScheme.background,
+    mainColorBottom: Color = if (MaterialTheme.colorScheme.background.red < 0.5f) {
+        // Dark theme: deep blue/black
+        Color(0xFF0b1220)
+    } else {
+        // Light theme: slightly darker grey/blue
+        Color(0xFFE5E7EB)
+    },
+    starColor: Color = if (MaterialTheme.colorScheme.background.red < 0.5f) Color.White else Color(
+        0xFF1E3A8A
+    ).copy(alpha = 0.4f),
     twinkleSpeedMultiplier: Float = 1f,
     content: @Composable () -> Unit = {}
 ) {
@@ -90,7 +98,7 @@ fun StarryBackground(
             // subtle nebula / glow behind stars (optional)
             drawRect(
                 brush = Brush.verticalGradient(
-                    colors = listOf(Color.Transparent, Color(0x11FFFFFF)),
+                    colors = listOf(Color.Transparent, starColor.copy(alpha = 0.1f)),
                 ),
                 alpha = 0.04f
             )
@@ -101,7 +109,6 @@ fun StarryBackground(
                 val cy = star.y * height
 
                 // compute star alpha by combining baseAlpha and a smooth twinkle function
-                // twinkle: (cos(time * freq + phase) + 1) / 2 -> 0..1
                 val twinkle =
                     (0.5f * (1f + cos((time * star.twinkleFreq * twinkleSpeedMultiplier) + star.twinklePhase)))
                 val alpha = (star.baseAlpha * (0.4f + 0.6f * twinkle)).coerceIn(0f, 1f)

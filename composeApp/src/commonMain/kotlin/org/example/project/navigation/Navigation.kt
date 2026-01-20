@@ -3,7 +3,15 @@ package org.example.project.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.example.project.data.StorageManager
-import org.example.project.screens.*
+import org.example.project.screens.AboutScreen
+import org.example.project.screens.HomeScreen
+import org.example.project.screens.QuotesModeScreen
+import org.example.project.screens.SettingsScreen
+import org.example.project.screens.StatisticsScreen
+import org.example.project.screens.StatisticsScreenState
+import org.example.project.screens.TimeModeScreen
+import org.example.project.screens.TypingScreenAction
+import org.example.project.screens.WordsModeScreen
 import org.example.project.ui.StarryBackground
 
 @Composable
@@ -49,15 +57,25 @@ fun Navigation(
         }
         is Screen.QuotesMode -> {
             QuotesModeScreen(
-                navigationManager = navigationManager,
-                storageManager = storageManager,
+                action = {
+                    when (it) {
+                        is TypingScreenAction.OnTestComplete -> storageManager.saveResult(it.result)
+                        TypingScreenAction.OnNavigateBack -> {
+                            navigationManager.navigateBack()
+                        }
+                    }
+                },
                 modifier = modifier
             )
         }
         is Screen.Statistics -> {
             StatisticsScreen(
                 navigationManager = navigationManager,
-                storageManager = storageManager,
+                statisticsScreenState = StatisticsScreenState(
+                    results = storageManager.getResults(),
+                    bestWpm = storageManager.getBestWpm(),
+                    totalTests = storageManager.getTotalTests(),
+                ),
                 modifier = modifier
             )
         }

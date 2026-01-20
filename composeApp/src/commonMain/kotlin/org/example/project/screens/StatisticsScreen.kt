@@ -25,23 +25,27 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.example.project.ThemeColors
-import org.example.project.data.StorageManager
+import org.example.project.MobileTypistTheme
 import org.example.project.data.TypingTestResult
-import org.example.project.data.createSettings
 import org.example.project.navigation.NavigationManager
 import org.example.project.utils.formatDate
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+data class StatisticsScreenState(
+    val results: List<TypingTestResult> = emptyList(),
+    val bestWpm: Int = 0,
+    val totalTests: Int = 0
+)
+
 @Composable
 fun StatisticsScreen(
     navigationManager: NavigationManager,
-    storageManager: StorageManager,
+    statisticsScreenState: StatisticsScreenState,
     modifier: Modifier = Modifier
 ) {
-    val results = storageManager.getResults()
-    val bestWpm = storageManager.getBestWpm()
-    val totalTests = storageManager.getTotalTests()
+    val results = statisticsScreenState.results
+    val bestWpm = statisticsScreenState.bestWpm
+    val totalTests = statisticsScreenState.totalTests
 
     val averageWpm = if (results.isNotEmpty()) {
         results.map { it.wpm }.average().toInt()
@@ -57,119 +61,120 @@ fun StatisticsScreen(
 
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = ThemeColors.Background
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(20.dp)
         ) {
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Statistics",
-                style = TextStyle(
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = ThemeColors.OnSurface
-                )
-            )
-            Button(
-                onClick = { navigationManager.navigateBack() },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ThemeColors.Surface
-                )
-            ) {
-                Text("Back")
-            }
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        // Summary Cards
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatSummaryCard(
-                title = "Best WPM",
-                value = bestWpm.toString(),
-                modifier = Modifier.weight(1f)
-            )
-            StatSummaryCard(
-                title = "Avg WPM",
-                value = averageWpm.toString(),
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatSummaryCard(
-                title = "Avg Accuracy",
-                value = "$averageAccuracy%",
-                modifier = Modifier.weight(1f)
-            )
-            StatSummaryCard(
-                title = "Total Tests",
-                value = totalTests.toString(),
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        Text(
-            text = "Recent Tests",
-            style = TextStyle(
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = ThemeColors.OnSurface
-            )
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        if (results.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "No tests completed yet",
+                    text = "Statistics",
                     style = TextStyle(
-                        fontSize = 16.sp,
-                        color = ThemeColors.OnSurface.copy(alpha = 0.6f)
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 )
-                Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = { navigationManager.navigateBack() },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ThemeColors.Primary
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Start Your First Test")
+                    Text("Back")
                 }
             }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+
+            Spacer(Modifier.height(24.dp))
+
+            // Summary Cards
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(results) { result ->
-                    ResultCard(result = result)
+                StatSummaryCard(
+                    title = "Best WPM",
+                    value = bestWpm.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatSummaryCard(
+                    title = "Avg WPM",
+                    value = averageWpm.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatSummaryCard(
+                    title = "Avg Accuracy",
+                    value = "$averageAccuracy%",
+                    modifier = Modifier.weight(1f)
+                )
+                StatSummaryCard(
+                    title = "Total Tests",
+                    value = totalTests.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            Text(
+                text = "Recent Tests",
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            if (results.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "No tests completed yet",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Button(
+                        onClick = { navigationManager.navigateBack() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text("Start Your First Test")
+                    }
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(results) { result ->
+                        ResultCard(result = result)
+                    }
                 }
             }
-        }
         }
     }
 }
@@ -183,9 +188,10 @@ private fun StatSummaryCard(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
-            containerColor = ThemeColors.Surface
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
@@ -198,7 +204,7 @@ private fun StatSummaryCard(
                 style = TextStyle(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = ThemeColors.Primary
+                    color = MaterialTheme.colorScheme.primary
                 )
             )
             Spacer(Modifier.height(4.dp))
@@ -206,7 +212,7 @@ private fun StatSummaryCard(
                 text = title,
                 style = TextStyle(
                     fontSize = 12.sp,
-                    color = ThemeColors.OnSurface.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             )
         }
@@ -220,9 +226,10 @@ private fun ResultCard(result: TypingTestResult) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = ThemeColors.Surface
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
@@ -238,14 +245,14 @@ private fun ResultCard(result: TypingTestResult) {
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = ThemeColors.OnSurface
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 )
                 Text(
                     text = dateString,
                     style = TextStyle(
                         fontSize = 12.sp,
-                        color = ThemeColors.OnSurface.copy(alpha = 0.6f)
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 )
             }
@@ -275,14 +282,14 @@ private fun StatItem(label: String, value: String) {
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = ThemeColors.Primary
+                color = MaterialTheme.colorScheme.primary
             )
         )
         Text(
             text = label,
             style = TextStyle(
                 fontSize = 10.sp,
-                color = ThemeColors.OnSurface.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         )
     }
@@ -291,19 +298,25 @@ private fun StatItem(label: String, value: String) {
 @Preview
 @Composable
 private fun StatisticsScreenPreview() {
-    org.example.project.MobileTypistTheme(darkTheme = true) {
+    MobileTypistTheme(darkTheme = false) {
         StatisticsScreen(
-            navigationManager = org.example.project.navigation.NavigationManager(),
-            storageManager = org.example.project.data.StorageManager(
-                settings = createSettings()
+            navigationManager = NavigationManager(),
+            statisticsScreenState = StatisticsScreenState(
+
             )
         )
     }
 }
 
+@Preview
+@Composable
+private fun StatisticsScreenDarkModePreview() {
+    MobileTypistTheme(darkTheme = true) {
+        StatisticsScreen(
+            navigationManager = NavigationManager(),
+            statisticsScreenState = StatisticsScreenState(
 
-
-
-
-
-
+            )
+        )
+    }
+}
