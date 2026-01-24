@@ -1,28 +1,28 @@
 package org.example.project.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -32,23 +32,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.RefreshCw
-import org.example.project.CleanTypingArea
-import org.example.project.GlobalHiddenInputOverlay
-import org.example.project.MobileTypistTheme
 import org.example.project.ResultBottomSheet
 import org.example.project.data.TypingMode
 import org.example.project.data.TypingTestResult
+import org.example.project.ui.CleanTypingArea
+import org.example.project.ui.GlobalHiddenInputOverlay
+import org.example.project.viewModel.TypingScreenAction
 import org.example.project.viewModel.TypingViewModel
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
-sealed class TypingScreenAction {
-    data object OnNavigateBack : TypingScreenAction()
-    data class OnTestComplete(val result: TypingTestResult) : TypingScreenAction()
-}
 
 @Composable
 fun TypingScreen(
@@ -89,9 +85,12 @@ fun TypingScreenContent(
     isStarted: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val focusRequester = remember { FocusRequester() }
+
     LaunchedEffect(isStarted) {
         if (isStarted) {
             viewModel.startTest()
+            focusRequester.requestFocus()
         } else {
             viewModel.resetTest()
         }
@@ -107,88 +106,58 @@ fun TypingScreenContent(
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            AnimatedVisibility(
-                visible = viewModel.isRunning || viewModel.isFinished,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(500)
-                ) + fadeIn(animationSpec = tween(500)),
-                exit = slideOutVertically(
-                    targetOffsetY = { -it },
-                    animationSpec = tween(500)
-                ) + fadeOut(animationSpec = tween(500))
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 40.dp)
+                // Live HUD
+                AnimatedVisibility(
+                    visible = viewModel.isRunning,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.padding(bottom = 32.dp),
+                        horizontalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
-                        TextButton(
-                            onClick = { onBack() }
-                        ) {
-                            Text(
-                                text = "← Back",
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-                        }
-                    }
-
-                    Box(
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CleanTypingArea(
-                            targetText = viewModel.targetText,
-                            cumulativeInput = "", 
-                            input = viewModel.input,
-                            onInputChange = { viewModel.onInputChanged(it) },
-                            enabled = !viewModel.isFinished,
-                            charStatuses = viewModel.charStatuses.toList(),
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        FloatingActionButton(
-                            onClick = { viewModel.resetTest() },
-                            modifier = Modifier.size(56.dp),
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        ) {
-                            Icon(
-                                imageVector = FeatherIcons.RefreshCw,
-                                contentDescription = "Reset",
-                                modifier = Modifier.size(24.dp)
-                            )
+                        StatDisplay(label = "wpm", value = viewModel.currentWpm.toString())
+                        StatDisplay(label = "acc", value = "${viewModel.currentAccuracy}%")
+                        if (viewModel.timeLeft > 0) {
+                            StatDisplay(label = "time", value = "${viewModel.timeLeft}s")
                         }
                     }
                 }
+
+                // Monkeytype Area
+                CleanTypingArea(
+                    targetText = viewModel.targetText,
+                    input = viewModel.input,
+                    enabled = !viewModel.isFinished,
+                    charStatuses = viewModel.charStatuses.toList(),
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                )
+
+                // Restart button
+                Spacer(modifier = Modifier.height(32.dp))
+                IconButton(
+                    onClick = { viewModel.resetTest() },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = FeatherIcons.RefreshCw,
+                        contentDescription = "Restart",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.BottomCenter
-            ) {
+            if (viewModel.isFinished) {
                 ResultBottomSheet(
-                    visible = viewModel.isFinished,
+                    visible = true,
                     correctCount = viewModel.correctCount,
                     errorCount = viewModel.errorCount,
-                    selectedTime = viewModel.timeLeft,
+                    selectedTime = 0,
                     onReset = { viewModel.resetTest() },
                     onSurface = MaterialTheme.colorScheme.onSurface,
                     onBg = MaterialTheme.colorScheme.surface,
@@ -201,22 +170,30 @@ fun TypingScreenContent(
             value = viewModel.input,
             onValueChange = { viewModel.onInputChanged(it) },
             enabled = !viewModel.isFinished,
-            focusRequester = FocusRequester(), 
+            focusRequester = focusRequester,
         )
     }
 }
 
-@Preview
 @Composable
-private fun TypingScreenPreview() {
-    val coroutineScope = rememberCoroutineScope()
-    val viewModel = TypingViewModel(coroutineScope)
-    MobileTypistTheme(darkTheme = true) {
-        TypingScreenContent(
-            viewModel = viewModel,
-            onTestComplete = {},
-            onBack = {},
-            isStarted = true
+fun StatDisplay(label: String, value: String) {
+    Column(horizontalAlignment = Alignment.Start) {
+        Text(
+            text = label,
+            style = TextStyle(
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                fontFamily = FontFamily.Monospace
+            )
+        )
+        Text(
+            text = value,
+            style = TextStyle(
+                fontSize = 24.sp,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
+            )
         )
     }
 }

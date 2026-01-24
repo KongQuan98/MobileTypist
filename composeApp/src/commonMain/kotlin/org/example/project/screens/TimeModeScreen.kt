@@ -3,11 +3,13 @@ package org.example.project.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import org.example.project.MobileTypistTheme
 import org.example.project.data.QuotesData
 import org.example.project.data.StorageManager
 import org.example.project.data.TypingMode
 import org.example.project.data.createSettings
 import org.example.project.navigation.NavigationManager
+import org.example.project.viewModel.TypingScreenAction
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -48,10 +50,10 @@ fun TimeModeScreen(
 @Preview
 @Composable
 private fun TimeModeScreenPreview() {
-    org.example.project.MobileTypistTheme(darkTheme = true) {
+    MobileTypistTheme(darkTheme = true) {
         TimeModeScreen(
-            navigationManager = org.example.project.navigation.NavigationManager(),
-            storageManager = org.example.project.data.StorageManager(
+            navigationManager = NavigationManager(),
+            storageManager = StorageManager(
                 settings = createSettings()
             )
         )

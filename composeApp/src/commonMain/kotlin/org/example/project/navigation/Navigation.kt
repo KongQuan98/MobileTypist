@@ -5,14 +5,9 @@ import androidx.compose.ui.Modifier
 import org.example.project.data.StorageManager
 import org.example.project.screens.AboutScreen
 import org.example.project.screens.HomeScreen
-import org.example.project.screens.QuotesModeScreen
 import org.example.project.screens.SettingsScreen
 import org.example.project.screens.StatisticsScreen
 import org.example.project.screens.StatisticsScreenState
-import org.example.project.screens.TimeModeScreen
-import org.example.project.screens.TypingScreenAction
-import org.example.project.screens.WordsModeScreen
-import org.example.project.ui.StarryBackground
 
 @Composable
 fun Navigation(
@@ -28,46 +23,48 @@ fun Navigation(
             navigationManager.navigateBack()
         }
     )
-    
+
     val currentScreen = navigationManager.currentScreen
-    
+
     when (currentScreen) {
         is Screen.Home -> {
-            StarryBackground {
-                HomeScreen(
-                    navigationManager = navigationManager,
-                    storageManager = storageManager,
-                    modifier = modifier
-                )
-            }
+            HomeScreen(
+                navigationManager = navigationManager,
+                storageManager = storageManager,
+                modifier = modifier
+            )
         }
+
         is Screen.TimeModeScreen -> {
-            TimeModeScreen(
-                navigationManager = navigationManager,
-                storageManager = storageManager,
-                modifier = modifier
-            )
+//            TimeModeScreen(
+//                navigationManager = navigationManager,
+//                storageManager = storageManager,
+//                modifier = modifier
+//            )
         }
+
         is Screen.WordsMode -> {
-            WordsModeScreen(
-                navigationManager = navigationManager,
-                storageManager = storageManager,
-                modifier = modifier
-            )
+//            WordsModeScreen(
+//                navigationManager = navigationManager,
+//                storageManager = storageManager,
+//                modifier = modifier
+//            )
         }
+
         is Screen.QuotesMode -> {
-            QuotesModeScreen(
-                action = {
-                    when (it) {
-                        is TypingScreenAction.OnTestComplete -> storageManager.saveResult(it.result)
-                        TypingScreenAction.OnNavigateBack -> {
-                            navigationManager.navigateBack()
-                        }
-                    }
-                },
-                modifier = modifier
-            )
+//            QuotesModeScreen(
+//                action = {
+//                    when (it) {
+//                        is TypingScreenAction.OnTestComplete -> storageManager.saveResult(it.result)
+//                        TypingScreenAction.OnNavigateBack -> {
+//                            navigationManager.navigateBack()
+//                        }
+//                    }
+//                },
+//                modifier = modifier
+//            )
         }
+
         is Screen.Statistics -> {
             StatisticsScreen(
                 navigationManager = navigationManager,
@@ -79,6 +76,7 @@ fun Navigation(
                 modifier = modifier
             )
         }
+
         is Screen.Settings -> {
             SettingsScreen(
                 navigationManager = navigationManager,
@@ -87,6 +85,7 @@ fun Navigation(
                 modifier = modifier
             )
         }
+
         is Screen.About -> {
             AboutScreen(
                 navigationManager = navigationManager,
@@ -95,4 +94,3 @@ fun Navigation(
         }
     }
 }
-

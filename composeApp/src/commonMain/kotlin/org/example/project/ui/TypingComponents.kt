@@ -1,4 +1,4 @@
-package org.example.project
+package org.example.project.ui
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -10,20 +10,26 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -36,13 +42,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.example.project.CharStatus
 
 @Composable
 fun CleanTypingArea(
     targetText: String,
-    cumulativeInput: String, // Kept for compatibility but not heavily used
     input: String,
-    onInputChange: (String) -> Unit,
     enabled: Boolean,
     charStatuses: List<CharStatus>,
     modifier: Modifier = Modifier
@@ -50,8 +55,6 @@ fun CleanTypingArea(
     val textMeasurer = rememberTextMeasurer()
     val scrollState = rememberScrollState()
 
-    // Monkeytype Colors
-    val backgroundColor = Color.Transparent
     val pendingColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
     val correctColor = MaterialTheme.colorScheme.onSurface
     val errorColor = Color(0xFFCA4754)
@@ -84,19 +87,14 @@ fun CleanTypingArea(
         letterSpacing = 0.5.sp
     )
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .background(backgroundColor)
-    ) {
+    Box(modifier = modifier.fillMaxWidth()) {
         val layoutResult = textMeasurer.measure(
             text = annotatedString,
             style = textStyle,
-            constraints = Constraints(maxWidth = 1000) // Adjust based on your UI
+            constraints = Constraints(maxWidth = 1200)
         )
 
-        // Caret Animation
+        // Caret Blink
         val infiniteTransition = rememberInfiniteTransition()
         val caretAlpha by infiniteTransition.animateFloat(
             initialValue = 1f,
@@ -107,13 +105,20 @@ fun CleanTypingArea(
             )
         )
 
-        // Smooth Caret Position Animation
+        // Smooth Caret Motion
         val caretOffset = remember(currentCharIndex, layoutResult) {
-            if (currentCharIndex < targetText.length) {
-                layoutResult.getCursorRect(currentCharIndex)
-            } else {
-                layoutResult.getCursorRect(targetText.length - 1).let {
-                    it.copy(left = it.right)
+            when {
+                currentCharIndex < targetText.length -> layoutResult.getCursorRect(currentCharIndex)
+                targetText.isEmpty() -> {
+                    layoutResult.getCursorRect(0).let {
+                        it.copy(left = it.right)
+                    }
+                }
+
+                else -> {
+                    layoutResult.getCursorRect(targetText.length - 1).let {
+                        it.copy(left = it.right)
+                    }
                 }
             }
         }
@@ -121,44 +126,67 @@ fun CleanTypingArea(
         val animatedCaretX by animateFloatAsState(
             targetValue = caretOffset.left,
             animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
+                dampingRatio = Spring.DampingRatioNoBouncy,
                 stiffness = Spring.StiffnessLow
             )
         )
         val animatedCaretY by animateFloatAsState(
             targetValue = caretOffset.top,
             animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
+                dampingRatio = Spring.DampingRatioNoBouncy,
                 stiffness = Spring.StiffnessLow
             )
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState)
-        ) {
-            Box {
-                Text(
-                    text = annotatedString,
-                    style = textStyle,
-                    modifier = Modifier.fillMaxWidth()
-                )
+        Box(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
+            Text(
+                text = annotatedString,
+                style = textStyle,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-                // The Caret
-                if (enabled) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        drawRect(
-                            color = caretColor,
-                            topLeft = Offset(animatedCaretX, animatedCaretY + 4.dp.toPx()),
-                            size = androidx.compose.ui.geometry.Size(2.5.dp.toPx(), 24.sp.toPx()),
-                            alpha = caretAlpha
-                        )
-                    }
+            if (enabled) {
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    drawRect(
+                        color = caretColor,
+                        topLeft = Offset(animatedCaretX, animatedCaretY + 4.dp.toPx()),
+                        size = androidx.compose.ui.geometry.Size(2.5.dp.toPx(), 24.sp.toPx()),
+                        alpha = caretAlpha
+                    )
                 }
             }
         }
     }
 }
 
-enum class CharStatus { Pending, Correct, Incorrect }
+@Composable
+fun GlobalHiddenInputOverlay(
+    value: String,
+    onValueChange: (String) -> Unit,
+    enabled: Boolean,
+    focusRequester: FocusRequester,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            enabled = enabled,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .windowInsetsPadding(WindowInsets.ime)
+                .focusRequester(focusRequester),
+            textStyle = TextStyle(fontSize = 1.sp, color = Color.Transparent),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                cursorColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent
+            )
+        )
+    }
+}

@@ -6,11 +6,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import org.example.project.MobileTypistTheme
 import org.example.project.data.QuotesData
 import org.example.project.data.StorageManager
 import org.example.project.data.TypingMode
 import org.example.project.data.createSettings
 import org.example.project.navigation.NavigationManager
+import org.example.project.viewModel.TypingScreenAction
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -44,10 +46,10 @@ fun WordsModeScreen(
 @Preview
 @Composable
 private fun WordsModeScreenPreview() {
-    org.example.project.MobileTypistTheme(darkTheme = true) {
+    MobileTypistTheme(darkTheme = true) {
         WordsModeScreen(
-            navigationManager = org.example.project.navigation.NavigationManager(),
-            storageManager = org.example.project.data.StorageManager(
+            navigationManager = NavigationManager(),
+            storageManager = StorageManager(
                 settings = createSettings()
             )
         )

@@ -10,15 +10,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.example.project.CharStatus
 import org.example.project.data.TypingMode
+import org.example.project.data.TypingTestResult
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+
+sealed class TypingScreenAction {
+    data class OnTestComplete(val result: TypingTestResult) : TypingScreenAction()
+    object OnNavigateBack : TypingScreenAction()
+}
 
 @OptIn(ExperimentalTime::class)
 class TypingViewModel(private val coroutineScope: CoroutineScope) {
 
     var timeLeft by mutableStateOf(0)
-        private set
-    var wordsTyped by mutableStateOf(0)
         private set
     var isRunning by mutableStateOf(false)
         private set
@@ -31,6 +35,14 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
     var errorCount by mutableStateOf(0)
         private set
     var charStatuses = mutableStateListOf<CharStatus>()
+        private set
+
+    // Live stats
+    var currentWpm by mutableStateOf(0)
+        private set
+    var currentAccuracy by mutableStateOf(100)
+        private set
+    var currentCharIndex by mutableStateOf(0)
         private set
 
     private var timerJob: Job? = null
@@ -46,19 +58,68 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
         this.selectedTime = selectedTime
         this.selectedWords = selectedWords
         this.timeLeft = selectedTime
+        this.currentCharIndex = 0
+        this.currentWpm = 0
+        this.currentAccuracy = 100
         charStatuses.clear()
         repeat(targetText.length) { charStatuses.add(CharStatus.Pending) }
     }
 
-    fun onInputChanged(newInput: String) {
+    fun onInputChanged(new: String) {
+        if (isFinished) return
+        
         if (!isRunning && !isFinished) {
             startTest()
         }
 
-        // Handle character processing
+        if (new.length > input.length) {
+            // Character added
+            if (currentCharIndex < targetText.length) {
+                val newChar = new.last()
+                val targetChar = targetText[currentCharIndex]
+
+                if (newChar == targetChar) {
+                    charStatuses[currentCharIndex] = CharStatus.Correct
+                    correctCount++
+                } else {
+                    charStatuses[currentCharIndex] = CharStatus.Incorrect
+                    errorCount++
+                }
+                currentCharIndex++
+                input = new
+                updateLiveStats()
+            }
+        } else if (new.length < input.length) {
+            // Backspace
+            if (currentCharIndex > 0) {
+                currentCharIndex--
+                if (charStatuses[currentCharIndex] == CharStatus.Correct) {
+                    correctCount--
+                } else if (charStatuses[currentCharIndex] == CharStatus.Incorrect) {
+                    errorCount--
+                }
+                charStatuses[currentCharIndex] = CharStatus.Pending
+                input = new
+                updateLiveStats()
+            }
+        }
+
+        // Check if finished for words/quotes mode
+        if (currentCharIndex >= targetText.length && mode != TypingMode.TIME) {
+            finishTest()
+        }
+    }
+
+    private fun updateLiveStats() {
+        if (startTime == 0L) return
+        val now = Clock.System.now().toEpochMilliseconds()
+        val elapsedSeconds = ((now - startTime) / 1000).toInt().coerceAtLeast(1)
+        currentWpm = calculateWpm(correctCount, elapsedSeconds)
+        currentAccuracy = calculateAccuracy(correctCount, errorCount)
     }
 
     fun startTest() {
+        if (isRunning) return
         isRunning = true
         startTime = Clock.System.now().toEpochMilliseconds()
         if (mode == TypingMode.TIME) {
@@ -73,7 +134,10 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
         input = ""
         correctCount = 0
         errorCount = 0
-        wordsTyped = 0
+        currentCharIndex = 0
+        currentWpm = 0
+        currentAccuracy = 100
+        startTime = 0L
         if (mode == TypingMode.TIME) {
             timeLeft = selectedTime
         }
@@ -85,6 +149,7 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
             while (timeLeft > 0 && isRunning) {
                 delay(1000)
                 timeLeft--
+                updateLiveStats()
             }
             if (timeLeft == 0) {
                 finishTest()
@@ -95,13 +160,8 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
     private fun finishTest() {
         isRunning = false
         isFinished = true
-        val elapsedSeconds =
-            ((Clock.System.now().toEpochMilliseconds() - startTime) / 1000).toInt().coerceAtLeast(1)
-        val wpm = calculateWpm(correctCount, elapsedSeconds)
-        val accuracy = calculateAccuracy(correctCount, errorCount)
-
-        // The result is now handled within the ViewModel
-        // onTestComplete(result)
+        timerJob?.cancel()
+        updateLiveStats()
     }
 
     private fun calculateWpm(correctChars: Int, elapsedSeconds: Int): Int {

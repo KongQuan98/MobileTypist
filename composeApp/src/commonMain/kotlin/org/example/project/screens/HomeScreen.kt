@@ -45,8 +45,8 @@ import org.example.project.data.TypingMode
 import org.example.project.data.createSettings
 import org.example.project.navigation.NavigationManager
 import org.example.project.navigation.Screen
-import org.example.project.ui.StarryBackground
 import org.example.project.viewModel.HomeViewModel
+import org.example.project.viewModel.TypingScreenAction
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -64,7 +64,8 @@ fun HomeScreen(
         viewModel = viewModel,
         pagerState = pagerState,
         navigationManager = navigationManager,
-        coroutineScope = coroutineScope
+        coroutineScope = coroutineScope,
+        modifier = Modifier,
     )
 }
 
@@ -74,7 +75,8 @@ fun HomeScreenContent(
     viewModel: HomeViewModel,
     pagerState: PagerState,
     navigationManager: NavigationManager,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    modifier: Modifier = Modifier,
 ) {
     var currentTypingText = viewModel.typingTexts[pagerState.currentPage]
 
@@ -82,138 +84,136 @@ fun HomeScreenContent(
         currentTypingText = viewModel.typingTexts[pagerState.currentPage]
     }
 
-    StarryBackground {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
-            topBar = {
-                AnimatedVisibility(
-                    visible = viewModel.showContent,
-                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+    Scaffold(
+        modifier = modifier,
+        containerColor = Color.Transparent,
+        topBar = {
+            AnimatedVisibility(
+                visible = viewModel.showContent,
+                enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp)
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    Text(
+                        text = "Keyboard Warrior",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                    IconButton(
+                        onClick = { navigationManager.navigateTo(Screen.Settings) },
+                        modifier = Modifier.align(Alignment.CenterEnd)
                     ) {
+                        Icon(
+                            imageVector = FeatherIcons.Settings,
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f)
+            ) { page ->
+                TypingScreen(
+                    mode = viewModel.modes[page],
+                    targetText = currentTypingText,
+                    timeOptions = if (viewModel.modes[page] == TypingMode.TIME) viewModel.timeOptions else null,
+                    wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) viewModel.wordOptions else null,
+                    action = {
+                        when (it) {
+                            is TypingScreenAction.OnTestComplete -> viewModel.onTestComplete(it.result)
+                            TypingScreenAction.OnNavigateBack -> {
+                                viewModel.onBack()
+                            }
+                        }
+                    },
+                    isStarted = !viewModel.showContent
+                )
+            }
+
+            AnimatedVisibility(
+                visible = viewModel.showContent,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        IconButton(onClick = {
+                            if (pagerState.currentPage > 0) {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                }
+                            }
+                        }) {
+                            Icon(
+                                FeatherIcons.ArrowLeft,
+                                contentDescription = "Previous",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                         Text(
-                            text = "Keyboard Warrior",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold,
+                            text = viewModel.modes[pagerState.currentPage].name.lowercase()
+                                .replaceFirstChar { it.uppercase() },
+                            style = MaterialTheme.typography.headlineSmall.copy(
                                 color = MaterialTheme.colorScheme.onSurface
                             ),
-                            modifier = Modifier.align(Alignment.Center)
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            textAlign = TextAlign.Center
                         )
-                        IconButton(
-                            onClick = { navigationManager.navigateTo(Screen.Settings) },
-                            modifier = Modifier.align(Alignment.CenterEnd)
-                        ) {
+                        IconButton(onClick = {
+                            if (pagerState.currentPage < viewModel.modes.size - 1) {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                }
+                            }
+                        }) {
                             Icon(
-                                imageVector = FeatherIcons.Settings,
-                                contentDescription = "Settings",
+                                FeatherIcons.ArrowRight,
+                                contentDescription = "Next",
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
-                }
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.weight(1f)
-                ) { page ->
-                    TypingScreen(
-                        mode = viewModel.modes[page],
-                        targetText = currentTypingText,
-                        timeOptions = if (viewModel.modes[page] == TypingMode.TIME) viewModel.timeOptions else null,
-                        wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) viewModel.wordOptions else null,
-                        action = {
-                            when (it) {
-                                is TypingScreenAction.OnTestComplete -> viewModel.onTestComplete(it.result)
-                                TypingScreenAction.OnNavigateBack -> {
-                                    viewModel.onBack()
-                                }
-                            }
-                        },
-                        isStarted = !viewModel.showContent
-                    )
-                }
 
-                AnimatedVisibility(
-                    visible = viewModel.showContent,
-                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.padding(16.dp)
+                    Button(
+                        onClick = { viewModel.onStartTapped() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            IconButton(onClick = {
-                                if (pagerState.currentPage > 0) {
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                    }
-                                }
-                            }) {
-                                Icon(
-                                    FeatherIcons.ArrowLeft,
-                                    contentDescription = "Previous",
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            Text(
-                                text = viewModel.modes[pagerState.currentPage].name.lowercase()
-                                    .replaceFirstChar { it.uppercase() },
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                ),
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                textAlign = TextAlign.Center
-                            )
-                            IconButton(onClick = {
-                                if (pagerState.currentPage < viewModel.modes.size - 1) {
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                    }
-                                }
-                            }) {
-                                Icon(
-                                    FeatherIcons.ArrowRight,
-                                    contentDescription = "Next",
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-
-                        Button(
-                            onClick = { viewModel.onStartTapped() },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
+                        Text(
+                            text = "Start",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Bold
                             ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = "Start",
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-                        }
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
                     }
                 }
             }
