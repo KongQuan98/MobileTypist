@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import org.example.project.MobileTypistTheme
 import org.example.project.data.QuotesData
 import org.example.project.data.TypingMode
+import org.example.project.viewModel.TypingScreenAction
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable

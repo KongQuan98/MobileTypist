@@ -65,7 +65,7 @@ fun HomeScreen(
         pagerState = pagerState,
         navigationManager = navigationManager,
         coroutineScope = coroutineScope,
-        modifier = Modifier,
+        modifier = modifier,
     )
 }
 
