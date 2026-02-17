@@ -38,13 +38,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.RefreshCw
+import org.example.project.MobileTypistTheme
 import org.example.project.ResultBottomSheet
+import org.example.project.data.QuotesData
 import org.example.project.data.TypingMode
 import org.example.project.data.TypingTestResult
 import org.example.project.ui.CleanTypingArea
 import org.example.project.ui.GlobalHiddenInputOverlay
 import org.example.project.viewModel.TypingScreenAction
 import org.example.project.viewModel.TypingViewModel
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun TypingScreen(
@@ -96,6 +99,19 @@ fun TypingScreenContent(
         }
     }
 
+    if (viewModel.isFinished) {
+        ResultBottomSheet(
+            visible = true,
+            correctCount = viewModel.correctCount,
+            errorCount = viewModel.errorCount,
+            selectedTime = 0,
+            onReset = { viewModel.resetTest() },
+            onSurface = MaterialTheme.colorScheme.onSurface,
+            onBg = MaterialTheme.colorScheme.surface,
+            primary = MaterialTheme.colorScheme.primary
+        )
+    }
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = Color.Transparent
@@ -106,6 +122,7 @@ fun TypingScreenContent(
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
+
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -151,19 +168,6 @@ fun TypingScreenContent(
                     )
                 }
             }
-
-            if (viewModel.isFinished) {
-                ResultBottomSheet(
-                    visible = true,
-                    correctCount = viewModel.correctCount,
-                    errorCount = viewModel.errorCount,
-                    selectedTime = 0,
-                    onReset = { viewModel.resetTest() },
-                    onSurface = MaterialTheme.colorScheme.onSurface,
-                    onBg = MaterialTheme.colorScheme.surface,
-                    primary = MaterialTheme.colorScheme.primary
-                )
-            }
         }
 
         GlobalHiddenInputOverlay(
@@ -194,6 +198,32 @@ fun StatDisplay(label: String, value: String) {
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace
             )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun QuotesModeScreenPreview() {
+    MobileTypistTheme(darkTheme = false) {
+        TypingScreen(
+            mode = TypingMode.QUOTES,
+            targetText = QuotesData.quotes[0],
+            action = {},
+            modifier = Modifier,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun QuotesModeScreenDarkModePreview() {
+    MobileTypistTheme(darkTheme = true) {
+        TypingScreen(
+            mode = TypingMode.WORDS,
+            targetText = QuotesData.quotes.joinToString(" "),
+            action = {},
+            modifier = Modifier,
         )
     }
 }

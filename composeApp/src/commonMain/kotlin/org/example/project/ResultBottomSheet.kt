@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,11 +37,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ResultBottomSheet(
@@ -164,7 +164,7 @@ fun ResultBottomSheet(
                 Spacer(Modifier.height(32.dp))
                 
                 Button(
-                    onClick = onReset,
+                    onClick = { onReset() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .shadow(
@@ -225,4 +225,21 @@ private fun calculateAccuracy(correct: Int, errors: Int): Int {
     val total = correct + errors
     if (total == 0) return 100
     return kotlin.math.round((correct.toDouble() / total.toDouble()) * 100.0).toInt()
+}
+
+@Preview
+@Composable
+private fun ResultBottomSheeet() {
+    MobileTypistTheme(darkTheme = true) {
+        ResultBottomSheet(
+            visible = true,
+            correctCount = 20,
+            errorCount = 1,
+            selectedTime = 0,
+            onReset = { },
+            onSurface = MaterialTheme.colorScheme.onSurface,
+            onBg = MaterialTheme.colorScheme.surface,
+            primary = MaterialTheme.colorScheme.primary
+        )
+    }
 }

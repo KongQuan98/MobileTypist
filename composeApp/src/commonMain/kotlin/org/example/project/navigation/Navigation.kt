@@ -8,6 +8,7 @@ import org.example.project.screens.HomeScreen
 import org.example.project.screens.SettingsScreen
 import org.example.project.screens.StatisticsScreen
 import org.example.project.screens.StatisticsScreenState
+import org.example.project.ui.MainScaffold
 
 @Composable
 fun Navigation(
@@ -26,71 +27,55 @@ fun Navigation(
 
     val currentScreen = navigationManager.currentScreen
 
-    when (currentScreen) {
-        is Screen.Home -> {
-            HomeScreen(
-                navigationManager = navigationManager,
-                storageManager = storageManager,
-                modifier = modifier
-            )
-        }
+    MainScaffold(navigationManager = navigationManager) { scaffoldModifier ->
+        when (currentScreen) {
+            is Screen.Home -> {
+                HomeScreen(
+                    navigationManager = navigationManager,
+                    storageManager = storageManager,
+                    modifier = modifier.then(scaffoldModifier)
+                )
+            }
 
-        is Screen.TimeModeScreen -> {
-//            TimeModeScreen(
-//                navigationManager = navigationManager,
-//                storageManager = storageManager,
-//                modifier = modifier
-//            )
-        }
+            is Screen.TimeModeScreen -> {
+                // TimeModeScreen call
+            }
 
-        is Screen.WordsMode -> {
-//            WordsModeScreen(
-//                navigationManager = navigationManager,
-//                storageManager = storageManager,
-//                modifier = modifier
-//            )
-        }
+            is Screen.WordsMode -> {
+                // WordsModeScreen call
+            }
 
-        is Screen.QuotesMode -> {
-//            QuotesModeScreen(
-//                action = {
-//                    when (it) {
-//                        is TypingScreenAction.OnTestComplete -> storageManager.saveResult(it.result)
-//                        TypingScreenAction.OnNavigateBack -> {
-//                            navigationManager.navigateBack()
-//                        }
-//                    }
-//                },
-//                modifier = modifier
-//            )
-        }
+            is Screen.QuotesMode -> {
+                // QuotesModeScreen call
+            }
 
-        is Screen.Statistics -> {
-            StatisticsScreen(
-                navigationManager = navigationManager,
-                statisticsScreenState = StatisticsScreenState(
-                    results = storageManager.getResults(),
-                    bestWpm = storageManager.getBestWpm(),
-                    totalTests = storageManager.getTotalTests(),
-                ),
-                modifier = modifier
-            )
-        }
+            is Screen.Statistics -> {
+                StatisticsScreen(
+                    navigationManager = navigationManager,
+                    statisticsScreenState = StatisticsScreenState(
+                        results = storageManager.getResults(),
+                        bestWpm = storageManager.getBestWpm(),
+                        totalTests = storageManager.getTotalTests(),
+                    ),
+                    modifier = modifier.then(scaffoldModifier)
+                )
+            }
 
-        is Screen.Settings -> {
-            SettingsScreen(
-                navigationManager = navigationManager,
-                storageManager = storageManager,
-                onThemeChange = onThemeChange,
-                modifier = modifier
-            )
-        }
+            is Screen.Settings -> {
+                SettingsScreen(
+                    navigationManager = navigationManager,
+                    storageManager = storageManager,
+                    onThemeChange = onThemeChange,
+                    modifier = modifier.then(scaffoldModifier)
+                )
+            }
 
-        is Screen.About -> {
-            AboutScreen(
-                navigationManager = navigationManager,
-                modifier = modifier
-            )
+            is Screen.About -> {
+                AboutScreen(
+                    navigationManager = navigationManager,
+                    modifier = modifier.then(scaffoldModifier)
+                )
+            }
         }
     }
 }

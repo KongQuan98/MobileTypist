@@ -29,6 +29,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.example.project.MobileTypistTheme
 import org.example.project.data.StorageManager
 import org.example.project.data.createSettings
 import org.example.project.getPlatform
@@ -222,10 +223,10 @@ fun SettingsScreen(
 @Preview
 @Composable
 private fun SettingsScreenPreview() {
-    org.example.project.MobileTypistTheme(darkTheme = true) {
+    MobileTypistTheme(darkTheme = true) {
         SettingsScreen(
-            navigationManager = org.example.project.navigation.NavigationManager(),
-            storageManager = org.example.project.data.StorageManager(
+            navigationManager = NavigationManager(),
+            storageManager = StorageManager(
                 settings = createSettings()
             ),
             onThemeChange = {}

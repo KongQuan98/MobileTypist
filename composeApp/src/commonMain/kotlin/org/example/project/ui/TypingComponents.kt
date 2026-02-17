@@ -55,8 +55,8 @@ fun CleanTypingArea(
     val textMeasurer = rememberTextMeasurer()
     val scrollState = rememberScrollState()
 
-    val pendingColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-    val correctColor = MaterialTheme.colorScheme.onSurface
+    val pendingColor = MaterialTheme.colorScheme.onSurface
+    val correctColor = MaterialTheme.colorScheme.primary
     val errorColor = Color(0xFFCA4754)
     val caretColor = MaterialTheme.colorScheme.primary
 
@@ -87,7 +87,7 @@ fun CleanTypingArea(
         letterSpacing = 0.5.sp
     )
 
-    Box(modifier = modifier.fillMaxWidth()) {
+    Box(modifier = modifier) {
         val layoutResult = textMeasurer.measure(
             text = annotatedString,
             style = textStyle,

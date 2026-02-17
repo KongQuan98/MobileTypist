@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -24,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -31,13 +33,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.ArrowLeft
-import compose.icons.feathericons.ArrowRight
+import compose.icons.feathericons.Play
 import compose.icons.feathericons.Settings
+import compose.icons.feathericons.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.example.project.data.StorageManager
@@ -63,9 +65,14 @@ fun HomeScreen(
     HomeScreenContent(
         viewModel = viewModel,
         pagerState = pagerState,
-        navigationManager = navigationManager,
         coroutineScope = coroutineScope,
         modifier = modifier,
+        settingsAction = {
+            navigationManager.navigateTo(Screen.Settings)
+        },
+        profileAction = {
+            navigationManager.navigateTo(Screen.Statistics)
+        }
     )
 }
 
@@ -74,9 +81,10 @@ fun HomeScreen(
 fun HomeScreenContent(
     viewModel: HomeViewModel,
     pagerState: PagerState,
-    navigationManager: NavigationManager,
     coroutineScope: CoroutineScope,
     modifier: Modifier = Modifier,
+    settingsAction: () -> Unit,
+    profileAction: () -> Unit,
 ) {
     var currentTypingText = viewModel.typingTexts[pagerState.currentPage]
 
@@ -96,16 +104,29 @@ fun HomeScreenContent(
                 Box(
                     modifier = Modifier.fillMaxWidth().padding(16.dp)
                 ) {
-                    Text(
-                        text = "Keyboard Warrior",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        modifier = Modifier.align(Alignment.Center)
-                    )
                     IconButton(
-                        onClick = { navigationManager.navigateTo(Screen.Settings) },
+                        onClick = { profileAction() },
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    ) {
+                        Icon(
+                            imageVector = FeatherIcons.User,
+                            contentDescription = "Profile",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Text(
+                        text = "Mobile Typist",
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    )
+
+                    IconButton(
+                        onClick = { settingsAction() },
                         modifier = Modifier.align(Alignment.CenterEnd)
                     ) {
                         Icon(
@@ -125,9 +146,14 @@ fun HomeScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            TypingModeBar(
+                isShowContent = viewModel.showContent,
+                coroutineScope = coroutineScope,
+                pagerState = pagerState
+            )
+
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.weight(1f)
             ) { page ->
                 TypingScreen(
                     mode = viewModel.modes[page],
@@ -146,78 +172,152 @@ fun HomeScreenContent(
                 )
             }
 
-            AnimatedVisibility(
-                visible = viewModel.showContent,
-                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+            IconButton(
+                modifier = Modifier.padding(16.dp),
+                onClick = { viewModel.onStartTapped() }
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        IconButton(onClick = {
-                            if (pagerState.currentPage > 0) {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                }
-                            }
-                        }) {
-                            Icon(
-                                FeatherIcons.ArrowLeft,
-                                contentDescription = "Previous",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        Text(
-                            text = viewModel.modes[pagerState.currentPage].name.lowercase()
-                                .replaceFirstChar { it.uppercase() },
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            textAlign = TextAlign.Center
-                        )
-                        IconButton(onClick = {
-                            if (pagerState.currentPage < viewModel.modes.size - 1) {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                }
-                            }
-                        }) {
-                            Icon(
-                                FeatherIcons.ArrowRight,
-                                contentDescription = "Next",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
+                Icon(
+                    FeatherIcons.Play,
+                    contentDescription = "Start",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
 
-                    Button(
-                        onClick = { viewModel.onStartTapped() },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
+@Composable
+private fun TypingModeBar(
+    isShowContent: Boolean,
+    coroutineScope: CoroutineScope,
+    pagerState: PagerState,
+) {
+    AnimatedVisibility(
+        visible = isShowContent,
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    1.dp,
+                    Alignment.CenterHorizontally
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                ScreenSelectionButton(
+                    Modifier.weight(1f),
+                    coroutineScope,
+                    pagerState,
+                    TypingMode.TIME,
+                    "Time"
+                )
+                ScreenSelectionButton(
+                    Modifier.weight(1f),
+                    coroutineScope,
+                    pagerState,
+                    TypingMode.WORDS,
+                    "Words"
+                )
+                ScreenSelectionButton(
+                    Modifier.weight(1f),
+                    coroutineScope,
+                    pagerState,
+                    TypingMode.QUOTES,
+                    "Quotes"
+                )
+
+                VerticalDivider(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {},
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.padding(vertical = 8.dp).weight(1f),
+                ) {
+                    Text(
+                        text = "10s",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold
                         ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Start",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    )
+                }
+
+                Button(
+                    onClick = {},
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.padding(vertical = 8.dp).weight(1f),
+                ) {
+                    Text(
+                        text = "30s",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ScreenSelectionButton(
+    modifier: Modifier,
+    coroutineScope: CoroutineScope,
+    pagerState: PagerState,
+    mode: TypingMode,
+    title: String,
+) {
+    Button(
+        onClick = {
+            changeTypingModeTo(
+                mode = mode,
+                coroutineScope = coroutineScope,
+                pagerState = pagerState,
+            )
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ),
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
+            .padding(vertical = 4.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = if (pagerState.currentPage == mode.ordinal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(vertical = 4.dp),
+        )
+    }
+}
+
+private fun changeTypingModeTo(
+    mode: TypingMode,
+    coroutineScope: CoroutineScope,
+    pagerState: PagerState,
+) {
+    coroutineScope.launch {
+        pagerState.animateScrollToPage(mode.ordinal)
     }
 }
 
@@ -234,8 +334,9 @@ private fun HomeScreenPreview() {
         HomeScreenContent(
             viewModel = viewModel,
             pagerState = pagerState,
-            navigationManager = NavigationManager(),
-            coroutineScope = coroutineScope
+            coroutineScope = coroutineScope,
+            settingsAction = {},
+            profileAction = {}
         )
     }
 }
