@@ -45,6 +45,9 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
     var currentCharIndex by mutableStateOf(0)
         private set
 
+    // Data for the graph
+    val wpmHistory = mutableStateListOf<Int>()
+
     private var timerJob: Job? = null
     private var startTime by mutableStateOf(0L)
     var targetText = ""
@@ -62,6 +65,7 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
         this.currentWpm = 0
         this.currentAccuracy = 100
         charStatuses.clear()
+        wpmHistory.clear()
         repeat(targetText.length) { charStatuses.add(CharStatus.Pending) }
     }
 
@@ -104,7 +108,6 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
             }
         }
 
-        // Check if finished for words/quotes mode
         if (currentCharIndex >= targetText.length && mode != TypingMode.TIME) {
             finishTest()
         }
@@ -122,8 +125,19 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
         if (isRunning) return
         isRunning = true
         startTime = Clock.System.now().toEpochMilliseconds()
+        startDataTracking() // Start recording WPM points
         if (mode == TypingMode.TIME) {
             startTimer()
+        }
+    }
+
+    private fun startDataTracking() {
+        coroutineScope.launch {
+            while (isRunning) {
+                delay(1000)
+                updateLiveStats()
+                wpmHistory.add(currentWpm)
+            }
         }
     }
 
@@ -138,6 +152,7 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
         currentWpm = 0
         currentAccuracy = 100
         startTime = 0L
+        wpmHistory.clear()
         if (mode == TypingMode.TIME) {
             timeLeft = selectedTime
         }
@@ -149,7 +164,6 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
             while (timeLeft > 0 && isRunning) {
                 delay(1000)
                 timeLeft--
-                updateLiveStats()
             }
             if (timeLeft == 0) {
                 finishTest()
@@ -162,6 +176,10 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
         isFinished = true
         timerJob?.cancel()
         updateLiveStats()
+        // Ensure final point is captured
+        if (wpmHistory.isEmpty() || wpmHistory.last() != currentWpm) {
+            wpmHistory.add(currentWpm)
+        }
     }
 
     private fun calculateWpm(correctChars: Int, elapsedSeconds: Int): Int {

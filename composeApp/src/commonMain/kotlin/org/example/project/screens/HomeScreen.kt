@@ -42,6 +42,7 @@ import compose.icons.feathericons.Settings
 import compose.icons.feathericons.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.example.project.MobileTypistTheme
 import org.example.project.data.StorageManager
 import org.example.project.data.TypingMode
 import org.example.project.data.createSettings
@@ -305,7 +306,7 @@ private fun HomeScreenPreview() {
     val viewModel = HomeViewModel(storageManager, coroutineScope)
     val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
 
-    org.example.project.MobileTypistTheme(darkTheme = true) {
+    MobileTypistTheme(darkTheme = true) {
         HomeScreenContent(
             viewModel = viewModel,
             pagerState = pagerState,

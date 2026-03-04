@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -55,8 +56,8 @@ fun CleanTypingArea(
     val textMeasurer = rememberTextMeasurer()
     val scrollState = rememberScrollState()
 
-    val pendingColor = MaterialTheme.colorScheme.onSurface
-    val correctColor = MaterialTheme.colorScheme.primary
+    val pendingColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+    val correctColor = MaterialTheme.colorScheme.onSurface
     val errorColor = Color(0xFFCA4754)
     val caretColor = MaterialTheme.colorScheme.primary
 
@@ -137,6 +138,11 @@ fun CleanTypingArea(
                 stiffness = Spring.StiffnessLow
             )
         )
+
+        // Auto-scroll logic: Keep caret visible
+        LaunchedEffect(animatedCaretY) {
+            scrollState.animateScrollTo(animatedCaretY.toInt().coerceAtLeast(0))
+        }
 
         Box(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
             Text(
