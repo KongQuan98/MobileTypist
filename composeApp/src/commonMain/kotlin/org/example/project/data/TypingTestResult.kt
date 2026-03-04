@@ -21,15 +21,3 @@ data class TypingTestResult(
 enum class TypingMode {
     TIME, WORDS, QUOTES
 }
-
-
-
-
-
-
-
-
-
-
-
-

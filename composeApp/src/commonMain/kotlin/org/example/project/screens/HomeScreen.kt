@@ -72,8 +72,7 @@ fun HomeScreen(
         },
         profileAction = {
             navigationManager.navigateTo(Screen.Statistics)
-        }
-    )
+        })
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -86,12 +85,8 @@ fun HomeScreenContent(
     settingsAction: () -> Unit,
     profileAction: () -> Unit,
 ) {
-    // REMOVED: var currentTypingText = ... (This causes the offset crash)
-
     Scaffold(
-        modifier = modifier,
-        containerColor = Color.Transparent,
-        topBar = {
+        modifier = modifier, containerColor = Color.Transparent, topBar = {
             AnimatedVisibility(
                 visible = viewModel.showContent,
                 enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
@@ -99,32 +94,26 @@ fun HomeScreenContent(
             ) {
                 TopAppBar(settingsAction, profileAction)
             }
-        }
-    ) { innerPadding ->
+        }) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             TypingModeBar(
-                isShowContent = viewModel.showContent,
-                coroutineScope = coroutineScope,
-                pagerState = pagerState
+                viewModel = viewModel, coroutineScope = coroutineScope, pagerState = pagerState
             )
 
             HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.weight(1f)
+                state = pagerState, modifier = Modifier.weight(1f)
             ) { page ->
                 val textForPage = viewModel.typingTexts.getOrNull(page) ?: ""
 
                 TypingScreen(
                     mode = viewModel.modes[page],
                     targetText = textForPage,
-                    timeOptions = if (viewModel.modes[page] == TypingMode.TIME) viewModel.timeOptions else null,
-                    wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) viewModel.wordOptions else null,
+                    timeOptions = if (viewModel.modes[page] == TypingMode.TIME) listOf(viewModel.selectedTime) else null,
+                    wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) listOf(viewModel.selectedWords) else null,
                     action = {
                         when (it) {
                             is TypingScreenAction.OnTestComplete -> viewModel.onTestComplete(it.result)
@@ -135,12 +124,10 @@ fun HomeScreenContent(
                 )
             }
 
-            // This will now stay visible at the bottom of the column
             AnimatedVisibility(visible = viewModel.showContent) {
                 IconButton(
                     modifier = Modifier.padding(bottom = 32.dp),
-                    onClick = { viewModel.onStartTapped() }
-                ) {
+                    onClick = { viewModel.onStartTapped() }) {
                     Icon(
                         FeatherIcons.Play,
                         contentDescription = "Start",
@@ -162,8 +149,7 @@ private fun TopAppBar(
         modifier = Modifier.fillMaxWidth().padding(16.dp)
     ) {
         IconButton(
-            onClick = { profileAction() },
-            modifier = Modifier.align(Alignment.CenterStart)
+            onClick = { profileAction() }, modifier = Modifier.align(Alignment.CenterStart)
         ) {
             Icon(
                 imageVector = FeatherIcons.User,
@@ -177,14 +163,12 @@ private fun TopAppBar(
             modifier = Modifier.align(Alignment.Center),
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace
+                fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace
             )
         )
 
         IconButton(
-            onClick = { settingsAction() },
-            modifier = Modifier.align(Alignment.CenterEnd)
+            onClick = { settingsAction() }, modifier = Modifier.align(Alignment.CenterEnd)
         ) {
             Icon(
                 imageVector = FeatherIcons.Settings,
@@ -197,39 +181,25 @@ private fun TopAppBar(
 
 @Composable
 private fun TypingModeBar(
-    isShowContent: Boolean,
+    viewModel: HomeViewModel,
     coroutineScope: CoroutineScope,
     pagerState: PagerState,
 ) {
-
-    val typingModeList = listOf(TypingMode.TIME, TypingMode.WORDS, TypingMode.QUOTES)
-    val childList = when (pagerState.currentPage) {
-        TypingMode.TIME.ordinal -> listOf("30s", "60s")
-        TypingMode.WORDS.ordinal -> listOf("50", "100", "200")
-        else -> emptyList()
-    }
-
     AnimatedVisibility(
-        visible = isShowContent,
+        visible = viewModel.showContent,
         enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(
-                    1.dp,
-                    Alignment.CenterHorizontally
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
+                horizontalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterHorizontally),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                typingModeList.forEach { mode ->
+                viewModel.modes.forEach { mode ->
                     ScreenSelectionButton(
                         modifier = Modifier.weight(1f),
                         coroutineScope = coroutineScope,
@@ -242,22 +212,31 @@ private fun TypingModeBar(
 
             HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp))
 
-            if (childList.isNotEmpty()) {
+            val currentMode = viewModel.modes[pagerState.currentPage]
+            if (currentMode == TypingMode.TIME || currentMode == TypingMode.WORDS) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(
-                        1.dp,
-                        Alignment.CenterHorizontally
+                        1.dp, Alignment.CenterHorizontally
                     ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 64.dp)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 64.dp)
                 ) {
-                    childList.forEach { title ->
-                        ChildSelectionButton(
-                            modifier = Modifier.weight(1f),
-                            title = title,
-                        )
+                    if (currentMode == TypingMode.TIME) {
+                        viewModel.timeOptions.forEach { time ->
+                            ChildSelectionButton(
+                                modifier = Modifier.weight(1f),
+                                title = "${time}s",
+                                isSelected = viewModel.selectedTime == time,
+                                onClick = { viewModel.selectedTime = time })
+                        }
+                    } else if (currentMode == TypingMode.WORDS) {
+                        viewModel.wordOptions.forEach { count ->
+                            ChildSelectionButton(
+                                modifier = Modifier.weight(1f),
+                                title = count.toString(),
+                                isSelected = viewModel.selectedWords == count,
+                                onClick = { viewModel.selectedWords = count })
+                        }
                     }
                 }
             }
@@ -275,25 +254,19 @@ private fun ScreenSelectionButton(
 ) {
     Button(
         onClick = {
-            changeTypingModeTo(
-                mode = mode,
-                coroutineScope = coroutineScope,
-                pagerState = pagerState,
-            )
+            coroutineScope.launch {
+                pagerState.animateScrollToPage(mode.ordinal)
+            }
         },
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onPrimary
         ),
         shape = RoundedCornerShape(12.dp),
-        modifier = modifier
-            .padding(vertical = 4.dp),
+        modifier = modifier.padding(vertical = 4.dp),
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.Bold
-            ),
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
             color = if (pagerState.currentPage == mode.ordinal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(vertical = 4.dp),
         )
@@ -302,37 +275,24 @@ private fun ScreenSelectionButton(
 
 @Composable
 private fun ChildSelectionButton(
-    modifier: Modifier,
-    title: String,
+    modifier: Modifier, title: String, isSelected: Boolean, onClick: () -> Unit
 ) {
     Button(
-        onClick = {},
+        onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onPrimary
         ),
         shape = RoundedCornerShape(12.dp),
-        modifier = modifier
-            .padding(vertical = 4.dp),
+        modifier = modifier.padding(vertical = 4.dp),
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
+                alpha = 0.6f
             ),
-            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(vertical = 4.dp),
         )
-    }
-}
-
-private fun changeTypingModeTo(
-    mode: TypingMode,
-    coroutineScope: CoroutineScope,
-    pagerState: PagerState,
-) {
-    coroutineScope.launch {
-        pagerState.animateScrollToPage(mode.ordinal)
     }
 }
 
@@ -351,7 +311,6 @@ private fun HomeScreenPreview() {
             pagerState = pagerState,
             coroutineScope = coroutineScope,
             settingsAction = {},
-            profileAction = {}
-        )
+            profileAction = {})
     }
 }
