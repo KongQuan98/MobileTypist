@@ -40,7 +40,6 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.RefreshCw
 import org.example.project.MobileTypistTheme
 import org.example.project.ResultBottomSheet
-import org.example.project.data.QuotesData
 import org.example.project.data.TypingMode
 import org.example.project.data.TypingTestResult
 import org.example.project.ui.CleanTypingArea
@@ -113,12 +112,12 @@ fun TypingScreenContent(
     }
 
     Surface(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxWidth(),
         color = Color.Transparent
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
@@ -208,7 +207,7 @@ private fun QuotesModeScreenPreview() {
     MobileTypistTheme(darkTheme = false) {
         TypingScreen(
             mode = TypingMode.QUOTES,
-            targetText = QuotesData.quotes[0],
+            targetText = "something like this",
             action = {},
             modifier = Modifier,
         )
@@ -221,7 +220,7 @@ private fun QuotesModeScreenDarkModePreview() {
     MobileTypistTheme(darkTheme = true) {
         TypingScreen(
             mode = TypingMode.WORDS,
-            targetText = QuotesData.quotes.joinToString(" "),
+            targetText = "something like this",
             action = {},
             modifier = Modifier,
         )

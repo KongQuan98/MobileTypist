@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -20,14 +19,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -35,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Play
@@ -86,11 +86,7 @@ fun HomeScreenContent(
     settingsAction: () -> Unit,
     profileAction: () -> Unit,
 ) {
-    var currentTypingText = viewModel.typingTexts[pagerState.currentPage]
-
-    LaunchedEffect(pagerState.currentPage) {
-        currentTypingText = viewModel.typingTexts[pagerState.currentPage]
-    }
+    // REMOVED: var currentTypingText = ... (This causes the offset crash)
 
     Scaffold(
         modifier = modifier,
@@ -101,41 +97,7 @@ fun HomeScreenContent(
                 enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
                 exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
             ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
-                ) {
-                    IconButton(
-                        onClick = { profileAction() },
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    ) {
-                        Icon(
-                            imageVector = FeatherIcons.User,
-                            contentDescription = "Profile",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Text(
-                        text = "Mobile Typist",
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    )
-
-                    IconButton(
-                        onClick = { settingsAction() },
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    ) {
-                        Icon(
-                            imageVector = FeatherIcons.Settings,
-                            contentDescription = "Settings",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
+                TopAppBar(settingsAction, profileAction)
             }
         }
     ) { innerPadding ->
@@ -144,7 +106,7 @@ fun HomeScreenContent(
                 .fillMaxSize()
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             TypingModeBar(
                 isShowContent = viewModel.showContent,
@@ -154,34 +116,81 @@ fun HomeScreenContent(
 
             HorizontalPager(
                 state = pagerState,
+                modifier = Modifier.weight(1f)
             ) { page ->
+                val textForPage = viewModel.typingTexts.getOrNull(page) ?: ""
+
                 TypingScreen(
                     mode = viewModel.modes[page],
-                    targetText = currentTypingText,
+                    targetText = textForPage,
                     timeOptions = if (viewModel.modes[page] == TypingMode.TIME) viewModel.timeOptions else null,
                     wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) viewModel.wordOptions else null,
                     action = {
                         when (it) {
                             is TypingScreenAction.OnTestComplete -> viewModel.onTestComplete(it.result)
-                            TypingScreenAction.OnNavigateBack -> {
-                                viewModel.onBack()
-                            }
+                            TypingScreenAction.OnNavigateBack -> viewModel.onBack()
                         }
                     },
                     isStarted = !viewModel.showContent
                 )
             }
 
-            IconButton(
-                modifier = Modifier.padding(16.dp),
-                onClick = { viewModel.onStartTapped() }
-            ) {
-                Icon(
-                    FeatherIcons.Play,
-                    contentDescription = "Start",
-                    tint = MaterialTheme.colorScheme.primary
-                )
+            // This will now stay visible at the bottom of the column
+            AnimatedVisibility(visible = viewModel.showContent) {
+                IconButton(
+                    modifier = Modifier.padding(bottom = 32.dp),
+                    onClick = { viewModel.onStartTapped() }
+                ) {
+                    Icon(
+                        FeatherIcons.Play,
+                        contentDescription = "Start",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun TopAppBar(
+    settingsAction: () -> Unit,
+    profileAction: () -> Unit,
+) {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(16.dp)
+    ) {
+        IconButton(
+            onClick = { profileAction() },
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(
+                imageVector = FeatherIcons.User,
+                contentDescription = "Profile",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        Text(
+            text = "Mobile Typist",
+            modifier = Modifier.align(Alignment.Center),
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
+            )
+        )
+
+        IconButton(
+            onClick = { settingsAction() },
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            Icon(
+                imageVector = FeatherIcons.Settings,
+                contentDescription = "Settings",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
@@ -192,6 +201,14 @@ private fun TypingModeBar(
     coroutineScope: CoroutineScope,
     pagerState: PagerState,
 ) {
+
+    val typingModeList = listOf(TypingMode.TIME, TypingMode.WORDS, TypingMode.QUOTES)
+    val childList = when (pagerState.currentPage) {
+        TypingMode.TIME.ordinal -> listOf("30s", "60s")
+        TypingMode.WORDS.ordinal -> listOf("50", "100", "200")
+        else -> emptyList()
+    }
+
     AnimatedVisibility(
         visible = isShowContent,
         enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -199,6 +216,9 @@ private fun TypingModeBar(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -208,68 +228,37 @@ private fun TypingModeBar(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
             ) {
-                ScreenSelectionButton(
-                    Modifier.weight(1f),
-                    coroutineScope,
-                    pagerState,
-                    TypingMode.TIME,
-                    "Time"
-                )
-                ScreenSelectionButton(
-                    Modifier.weight(1f),
-                    coroutineScope,
-                    pagerState,
-                    TypingMode.WORDS,
-                    "Words"
-                )
-                ScreenSelectionButton(
-                    Modifier.weight(1f),
-                    coroutineScope,
-                    pagerState,
-                    TypingMode.QUOTES,
-                    "Quotes"
-                )
-
-                VerticalDivider(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.padding(vertical = 8.dp).weight(1f),
-                ) {
-                    Text(
-                        text = "10s",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(vertical = 4.dp),
+                typingModeList.forEach { mode ->
+                    ScreenSelectionButton(
+                        modifier = Modifier.weight(1f),
+                        coroutineScope = coroutineScope,
+                        pagerState = pagerState,
+                        mode = mode,
+                        title = mode.name.toUpperCase(Locale.current),
                     )
                 }
+            }
 
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+            HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp))
+
+            if (childList.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(
+                        1.dp,
+                        Alignment.CenterHorizontally
                     ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.padding(vertical = 8.dp).weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 64.dp)
                 ) {
-                    Text(
-                        text = "30s",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(vertical = 4.dp),
-                    )
+                    childList.forEach { title ->
+                        ChildSelectionButton(
+                            modifier = Modifier.weight(1f),
+                            title = title,
+                        )
+                    }
                 }
             }
         }
@@ -302,10 +291,36 @@ private fun ScreenSelectionButton(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodySmall.copy(
+            style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.Bold
             ),
             color = if (pagerState.currentPage == mode.ordinal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(vertical = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun ChildSelectionButton(
+    modifier: Modifier,
+    title: String,
+) {
+    Button(
+        onClick = {},
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ),
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
+            .padding(vertical = 4.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(vertical = 4.dp),
         )
     }

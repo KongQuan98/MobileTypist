@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,10 +77,10 @@ fun StatisticsScreen(
             ) {
                 Text(
                     text = "Statistics",
-                    style = TextStyle(
-                        fontSize = 28.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        fontFamily = FontFamily.Monospace
                     )
                 )
                 Button(
@@ -134,10 +135,10 @@ fun StatisticsScreen(
 
             Text(
                 text = "Recent Tests",
-                style = TextStyle(
+                style = MaterialTheme.typography.titleLarge.copy(
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    fontFamily = FontFamily.Monospace
                 )
             )
 

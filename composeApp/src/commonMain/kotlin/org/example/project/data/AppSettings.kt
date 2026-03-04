@@ -9,5 +9,3 @@ data class AppSettings(
     val vibrationEnabled: Boolean = true,
     val showStatistics: Boolean = true
 )
-
-

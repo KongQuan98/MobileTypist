@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,7 +50,7 @@ fun SettingsScreen(
     var soundEnabled by remember { mutableStateOf(currentSettings.soundEnabled) }
     var vibrationEnabled by remember { mutableStateOf(currentSettings.vibrationEnabled) }
     var showStatistics by remember { mutableStateOf(currentSettings.showStatistics) }
-    
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -70,8 +71,9 @@ fun SettingsScreen(
                     style = TextStyle(
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily.Monospace
+                    ),
                 )
                 Button(
                     onClick = { navigationManager.navigateBack() },
@@ -272,6 +274,7 @@ private fun SettingRow(
                     onCheckedChange = onCheckedChange
                 )
             }
+
             else -> {
                 Switch(
                     checked = checked,
