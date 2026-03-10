@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -38,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.RefreshCw
+import compose.icons.feathericons.Square
 import org.example.project.MobileTypistTheme
 import org.example.project.ResultBottomSheet
 import org.example.project.data.TypingMode
@@ -106,9 +105,7 @@ fun TypingScreenContent(
             selectedTime = 0,
             wpmHistory = viewModel.wpmHistory,
             onReset = { viewModel.resetTest() },
-            onSurface = MaterialTheme.colorScheme.onSurface,
-            onBg = MaterialTheme.colorScheme.surface,
-            primary = MaterialTheme.colorScheme.primary
+            onBack = { onBack() },
         )
     }
 
@@ -128,20 +125,53 @@ fun TypingScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Live HUD
+                // Live HUD & Top Actions
                 AnimatedVisibility(
                     visible = viewModel.isRunning,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    Row(
-                        modifier = Modifier.padding(bottom = 32.dp),
-                        horizontalArrangement = Arrangement.spacedBy(24.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 32.dp)
                     ) {
-                        StatDisplay(label = "wpm", value = viewModel.currentWpm.toString())
-                        StatDisplay(label = "acc", value = "${viewModel.currentAccuracy}%")
-                        if (viewModel.timeLeft > 0) {
-                            StatDisplay(label = "time", value = "${viewModel.timeLeft}s")
+                        // Refresh button (Top Left)
+                        IconButton(
+                            onClick = { viewModel.resetTest() },
+                            modifier = Modifier.align(Alignment.CenterStart)
+                        ) {
+                            Icon(
+                                imageVector = FeatherIcons.RefreshCw,
+                                contentDescription = "Restart",
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        // Stats (Center)
+                        Row(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalArrangement = Arrangement.spacedBy(24.dp)
+                        ) {
+                            StatDisplay(label = "wpm", value = viewModel.currentWpm.toString())
+                            StatDisplay(label = "acc", value = "${viewModel.currentAccuracy}%")
+                            if (viewModel.timeLeft > 0) {
+                                StatDisplay(label = "time", value = "${viewModel.timeLeft}s")
+                            }
+                        }
+
+                        // Stop button (Top Right)
+                        IconButton(
+                            onClick = { onBack() },
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        ) {
+                            Icon(
+                                imageVector = FeatherIcons.Square,
+                                contentDescription = "Stop",
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 }
@@ -154,19 +184,6 @@ fun TypingScreenContent(
                     charStatuses = viewModel.charStatuses.toList(),
                     modifier = Modifier.fillMaxWidth(0.9f)
                 )
-
-                // Restart button
-                Spacer(modifier = Modifier.height(32.dp))
-                IconButton(
-                    onClick = { viewModel.resetTest() },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = FeatherIcons.RefreshCw,
-                        contentDescription = "Restart",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
             }
         }
 

@@ -45,6 +45,7 @@ fun ResultBottomSheet(
     selectedTime: Int,
     wpmHistory: List<Int>,
     onReset: () -> Unit,
+    onBack: () -> Unit = {},
 ) {
     val yellow = Color(0xFFe2b714)
 
@@ -166,7 +167,7 @@ fun ResultBottomSheet(
 
                     Button(
                         onClick = onReset,
-                        modifier = Modifier.fillMaxWidth(0.85f).height(64.dp).border(
+                        modifier = Modifier.fillMaxWidth(0.85f).border(
                             2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)
                         ),
                         colors = ButtonDefaults.buttonColors(
@@ -177,6 +178,32 @@ fun ResultBottomSheet(
                     ) {
                         Text(
                             text = "restart test", style = TextStyle(
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        )
+                    }
+
+                    Button(
+                        onClick = onBack,
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .padding(top = 16.dp)
+                            .border(
+                                2.dp,
+                                MaterialTheme.colorScheme.primary,
+                                RoundedCornerShape(12.dp)
+                            ),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.primary
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "back",
+                            style = TextStyle(
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace

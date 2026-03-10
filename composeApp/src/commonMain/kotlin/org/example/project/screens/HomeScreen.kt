@@ -87,7 +87,9 @@ fun HomeScreenContent(
     profileAction: () -> Unit,
 ) {
     Scaffold(
-        modifier = modifier, containerColor = Color.Transparent, topBar = {
+        modifier = modifier,
+        containerColor = Color.Transparent,
+        topBar = {
             AnimatedVisibility(
                 visible = viewModel.showContent,
                 enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
