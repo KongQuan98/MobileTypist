@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.example.project.data.StorageManager
 import org.example.project.screens.AboutScreen
+import org.example.project.screens.CreateAccountScreen
 import org.example.project.screens.HomeScreen
+import org.example.project.screens.LoginScreen
 import org.example.project.screens.SettingsScreen
 import org.example.project.screens.StatisticsScreen
 import org.example.project.screens.StatisticsScreenState
@@ -37,18 +39,6 @@ fun Navigation(
                 )
             }
 
-            is Screen.TimeModeScreen -> {
-                // TimeModeScreen call
-            }
-
-            is Screen.WordsMode -> {
-                // WordsModeScreen call
-            }
-
-            is Screen.QuotesMode -> {
-                // QuotesModeScreen call
-            }
-
             is Screen.Statistics -> {
                 StatisticsScreen(
                     navigationManager = navigationManager,
@@ -74,6 +64,34 @@ fun Navigation(
                 AboutScreen(
                     navigationManager = navigationManager,
                     modifier = modifier.then(scaffoldModifier)
+                )
+            }
+
+            is Screen.Login -> {
+                LoginScreen(
+                    navigationManager = navigationManager,
+                    onSignInClick = { _, _ -> },
+                    onForgotPasswordClick = {},
+                    onGuestClick = {
+                        navigationManager.navigateTo(Screen.Home)
+                    },
+                    onSignUpClick = {
+                        navigationManager.navigateTo(Screen.Register)
+                    }
+                )
+            }
+
+            is Screen.Register -> {
+                CreateAccountScreen(
+                    navigationManager = navigationManager,
+                    onSignInClick = { _, _ -> },
+                    onForgotPasswordClick = {},
+                    onGuestClick = {
+                        navigationManager.navigateTo(Screen.Home)
+                    },
+                    onSignUpClick = {
+                        navigationManager.navigateTo(Screen.Register)
+                    }
                 )
             }
         }
