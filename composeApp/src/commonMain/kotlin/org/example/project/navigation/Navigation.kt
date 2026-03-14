@@ -7,6 +7,8 @@ import org.example.project.screens.AboutScreen
 import org.example.project.screens.CreateAccountScreen
 import org.example.project.screens.HomeScreen
 import org.example.project.screens.LoginScreen
+import org.example.project.screens.ProfileScreen
+import org.example.project.screens.ProfileScreenState
 import org.example.project.screens.SettingsScreen
 import org.example.project.screens.StatisticsScreen
 import org.example.project.screens.StatisticsScreenState
@@ -92,6 +94,18 @@ fun Navigation(
                     onSignUpClick = {
                         navigationManager.navigateTo(Screen.Register)
                     }
+                )
+            }
+
+            is Screen.Profile -> {
+                ProfileScreen(
+                    navigationManager = navigationManager,
+                    profileScreenState = ProfileScreenState(
+                        recentTestResult = storageManager.getResults(),
+                        bestWpm = storageManager.getBestWpm(),
+                        totalTests = storageManager.getTotalTests(),
+                    ),
+                    modifier = modifier.then(scaffoldModifier)
                 )
             }
         }

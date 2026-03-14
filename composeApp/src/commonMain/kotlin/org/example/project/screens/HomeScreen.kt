@@ -72,7 +72,7 @@ fun HomeScreen(
             navigationManager.navigateTo(Screen.Settings)
         },
         profileAction = {
-            navigationManager.navigateTo(Screen.Statistics)
+            navigationManager.navigateTo(Screen.Profile)
         })
 }
 
