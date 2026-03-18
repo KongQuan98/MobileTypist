@@ -10,6 +10,7 @@ import org.example.project.screens.LoginScreen
 import org.example.project.screens.ProfileScreen
 import org.example.project.screens.ProfileScreenState
 import org.example.project.screens.SettingsScreen
+import org.example.project.screens.SettingsScreenAction
 import org.example.project.screens.StatisticsScreen
 import org.example.project.screens.StatisticsScreenState
 import org.example.project.ui.MainScaffold
@@ -18,7 +19,6 @@ import org.example.project.ui.MainScaffold
 fun Navigation(
     navigationManager: NavigationManager,
     storageManager: StorageManager,
-    onThemeChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Handle platform back button (Android) - no-op on iOS
@@ -55,9 +55,15 @@ fun Navigation(
 
             is Screen.Settings -> {
                 SettingsScreen(
-                    navigationManager = navigationManager,
-                    storageManager = storageManager,
-                    onThemeChange = onThemeChange,
+                    action = { action ->
+                        when (action) {
+                            is SettingsScreenAction.Back -> navigationManager.navigateBack()
+                            is SettingsScreenAction.ClearAllData -> storageManager.clearAllData()
+                            is SettingsScreenAction.SaveSettings -> {
+                                storageManager.saveSettings(action.settings)
+                            }
+                        }
+                    },
                     modifier = modifier.then(scaffoldModifier)
                 )
             }

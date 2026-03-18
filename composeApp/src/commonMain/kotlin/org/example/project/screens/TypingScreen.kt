@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,8 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.RefreshCw
-import compose.icons.feathericons.Square
+import compose.icons.feathericons.StopCircle
 import org.example.project.MobileTypistTheme
 import org.example.project.ResultBottomSheet
 import org.example.project.data.TypingMode
@@ -136,19 +134,6 @@ fun TypingScreenContent(
                             .fillMaxWidth()
                             .padding(bottom = 32.dp)
                     ) {
-                        // Refresh button (Top Left)
-                        IconButton(
-                            onClick = { viewModel.resetTest() },
-                            modifier = Modifier.align(Alignment.CenterStart)
-                        ) {
-                            Icon(
-                                imageVector = FeatherIcons.RefreshCw,
-                                contentDescription = "Restart",
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
                         // Stats (Center)
                         Row(
                             modifier = Modifier.align(Alignment.Center),
@@ -167,10 +152,10 @@ fun TypingScreenContent(
                             modifier = Modifier.align(Alignment.CenterEnd)
                         ) {
                             Icon(
-                                imageVector = FeatherIcons.Square,
+                                imageVector = FeatherIcons.StopCircle,
                                 contentDescription = "Stop",
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                modifier = Modifier.size(20.dp)
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }

@@ -39,9 +39,6 @@ fun App(darkTheme: Boolean = false) {
         Navigation(
             navigationManager = navigationManager,
             storageManager = storageManager,
-            onThemeChange = { newTheme ->
-                isDarkTheme = newTheme
-            },
             modifier = Modifier.fillMaxSize().safeDrawingPadding()
         )
     }

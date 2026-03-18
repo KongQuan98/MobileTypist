@@ -16,7 +16,7 @@ class NavigationManager {
     
     fun navigateBack() {
         when (currentScreen) {
-            is Screen.Statistics,
+            is Screen.Profile,
             is Screen.Settings,
             is Screen.About -> currentScreen = Screen.Home
             else -> {}

@@ -12,8 +12,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import compose.icons.FeatherIcons
+import compose.icons.feathericons.BarChart
+import compose.icons.feathericons.Clipboard
 import compose.icons.feathericons.Home
 import compose.icons.feathericons.Settings
 import compose.icons.feathericons.User
@@ -32,10 +35,10 @@ fun MainScaffold(
     Scaffold(
         bottomBar = {
             val currentScreen = navigationManager.currentScreen
-//            BottomNavigation(
-//                currentScreen = currentScreen,
-//                navigationManager = navigationManager,
-//            )
+            BottomNavigation(
+                currentScreen = currentScreen,
+                navigationManager = navigationManager,
+            )
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())) {
@@ -55,10 +58,35 @@ private fun BottomNavigation(
         tonalElevation = 0.dp
     ) {
         NavigationBarItem(
+            selected = currentScreen is Screen.Login,
+            onClick = { navigationManager.navigateTo(Screen.Login) },
+            icon = { Icon(FeatherIcons.Clipboard, contentDescription = "Leaderboard") },
+            label = {
+                Text(
+                    text = "Leaderboard",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                indicatorColor = Color.Transparent
+            )
+        )
+        NavigationBarItem(
             selected = currentScreen is Screen.Settings,
             onClick = { navigationManager.navigateTo(Screen.Settings) },
             icon = { Icon(FeatherIcons.Settings, contentDescription = "Settings") },
-            label = { Text("Settings") },
+            label = {
+                Text(
+                    text = "Settings",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = MaterialTheme.colorScheme.primary,
                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -83,6 +111,19 @@ private fun BottomNavigation(
         NavigationBarItem(
             selected = currentScreen is Screen.Statistics,
             onClick = { navigationManager.navigateTo(Screen.Statistics) },
+            icon = { Icon(FeatherIcons.BarChart, contentDescription = "Statistics") },
+            label = { Text("Statistics") },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                indicatorColor = Color.Transparent
+            )
+        )
+        NavigationBarItem(
+            selected = currentScreen is Screen.Profile,
+            onClick = { navigationManager.navigateTo(Screen.Profile) },
             icon = { Icon(FeatherIcons.User, contentDescription = "Profile") },
             label = { Text("Profile") },
             colors = NavigationBarItemDefaults.colors(

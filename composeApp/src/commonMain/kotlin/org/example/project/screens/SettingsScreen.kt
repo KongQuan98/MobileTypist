@@ -1,6 +1,8 @@
 package org.example.project.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,20 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,256 +27,243 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.example.project.MobileTypistTheme
-import org.example.project.data.StorageManager
-import org.example.project.data.createSettings
-import org.example.project.getPlatform
-import org.example.project.navigation.NavigationManager
-import org.example.project.utils.LiquidToggle
+import org.example.project.data.AppSettings
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+sealed class SettingsScreenAction {
+    object Back : SettingsScreenAction()
+    object ClearAllData : SettingsScreenAction()
+    data class SaveSettings(val settings: AppSettings) : SettingsScreenAction()
+}
 
 @Composable
 fun SettingsScreen(
-    navigationManager: NavigationManager,
-    storageManager: StorageManager,
-    onThemeChange: (Boolean) -> Unit,
+    action: (SettingsScreenAction) -> Unit = {},
+    appSettings: AppSettings = AppSettings(),
     modifier: Modifier = Modifier
 ) {
-    val currentSettings = storageManager.getSettings()
-    var darkTheme by remember { mutableStateOf(currentSettings.darkTheme) }
-    var soundEnabled by remember { mutableStateOf(currentSettings.soundEnabled) }
-    var vibrationEnabled by remember { mutableStateOf(currentSettings.vibrationEnabled) }
-    var showStatistics by remember { mutableStateOf(currentSettings.showStatistics) }
+    val monkeyBackground = Color(0xFF1f1f1f)
+    val monkeyYellow = Color(0xFFe2b714)
+    val monkeyGrey = Color(0xFF646669)
+    val monkeyText = Color(0xFFd1d0c5)
+    val monkeyRed = Color(0xFFca4754)
 
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        color = monkeyBackground
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp)
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState())
         ) {
+            Spacer(Modifier.height(40.dp))
+            
             // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Text(
+                text = "settings",
+                style = TextStyle(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = monkeyText,
+                    fontFamily = FontFamily.Monospace
+                )
+            )
+
+            Spacer(Modifier.height(40.dp))
+
+            // Appearance Section
+            SettingSectionHeader("// appearance")
+
+            SettingNavRow(label = "theme", value = "dark minimal")
+            SettingNavRow(label = "font size", value = "medium")
+            SettingNavRow(label = "font family", value = "jetbrains mono")
+
+            SettingToggleRow(
+                label = "dark theme",
+                checked = appSettings.darkTheme,
+                onCheckedChange = {
+                    action(SettingsScreenAction.SaveSettings(appSettings.copy(darkTheme = it))) 
+                }
+            )
+
+            Spacer(Modifier.height(32.dp))
+
+            // Gameplay Section
+            SettingSectionHeader("// gameplay")
+
+            SettingToggleRow(
+                label = "sound effects",
+                checked = appSettings.soundEnabled,
+                onCheckedChange = {
+                    action(SettingsScreenAction.SaveSettings(appSettings.copy(soundEnabled = it)))
+                }
+            )
+
+            SettingToggleRow(
+                label = "haptic feedback",
+                checked = appSettings.vibrationEnabled,
+                onCheckedChange = {
+                    action(SettingsScreenAction.SaveSettings(appSettings.copy(vibrationEnabled = it)))
+                }
+            )
+
+            SettingToggleRow(label = "blind mode", checked = false, onCheckedChange = {})
+            SettingToggleRow(label = "strict space", checked = false, onCheckedChange = {})
+
+            Spacer(Modifier.height(32.dp))
+
+            // Account Section
+            SettingSectionHeader("// account")
+
+            SettingNavRow(label = "language", value = "english")
+
+            Text(
+                text = "reset statistics",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { action(SettingsScreenAction.ClearAllData) }
+                    .padding(vertical = 12.dp),
+                style = TextStyle(
+                    color = monkeyRed,
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            )
+
+            Text(
+                text = "sign out",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { /* Handle Sign Out */ }
+                    .padding(vertical = 12.dp),
+                style = TextStyle(
+                    color = monkeyRed,
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            )
+
+            Spacer(Modifier.height(64.dp))
+
+            // Footer
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Settings",
+                    text = "typekey v1.0.0",
                     style = TextStyle(
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = monkeyGrey.copy(alpha = 0.5f),
+                        fontSize = 12.sp,
                         fontFamily = FontFamily.Monospace
-                    ),
-                )
-                Button(
-                    onClick = { navigationManager.navigateBack() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                ) {
-                    Text("Back")
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // Settings Cards
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Appearance",
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-
-                    SettingRow(
-                        title = "Dark Theme",
-                        description = "Use dark theme for better visibility in low light",
-                        checked = darkTheme,
-                        onCheckedChange = {
-                            darkTheme = it
-                            onThemeChange(it)
-                            storageManager.saveSettings(
-                                currentSettings.copy(darkTheme = it)
-                            )
-                        }
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Preferences",
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-
-                    SettingRow(
-                        title = "Sound Effects",
-                        description = "Play sounds for test completion",
-                        checked = soundEnabled,
-                        onCheckedChange = {
-                            soundEnabled = it
-                            storageManager.saveSettings(
-                                currentSettings.copy(soundEnabled = it)
-                            )
-                        }
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    SettingRow(
-                        title = "Vibration",
-                        description = "Vibrate on test completion",
-                        checked = vibrationEnabled,
-                        onCheckedChange = {
-                            vibrationEnabled = it
-                            storageManager.saveSettings(
-                                currentSettings.copy(vibrationEnabled = it)
-                            )
-                        }
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    SettingRow(
-                        title = "Show Statistics",
-                        description = "Display statistics on home screen",
-                        checked = showStatistics,
-                        onCheckedChange = {
-                            showStatistics = it
-                            storageManager.saveSettings(
-                                currentSettings.copy(showStatistics = it)
-                            )
-                        }
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Button(
-                onClick = {
-                    storageManager.clearAllData()
-                    navigationManager.navigateBack()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE57373)
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Clear All Data",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White
                     )
                 )
             }
+
+            Spacer(Modifier.height(40.dp))
         }
+    }
+}
+
+@Composable
+private fun SettingSectionHeader(title: String) {
+    Text(
+        text = title,
+        style = TextStyle(
+            color = Color(0xFF646669),
+            fontSize = 14.sp,
+            fontFamily = FontFamily.Monospace
+        ),
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
+}
+
+@Composable
+private fun SettingNavRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { /* Navigate */ }
+            .padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = TextStyle(
+                color = Color(0xFFd1d0c5),
+                fontSize = 16.sp,
+                fontFamily = FontFamily.Monospace
+            )
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = value,
+                style = TextStyle(
+                    color = Color(0xFF646669),
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = ">",
+                style = TextStyle(
+                    color = Color(0xFF646669),
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingToggleRow(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = TextStyle(
+                color = Color(0xFFd1d0c5),
+                fontSize = 16.sp,
+                fontFamily = FontFamily.Monospace
+            )
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color(0xFF1f1f1f),
+                checkedTrackColor = Color(0xFFe2b714),
+                uncheckedThumbColor = Color(0xFF1f1f1f),
+                uncheckedTrackColor = Color(0xFF646669).copy(alpha = 0.3f),
+                uncheckedBorderColor = Color.Transparent
+            )
+        )
     }
 }
 
 @Preview
 @Composable
 private fun SettingsScreenPreview() {
-    MobileTypistTheme(darkTheme = true) {
-        SettingsScreen(
-            navigationManager = NavigationManager(),
-            storageManager = StorageManager(
-                settings = createSettings()
-            ),
-            onThemeChange = {}
-        )
+    MobileTypistTheme(darkTheme = false) {
+        SettingsScreen()
     }
 }
 
+@Preview
 @Composable
-private fun SettingRow(
-    title: String,
-    description: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = title,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            )
-            Text(
-                text = description,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            )
-        }
-        when (getPlatform().name == "Android") {
-            true -> {
-                LiquidToggle(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange
-                )
-            }
-
-            else -> {
-                Switch(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange
-                )
-            }
-        }
+private fun SettingsScreenPreviewDarkTheme() {
+    MobileTypistTheme(darkTheme = true) {
+        SettingsScreen()
     }
 }

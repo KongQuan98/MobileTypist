@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,9 +17,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,10 +36,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
+import compose.icons.feathericons.ArrowRightCircle
+import compose.icons.feathericons.BarChart
 import compose.icons.feathericons.Edit3
 import org.example.project.MobileTypistTheme
+import org.example.project.data.TypingMode
 import org.example.project.data.TypingTestResult
 import org.example.project.navigation.NavigationManager
+import org.example.project.navigation.Screen
 import org.example.project.utils.formatDate
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -70,191 +76,236 @@ fun ProfileScreen(
         0
     }
 
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(top = 40.dp, bottom = 40.dp)
-        ) {
-            // Profile Header Section
-            item {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "SP", // Initials
-                        style = TextStyle(
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.background,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    )
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                Text(
-                    text = "@speedtyper",
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontFamily = FontFamily.Monospace
-                    )
-                )
-
-                Text(
-                    text = "member since jan 2024",
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontFamily = FontFamily.Monospace
-                    )
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                // Edit Profile Button
-                Row(
-                    modifier = Modifier
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                            RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+    Scaffold(
+        modifier = modifier.padding(horizontal = 20.dp),
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                IconButton(
+                    onClick = { navigationManager.navigateTo(Screen.Statistics) },
+                    modifier = Modifier.align(Alignment.CenterStart)
                 ) {
                     Icon(
-                        imageVector = FeatherIcons.Edit3,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "edit profile",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontFamily = FontFamily.Monospace
-                        )
+                        imageVector = FeatherIcons.BarChart,
+                        contentDescription = "Statistics",
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
-                Spacer(Modifier.height(40.dp))
-            }
-
-            // Summary Stats Cards
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                IconButton(
+                    onClick = { navigationManager.navigateBack() },
+                    modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
-                    StatBox(
-                        label = "avg wpm",
-                        value = averageWpm.toString(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatBox(
-                        label = "best",
-                        value = bestWpm.toString(),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatBox(
-                        label = "tests",
-                        value = totalTests.toString(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
+                    Icon(
+                        imageVector = FeatherIcons.ArrowRightCircle,
+                        contentDescription = "Settings",
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
-
-                Spacer(Modifier.height(32.dp))
             }
-
-            // Global Accuracy
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "global accuracy",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    )
-                    Text(
-                        text = "$averageAccuracy%",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    )
-                }
-                Spacer(Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = { averageAccuracy / 100f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(Modifier.height(40.dp))
-            }
-
-            // Recent Tests Section
-            item {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "RECENT TESTS",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontFamily = FontFamily.Monospace,
-                            letterSpacing = 1.sp
-                        )
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            if (results.isEmpty()) {
+        }
+    ) { innerPadding ->
+        Surface(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(top = 20.dp),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                // Profile Header Section
                 item {
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "SP", // Initials
+                            style = TextStyle(
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.background,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        )
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
                     Text(
-                        text = "no tests completed yet",
+                        text = "@speedtyper",
                         style = TextStyle(
-                            fontSize = 14.sp,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Text(
+                        text = "member since jan 2024",
+                        style = TextStyle(
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontFamily = FontFamily.Monospace
                         ),
-                        modifier = Modifier.padding(top = 20.dp)
                     )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Edit Profile Button
+                    Row(
+                        modifier = Modifier
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = FeatherIcons.Edit3,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "edit profile",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        )
+                    }
+
+                    Spacer(Modifier.height(20.dp))
+
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                    )
+
+                    Spacer(Modifier.height(20.dp))
                 }
-            } else {
-                items(results.reversed()) { result ->
-                    ProfileResultItem(result)
+
+                // Summary Stats Cards
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        StatBox(
+                            label = "avg wpm",
+                            value = averageWpm.toString(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatBox(
+                            label = "best",
+                            value = bestWpm.toString(),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatBox(
+                            label = "tests",
+                            value = totalTests.toString(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Spacer(Modifier.height(32.dp))
+                }
+
+                // Global Accuracy
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "global accuracy",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Text(
+                            text = "$averageAccuracy%",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        )
+                    }
                     Spacer(Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { averageAccuracy / 100f },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.background
+                    )
+
+                    Spacer(Modifier.height(40.dp))
+                }
+
+                // Recent Tests Section
+                item {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "RECENT TESTS",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontFamily = FontFamily.Monospace,
+                                letterSpacing = 1.sp
+                            )
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+                }
+
+                if (results.isEmpty()) {
+                    item {
+                        Text(
+                            text = "no tests completed yet",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontFamily = FontFamily.Monospace
+                            ),
+                            modifier = Modifier.padding(top = 20.dp)
+                        )
+                    }
+                } else {
+                    items(results.reversed()) { result ->
+                        ProfileResultItem(result)
+                        Spacer(Modifier.height(8.dp))
+                    }
                 }
             }
         }
@@ -330,7 +381,10 @@ private fun ProfileResultItem(
 
         // WPM and Time Ago
         Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.Bottom) {
+            Row(
+                modifier = Modifier.padding(bottom = 4.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
                 Text(
                     text = result.wpm.toString(),
                     style = TextStyle(
@@ -356,7 +410,7 @@ private fun ProfileResultItem(
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.primary,
                     fontFamily = FontFamily.Monospace
-                )
+                ),
             )
         }
 
@@ -385,10 +439,47 @@ private fun ProfileResultItem(
 @Preview
 @Composable
 private fun ProfileScreenPreviewDark() {
+    val dummyProfileScreenState = ProfileScreenState(
+        recentTestResult = listOf(
+            TypingTestResult(
+                id = "",
+                mode = TypingMode.WORDS,
+                wpm = 100,
+                accuracy = 90,
+                timestamp = 1000L,
+                correctChars = 0,
+                errorCount = 0,
+                duration = 0,
+            ),
+            TypingTestResult(
+                id = "",
+                mode = TypingMode.WORDS,
+                wpm = 100,
+                accuracy = 90,
+                timestamp = 1000L,
+                correctChars = 0,
+                errorCount = 0,
+                duration = 0,
+            ),
+            TypingTestResult(
+                id = "",
+                mode = TypingMode.WORDS,
+                wpm = 100,
+                accuracy = 90,
+                timestamp = 1000L,
+                correctChars = 0,
+                errorCount = 0,
+                duration = 0,
+            )
+        ),
+        bestWpm = 50,
+        totalTests = 25,
+    )
+
     MobileTypistTheme(darkTheme = true) {
         ProfileScreen(
             navigationManager = NavigationManager(),
-            profileScreenState = ProfileScreenState()
+            profileScreenState = dummyProfileScreenState,
         )
     }
 }
@@ -396,10 +487,47 @@ private fun ProfileScreenPreviewDark() {
 @Preview
 @Composable
 private fun ProfileScreenPreview() {
+    val dummyProfileScreenState = ProfileScreenState(
+        recentTestResult = listOf(
+            TypingTestResult(
+                id = "",
+                mode = TypingMode.WORDS,
+                wpm = 100,
+                accuracy = 90,
+                timestamp = 1000L,
+                correctChars = 0,
+                errorCount = 0,
+                duration = 0,
+            ),
+            TypingTestResult(
+                id = "",
+                mode = TypingMode.WORDS,
+                wpm = 100,
+                accuracy = 90,
+                timestamp = 1000L,
+                correctChars = 0,
+                errorCount = 0,
+                duration = 0,
+            ),
+            TypingTestResult(
+                id = "",
+                mode = TypingMode.WORDS,
+                wpm = 100,
+                accuracy = 90,
+                timestamp = 1000L,
+                correctChars = 0,
+                errorCount = 0,
+                duration = 0,
+            )
+        ),
+        bestWpm = 50,
+        totalTests = 25,
+    )
+
     MobileTypistTheme(darkTheme = false) {
         ProfileScreen(
             navigationManager = NavigationManager(),
-            profileScreenState = ProfileScreenState()
+            profileScreenState = dummyProfileScreenState,
         )
     }
 }
