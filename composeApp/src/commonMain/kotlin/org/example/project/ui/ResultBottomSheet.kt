@@ -1,4 +1,4 @@
-package org.example.project
+package org.example.project.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -254,7 +254,7 @@ private fun calculateAccuracy(correct: Int, errors: Int): Int {
 @Preview
 @Composable
 private fun PreviewRealGraphDarkTheme() {
-    MobileTypistTheme(darkTheme = true) {
+    _root_ide_package_.org.example.project.MobileTypistTheme(darkTheme = true) {
         ResultBottomSheet(
             visible = true,
             correctCount = 100,
@@ -269,7 +269,7 @@ private fun PreviewRealGraphDarkTheme() {
 @Preview
 @Composable
 private fun PreviewRealGraph() {
-    MobileTypistTheme(darkTheme = false) {
+    _root_ide_package_.org.example.project.MobileTypistTheme(darkTheme = false) {
         ResultBottomSheet(
             visible = true,
             correctCount = 100,

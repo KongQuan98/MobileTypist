@@ -43,7 +43,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.example.project.CharStatus
+import org.example.project.screens.CharStatus
 
 @Composable
 fun CleanTypingArea(

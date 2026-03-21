@@ -36,14 +36,16 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.StopCircle
 import org.example.project.MobileTypistTheme
-import org.example.project.ResultBottomSheet
-import org.example.project.data.TypingMode
-import org.example.project.data.TypingTestResult
+import org.example.project.data.model.TypingMode
+import org.example.project.data.model.TypingTestResult
 import org.example.project.ui.CleanTypingArea
 import org.example.project.ui.GlobalHiddenInputOverlay
+import org.example.project.ui.ResultBottomSheet
 import org.example.project.viewModel.TypingScreenAction
 import org.example.project.viewModel.TypingViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+enum class CharStatus { Pending, Correct, Incorrect }
 
 @Composable
 fun TypingScreen(

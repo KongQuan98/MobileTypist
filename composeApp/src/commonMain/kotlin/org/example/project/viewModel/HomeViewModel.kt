@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.example.project.data.Difficulty
 import org.example.project.data.StorageManager
-import org.example.project.data.TypingMode
-import org.example.project.data.TypingTestResult
 import org.example.project.data.WordsRepository
+import org.example.project.data.model.TypingMode
+import org.example.project.data.model.TypingTestResult
 
 class HomeViewModel(
     private val storageManager: StorageManager, private val coroutineScope: CoroutineScope

@@ -19,8 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.example.project.MobileTypistTheme
-import org.example.project.data.TypingMode
-import org.example.project.data.TypingTestResult
+import org.example.project.data.model.TypingMode
+import org.example.project.data.model.TypingTestResult
 import org.example.project.navigation.NavigationManager
 import org.jetbrains.compose.ui.tooling.preview.Preview
 

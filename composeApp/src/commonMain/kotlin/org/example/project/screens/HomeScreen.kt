@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -44,10 +45,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.example.project.MobileTypistTheme
 import org.example.project.data.StorageManager
-import org.example.project.data.TypingMode
 import org.example.project.data.createSettings
+import org.example.project.data.model.TypingMode
 import org.example.project.navigation.NavigationManager
-import org.example.project.navigation.Screen
+import org.example.project.navigation.model.Screen
 import org.example.project.viewModel.HomeViewModel
 import org.example.project.viewModel.TypingScreenAction
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -68,6 +69,7 @@ fun HomeScreen(
         pagerState = pagerState,
         coroutineScope = coroutineScope,
         modifier = modifier,
+        navigationManager = navigationManager,
         settingsAction = {
             navigationManager.navigateTo(Screen.Settings)
         },
@@ -83,9 +85,15 @@ fun HomeScreenContent(
     pagerState: PagerState,
     coroutineScope: CoroutineScope,
     modifier: Modifier = Modifier,
+    navigationManager: NavigationManager,
     settingsAction: () -> Unit,
     profileAction: () -> Unit,
 ) {
+    // Sync bottom bar visibility with HomeScreen content state
+    LaunchedEffect(viewModel.showContent) {
+        navigationManager.showBottomBar = viewModel.showContent
+    }
+
     Scaffold(
         modifier = modifier,
         containerColor = Color.Transparent,
@@ -119,8 +127,15 @@ fun HomeScreenContent(
                     wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) listOf(viewModel.selectedWords) else null,
                     action = {
                         when (it) {
-                            is TypingScreenAction.OnTestComplete -> viewModel.onTestComplete(it.result)
-                            TypingScreenAction.OnNavigateBack -> viewModel.onBack()
+                            is TypingScreenAction.OnTestComplete -> {
+                                viewModel.onTestComplete(it.result)
+                                // Bottom bar stays hidden during result screen (which is full screen)
+                            }
+
+                            TypingScreenAction.OnNavigateBack -> {
+                                viewModel.onBack()
+                                navigationManager.showBottomBar = true
+                            }
                         }
                     },
                     isStarted = !viewModel.showContent
@@ -130,7 +145,10 @@ fun HomeScreenContent(
             AnimatedVisibility(visible = viewModel.showContent) {
                 IconButton(
                     modifier = Modifier.padding(bottom = 32.dp),
-                    onClick = { viewModel.onStartTapped() }) {
+                    onClick = {
+                        viewModel.onStartTapped()
+                        navigationManager.showBottomBar = false
+                    }) {
                     Icon(
                         FeatherIcons.Play,
                         contentDescription = "Start",
@@ -313,6 +331,7 @@ private fun HomeScreenPreview() {
             viewModel = viewModel,
             pagerState = pagerState,
             coroutineScope = coroutineScope,
+            navigationManager = NavigationManager(),
             settingsAction = {},
             profileAction = {})
     }

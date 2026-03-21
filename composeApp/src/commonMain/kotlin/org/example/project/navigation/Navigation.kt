@@ -3,6 +3,7 @@ package org.example.project.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.example.project.data.StorageManager
+import org.example.project.navigation.model.Screen
 import org.example.project.screens.AboutScreen
 import org.example.project.screens.CreateAccountScreen
 import org.example.project.screens.HomeScreen

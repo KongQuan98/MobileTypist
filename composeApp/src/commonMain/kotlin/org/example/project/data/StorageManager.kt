@@ -5,7 +5,8 @@ import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
+import org.example.project.data.model.AppSettings
+import org.example.project.data.model.TypingTestResult
 
 class StorageManager(private val settings: Settings) {
     private val json = Json { ignoreUnknownKeys = true }

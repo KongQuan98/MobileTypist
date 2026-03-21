@@ -66,6 +66,8 @@ fun LoginScreen(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
+        Spacer(Modifier.height(40.dp))
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -108,7 +110,7 @@ fun LoginScreen(
 
             // Heading
             Text(
-                text = "Sign in",
+                text = "sign in",
                 style = TextStyle(
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,

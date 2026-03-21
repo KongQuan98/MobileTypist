@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -27,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.example.project.MobileTypistTheme
-import org.example.project.data.AppSettings
+import org.example.project.data.model.AppSettings
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 sealed class SettingsScreenAction {
@@ -42,15 +43,9 @@ fun SettingsScreen(
     appSettings: AppSettings = AppSettings(),
     modifier: Modifier = Modifier
 ) {
-    val monkeyBackground = Color(0xFF1f1f1f)
-    val monkeyYellow = Color(0xFFe2b714)
-    val monkeyGrey = Color(0xFF646669)
-    val monkeyText = Color(0xFFd1d0c5)
-    val monkeyRed = Color(0xFFca4754)
-
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = monkeyBackground
+        color = Color.Transparent,
     ) {
         Column(
             modifier = Modifier
@@ -59,14 +54,14 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(Modifier.height(40.dp))
-            
+
             // Header
             Text(
                 text = "settings",
                 style = TextStyle(
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = monkeyText,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontFamily = FontFamily.Monospace
                 )
             )
@@ -84,7 +79,7 @@ fun SettingsScreen(
                 label = "dark theme",
                 checked = appSettings.darkTheme,
                 onCheckedChange = {
-                    action(SettingsScreenAction.SaveSettings(appSettings.copy(darkTheme = it))) 
+                    action(SettingsScreenAction.SaveSettings(appSettings.copy(darkTheme = it)))
                 }
             )
 
@@ -126,7 +121,7 @@ fun SettingsScreen(
                     .clickable { action(SettingsScreenAction.ClearAllData) }
                     .padding(vertical = 12.dp),
                 style = TextStyle(
-                    color = monkeyRed,
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 16.sp,
                     fontFamily = FontFamily.Monospace
                 )
@@ -139,7 +134,7 @@ fun SettingsScreen(
                     .clickable { /* Handle Sign Out */ }
                     .padding(vertical = 12.dp),
                 style = TextStyle(
-                    color = monkeyRed,
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 16.sp,
                     fontFamily = FontFamily.Monospace
                 )
@@ -152,7 +147,7 @@ fun SettingsScreen(
                 Text(
                     text = "typekey v1.0.0",
                     style = TextStyle(
-                        color = monkeyGrey.copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         fontSize = 12.sp,
                         fontFamily = FontFamily.Monospace
                     )
@@ -169,7 +164,7 @@ private fun SettingSectionHeader(title: String) {
     Text(
         text = title,
         style = TextStyle(
-            color = Color(0xFF646669),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp,
             fontFamily = FontFamily.Monospace
         ),
@@ -190,7 +185,7 @@ private fun SettingNavRow(label: String, value: String) {
         Text(
             text = label,
             style = TextStyle(
-                color = Color(0xFFd1d0c5),
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
                 fontFamily = FontFamily.Monospace
             )
@@ -199,7 +194,7 @@ private fun SettingNavRow(label: String, value: String) {
             Text(
                 text = value,
                 style = TextStyle(
-                    color = Color(0xFF646669),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = FontFamily.Monospace
                 )
@@ -208,7 +203,7 @@ private fun SettingNavRow(label: String, value: String) {
             Text(
                 text = ">",
                 style = TextStyle(
-                    color = Color(0xFF646669),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = FontFamily.Monospace
                 )
@@ -233,7 +228,7 @@ private fun SettingToggleRow(
         Text(
             text = label,
             style = TextStyle(
-                color = Color(0xFFd1d0c5),
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
                 fontFamily = FontFamily.Monospace
             )
@@ -242,10 +237,10 @@ private fun SettingToggleRow(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color(0xFF1f1f1f),
-                checkedTrackColor = Color(0xFFe2b714),
-                uncheckedThumbColor = Color(0xFF1f1f1f),
-                uncheckedTrackColor = Color(0xFF646669).copy(alpha = 0.3f),
+                checkedThumbColor = MaterialTheme.colorScheme.onBackground,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onBackground,
+                uncheckedTrackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                 uncheckedBorderColor = Color.Transparent
             )
         )

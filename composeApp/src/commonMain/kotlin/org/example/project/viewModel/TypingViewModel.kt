@@ -8,9 +8,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.example.project.CharStatus
-import org.example.project.data.TypingMode
-import org.example.project.data.TypingTestResult
+import org.example.project.data.model.TypingMode
+import org.example.project.data.model.TypingTestResult
+import org.example.project.screens.CharStatus
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
