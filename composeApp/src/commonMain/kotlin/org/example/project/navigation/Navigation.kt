@@ -7,6 +7,7 @@ import org.example.project.navigation.model.Screen
 import org.example.project.screens.AboutScreen
 import org.example.project.screens.CreateAccountScreen
 import org.example.project.screens.HomeScreen
+import org.example.project.screens.LeaderboardScreen
 import org.example.project.screens.LoginScreen
 import org.example.project.screens.ProfileScreen
 import org.example.project.screens.ProfileScreenState
@@ -112,6 +113,13 @@ fun Navigation(
                         bestWpm = storageManager.getBestWpm(),
                         totalTests = storageManager.getTotalTests(),
                     ),
+                    modifier = modifier.then(scaffoldModifier)
+                )
+            }
+
+            is Screen.LeaderBoard -> {
+                LeaderboardScreen(
+                    navigationManager = navigationManager,
                     modifier = modifier.then(scaffoldModifier)
                 )
             }

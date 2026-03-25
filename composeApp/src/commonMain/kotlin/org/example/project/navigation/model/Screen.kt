@@ -16,6 +16,7 @@ sealed class Screen {
     object Login : Screen()
     object Register : Screen()
     object Profile : Screen()
+    object LeaderBoard : Screen()
 }
 
 sealed class BottomNavigationTab(
@@ -29,10 +30,10 @@ sealed class BottomNavigationTab(
         screenRoute = Screen.Settings,
     )
 
-    object Login : BottomNavigationTab(
+    object LeaderBoard : BottomNavigationTab(
         title = "Leaderboard",
         icon = FeatherIcons.Clipboard,
-        screenRoute = Screen.Login,
+        screenRoute = Screen.LeaderBoard,
     )
 
     object Home : BottomNavigationTab(
@@ -56,7 +57,7 @@ sealed class BottomNavigationTab(
     companion object {
         val tabList: List<BottomNavigationTab> = listOf(
             Settings,
-            Login,
+            LeaderBoard,
             Home,
             Statistics,
             Profile
