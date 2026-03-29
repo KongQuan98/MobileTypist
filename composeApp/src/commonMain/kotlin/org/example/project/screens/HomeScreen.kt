@@ -6,15 +6,19 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -93,72 +98,97 @@ fun HomeScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AnimatedVisibility(
-                modifier = Modifier
-                    .padding(top = 40.dp),
-                visible = viewModel.showContent,
-                enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
-            ) {
-                Text(
-                    text = "mobile typist",
-                    style = TextStyle(
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontFamily = FontFamily.Monospace
-                    )
-                )
-            }
+            TitleSection(showTitleBar = viewModel.showContent)
 
             TypingModeBar(
                 viewModel = viewModel, coroutineScope = coroutineScope, pagerState = pagerState
             )
 
-            HorizontalPager(
-                state = pagerState, modifier = Modifier.weight(1f)
-            ) { page ->
-                val textForPage = viewModel.typingTexts.getOrNull(page) ?: ""
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                HorizontalPager(
+                    state = pagerState,
+                    userScrollEnabled = viewModel.showContent,
+                ) { page ->
+                    val textForPage = viewModel.typingTexts.getOrNull(page) ?: ""
 
-                TypingScreen(
-                    mode = viewModel.modes[page],
-                    targetText = textForPage,
-                    timeOptions = if (viewModel.modes[page] == TypingMode.TIME) listOf(viewModel.selectedTime) else null,
-                    wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) listOf(
-                        viewModel.selectedWords
-                    ) else null,
-                    action = {
-                        when (it) {
-                            is TypingScreenAction.OnTestComplete -> {
-                                viewModel.onTestComplete(it.result)
-                                // Bottom bar stays hidden during result screen (which is full screen)
+                    TypingScreen(
+                        mode = viewModel.modes[page],
+                        targetText = textForPage,
+                        timeOptions = if (viewModel.modes[page] == TypingMode.TIME) listOf(viewModel.selectedTime) else null,
+                        wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) listOf(
+                            viewModel.selectedWords
+                        ) else null,
+                        action = {
+                            when (it) {
+                                is TypingScreenAction.OnTestComplete -> {
+                                    viewModel.onTestComplete(it.result)
+                                    // Bottom bar stays hidden during result screen (which is full screen)
+                                }
+
+                                TypingScreenAction.OnNavigateBack -> {
+                                    viewModel.onBack()
+                                    navigationManager.showBottomBar = true
+                                }
                             }
-
-                            TypingScreenAction.OnNavigateBack -> {
-                                viewModel.onBack()
-                                navigationManager.showBottomBar = true
-                            }
-                        }
-                    },
-                    isStarted = !viewModel.showContent
-                )
-            }
-
-            AnimatedVisibility(visible = viewModel.showContent) {
-                IconButton(
-                    onClick = {
-                        viewModel.onStartTapped()
-                        navigationManager.showBottomBar = false
-                    }) {
-                    Icon(
-                        FeatherIcons.Play,
-                        contentDescription = "Start",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.fillMaxSize()
+                        },
+                        isStarted = !viewModel.showContent
                     )
+                }
+
+                if (viewModel.showContent) {
+                    IconButton(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .clip(CircleShape)
+                            .size(180.dp)
+                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f)),
+                        onClick = {
+                            viewModel.onStartTapped()
+                            navigationManager.showBottomBar = false
+                        },
+                    ) {
+                        Icon(
+                            FeatherIcons.Play,
+                            contentDescription = "Start",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(80.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PlayButto() {
+
+}
+
+@Composable
+private fun TitleSection(
+    showTitleBar: Boolean,
+) {
+    AnimatedVisibility(
+        modifier = Modifier
+            .padding(top = 40.dp),
+        visible = showTitleBar,
+        enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+    ) {
+        Text(
+            text = "mobile typist",
+            style = TextStyle(
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontFamily = FontFamily.Monospace
+            )
+        )
     }
 }
 

@@ -16,7 +16,8 @@ import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 
 class HomeViewModel(
-    private val storageManager: StorageManager, private val coroutineScope: CoroutineScope
+    private val storageManager: StorageManager,
+    private val coroutineScope: CoroutineScope,
 ) {
 
     val modes = listOf(TypingMode.TIME, TypingMode.WORDS, TypingMode.QUOTES)
@@ -40,6 +41,10 @@ class HomeViewModel(
             snapshotFlow { selectedWords }.drop(1) // Skip initial value since loadTexts() handles it
                 .collectLatest {
                     loadTextsForMode(TypingMode.WORDS)
+                }
+            snapshotFlow { selectedTime }.drop(1) // Skip initial value since loadTexts() handles it
+                .collectLatest {
+                    loadTextsForMode(TypingMode.TIME)
                 }
         }
     }
