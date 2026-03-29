@@ -1,6 +1,8 @@
 package org.example.project.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.example.project.data.StorageManager
 import org.example.project.navigation.model.Screen
@@ -32,6 +34,8 @@ fun Navigation(
     )
 
     val currentScreen = navigationManager.currentScreen
+
+    val appSettings by storageManager.settingsFlow.collectAsState()
 
     MainScaffold(navigationManager = navigationManager) { scaffoldModifier ->
         when (currentScreen) {
@@ -66,6 +70,7 @@ fun Navigation(
                             }
                         }
                     },
+                    appSettings = appSettings,
                     modifier = modifier.then(scaffoldModifier)
                 )
             }

@@ -1,30 +1,17 @@
-//package org.example.project.utils
-//
-//import androidx.compose.foundation.layout.padding
-//import androidx.compose.foundation.layout.size
-//import androidx.compose.foundation.text.BasicText
-//import androidx.compose.material3.Icon
-//import androidx.compose.material3.ListItemDefaults.contentColor
-//import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.LaunchedEffect
-//import androidx.compose.runtime.getValue
-//import androidx.compose.runtime.mutableIntStateOf
-//import androidx.compose.runtime.saveable.rememberSaveable
-//import androidx.compose.runtime.setValue
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.text.TextStyle
-//import androidx.compose.ui.unit.dp
-//import androidx.compose.ui.unit.sp
-//import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-//import org.example.project.ThemeColors
-//import org.example.project.liquidglasssetup.LiquidBottomTab
-//import org.example.project.liquidglasssetup.LiquidBottomTabs
-//
-//@Composable
-//actual fun LiquidBottomTabs(
+package org.example.project.utils
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.Composable
+
+@Composable
+actual fun LiquidBottomTabs(
+    content: @Composable () -> Unit
 //    tabList: List<TabListSettings>,
 //    selectedTabIndex: Int,
-//) {
+) {
+    Box() {
+        content()
+    }
 //    val backdrop = rememberLayerBackdrop()
 //
 //    var selectedIndex by rememberSaveable { mutableIntStateOf(selectedTabIndex) }
@@ -54,7 +41,7 @@
 //                    imageVector = icon,
 //                    contentDescription = title,
 //                    modifier = Modifier.size(28f.dp),
-//                    tint = ThemeColors.Primary,
+//                    tint = MaterialTheme.colorScheme.primary,
 //                )
 //                BasicText(
 //                    title,
@@ -63,7 +50,7 @@
 //            }
 //        }
 //    }
-//
-//}
-//
-//
+
+}
+
+

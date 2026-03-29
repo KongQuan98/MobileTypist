@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -104,9 +105,6 @@ fun SettingsScreen(
                 }
             )
 
-            SettingToggleRow(label = "blind mode", checked = false, onCheckedChange = {})
-            SettingToggleRow(label = "strict space", checked = false, onCheckedChange = {})
-
             Spacer(Modifier.height(32.dp))
 
             // Account Section
@@ -178,7 +176,7 @@ private fun SettingNavRow(label: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { /* Navigate */ }
-            .padding(vertical = 12.dp),
+            .padding(vertical = 24.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -210,6 +208,11 @@ private fun SettingNavRow(label: String, value: String) {
             )
         }
     }
+
+    HorizontalDivider(
+        thickness = 1.dp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+    )
 }
 
 @Composable
@@ -245,6 +248,11 @@ private fun SettingToggleRow(
             )
         )
     }
+
+    HorizontalDivider(
+        thickness = 1.dp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+    )
 }
 
 @Preview

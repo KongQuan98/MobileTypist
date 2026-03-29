@@ -7,7 +7,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,15 +31,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Play
-import compose.icons.feathericons.Settings
-import compose.icons.feathericons.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.example.project.MobileTypistTheme
@@ -48,7 +47,6 @@ import org.example.project.data.StorageManager
 import org.example.project.data.createSettings
 import org.example.project.data.model.TypingMode
 import org.example.project.navigation.NavigationManager
-import org.example.project.navigation.model.Screen
 import org.example.project.viewModel.HomeViewModel
 import org.example.project.viewModel.TypingScreenAction
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -70,12 +68,7 @@ fun HomeScreen(
         coroutineScope = coroutineScope,
         modifier = modifier,
         navigationManager = navigationManager,
-        settingsAction = {
-            navigationManager.navigateTo(Screen.Settings)
-        },
-        profileAction = {
-            navigationManager.navigateTo(Screen.Profile)
-        })
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -86,31 +79,38 @@ fun HomeScreenContent(
     coroutineScope: CoroutineScope,
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager,
-    settingsAction: () -> Unit,
-    profileAction: () -> Unit,
 ) {
     // Sync bottom bar visibility with HomeScreen content state
     LaunchedEffect(viewModel.showContent) {
         navigationManager.showBottomBar = viewModel.showContent
     }
-
-    Scaffold(
-        modifier = modifier,
-        containerColor = Color.Transparent,
-        topBar = {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             AnimatedVisibility(
+                modifier = Modifier
+                    .padding(top = 40.dp),
                 visible = viewModel.showContent,
                 enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
                 exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
             ) {
-                TopAppBar(settingsAction, profileAction)
+                Text(
+                    text = "mobile typist",
+                    style = TextStyle(
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily.Monospace
+                    )
+                )
             }
-        }) { innerPadding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+
             TypingModeBar(
                 viewModel = viewModel, coroutineScope = coroutineScope, pagerState = pagerState
             )
@@ -124,7 +124,9 @@ fun HomeScreenContent(
                     mode = viewModel.modes[page],
                     targetText = textForPage,
                     timeOptions = if (viewModel.modes[page] == TypingMode.TIME) listOf(viewModel.selectedTime) else null,
-                    wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) listOf(viewModel.selectedWords) else null,
+                    wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) listOf(
+                        viewModel.selectedWords
+                    ) else null,
                     action = {
                         when (it) {
                             is TypingScreenAction.OnTestComplete -> {
@@ -144,7 +146,6 @@ fun HomeScreenContent(
 
             AnimatedVisibility(visible = viewModel.showContent) {
                 IconButton(
-                    modifier = Modifier.padding(bottom = 32.dp),
                     onClick = {
                         viewModel.onStartTapped()
                         navigationManager.showBottomBar = false
@@ -162,45 +163,6 @@ fun HomeScreenContent(
 }
 
 @Composable
-private fun TopAppBar(
-    settingsAction: () -> Unit,
-    profileAction: () -> Unit,
-) {
-    Box(
-        modifier = Modifier.fillMaxWidth().padding(16.dp)
-    ) {
-        IconButton(
-            onClick = { profileAction() }, modifier = Modifier.align(Alignment.CenterStart)
-        ) {
-            Icon(
-                imageVector = FeatherIcons.User,
-                contentDescription = "Profile",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        Text(
-            text = "Mobile Typist",
-            modifier = Modifier.align(Alignment.Center),
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace
-            )
-        )
-
-        IconButton(
-            onClick = { settingsAction() }, modifier = Modifier.align(Alignment.CenterEnd)
-        ) {
-            Icon(
-                imageVector = FeatherIcons.Settings,
-                contentDescription = "Settings",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-
-@Composable
 private fun TypingModeBar(
     viewModel: HomeViewModel,
     coroutineScope: CoroutineScope,
@@ -213,7 +175,7 @@ private fun TypingModeBar(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -287,6 +249,7 @@ private fun ScreenSelectionButton(
     ) {
         Text(
             text = title,
+            maxLines = 1,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
             color = if (pagerState.currentPage == mode.ordinal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(vertical = 4.dp),
@@ -332,7 +295,6 @@ private fun HomeScreenPreview() {
             pagerState = pagerState,
             coroutineScope = coroutineScope,
             navigationManager = NavigationManager(),
-            settingsAction = {},
-            profileAction = {})
+        )
     }
 }

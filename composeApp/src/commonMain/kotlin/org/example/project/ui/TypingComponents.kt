@@ -59,7 +59,7 @@ fun CleanTypingArea(
     val pendingColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
     val correctColor = MaterialTheme.colorScheme.onSurface
     val errorColor = Color(0xFFCA4754)
-    val caretColor = MaterialTheme.colorScheme.primary
+    val caretColor = Color.Transparent
 
     val currentCharIndex = charStatuses.count { it != CharStatus.Pending }
 

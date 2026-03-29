@@ -3,6 +3,8 @@ package org.example.project.data
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.example.project.data.model.AppSettings
@@ -17,6 +19,9 @@ class StorageManager(private val settings: Settings) {
         private const val KEY_BEST_WPM = "best_wpm"
         private const val KEY_TOTAL_TESTS = "total_tests"
     }
+
+    private val _settingsFlow = MutableStateFlow(AppSettings())
+    val settingsFlow = _settingsFlow.asStateFlow()
     
     fun saveResult(result: TypingTestResult) {
         val results = getResults().toMutableList()
@@ -70,6 +75,7 @@ class StorageManager(private val settings: Settings) {
     
     fun saveSettings(settings: AppSettings) {
         this.settings[KEY_SETTINGS] = json.encodeToString(settings)
+        _settingsFlow.value = settings
     }
     
     fun clearAllData() {
