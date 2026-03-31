@@ -1,15 +1,8 @@
 package org.example.project.ui
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -59,7 +51,6 @@ fun CleanTypingArea(
     val pendingColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
     val correctColor = MaterialTheme.colorScheme.onSurface
     val errorColor = Color(0xFFCA4754)
-    val caretColor = Color.Transparent
 
     val currentCharIndex = charStatuses.count { it != CharStatus.Pending }
 
@@ -69,7 +60,12 @@ fun CleanTypingArea(
                 index < charStatuses.size -> when (charStatuses[index]) {
                     CharStatus.Correct -> correctColor
                     CharStatus.Incorrect -> errorColor
-                    CharStatus.Pending -> pendingColor
+                    CharStatus.Pending -> if (index == currentCharIndex) {
+                        // Highlight current character color if needed, but no cursor line
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        pendingColor
+                    }
                 }
 
                 else -> pendingColor
@@ -95,18 +91,7 @@ fun CleanTypingArea(
             constraints = Constraints(maxWidth = 1200)
         )
 
-        // Caret Blink
-        val infiniteTransition = rememberInfiniteTransition()
-        val caretAlpha by infiniteTransition.animateFloat(
-            initialValue = 1f,
-            targetValue = 0f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 500, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse
-            )
-        )
-
-        // Smooth Caret Motion
+        // Smooth Caret Motion calculation remains for auto-scroll logic only
         val caretOffset = remember(currentCharIndex, layoutResult) {
             when {
                 currentCharIndex < targetText.length -> layoutResult.getCursorRect(currentCharIndex)
@@ -124,13 +109,6 @@ fun CleanTypingArea(
             }
         }
 
-        val animatedCaretX by animateFloatAsState(
-            targetValue = caretOffset.left,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioNoBouncy,
-                stiffness = Spring.StiffnessLow
-            )
-        )
         val animatedCaretY by animateFloatAsState(
             targetValue = caretOffset.top,
             animationSpec = spring(
@@ -139,7 +117,7 @@ fun CleanTypingArea(
             )
         )
 
-        // Auto-scroll logic: Keep caret visible
+        // Auto-scroll logic: Keep typing position visible
         LaunchedEffect(animatedCaretY) {
             scrollState.animateScrollTo(animatedCaretY.toInt().coerceAtLeast(0))
         }
@@ -150,17 +128,7 @@ fun CleanTypingArea(
                 style = textStyle,
                 modifier = Modifier.fillMaxWidth()
             )
-
-            if (enabled) {
-                Canvas(modifier = Modifier.matchParentSize()) {
-                    drawRect(
-                        color = caretColor,
-                        topLeft = Offset(animatedCaretX, animatedCaretY + 4.dp.toPx()),
-                        size = androidx.compose.ui.geometry.Size(2.5.dp.toPx(), 24.sp.toPx()),
-                        alpha = caretAlpha
-                    )
-                }
-            }
+            // Cursor Canvas Removed
         }
     }
 }

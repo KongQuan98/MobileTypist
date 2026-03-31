@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +35,12 @@ fun MainScaffold(
 ) {
     val currentScreen = navigationManager.currentScreen
     Scaffold(
+        contentWindowInsets = WindowInsets(
+            0,
+            0,
+            0,
+            0
+        ), // Remove default insets to handle them manually
         bottomBar = {
             AnimatedVisibility(
                 visible = navigationManager.showBottomBar,
@@ -65,7 +73,7 @@ private fun BottomNavigation(
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        tonalElevation = 0.dp
+        windowInsets = WindowInsets.navigationBars // Ensure it handles system nav bar correctly
     ) {
         BottomNavigationTab.tabList.forEach { tab ->
             NavigationBarItem(

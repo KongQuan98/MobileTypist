@@ -165,11 +165,6 @@ fun HomeScreenContent(
 }
 
 @Composable
-private fun PlayButto() {
-
-}
-
-@Composable
 private fun TitleSection(
     showTitleBar: Boolean,
 ) {
@@ -210,7 +205,9 @@ private fun TypingModeBar(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterHorizontally),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .fillMaxWidth()
             ) {
                 viewModel.modes.forEach { mode ->
                     ScreenSelectionButton(

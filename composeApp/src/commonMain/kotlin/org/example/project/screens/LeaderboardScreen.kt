@@ -92,7 +92,7 @@ fun LeaderboardScreen(
                     .fillMaxSize()
                     .padding(horizontal = 24.dp)
             ) {
-                Spacer(Modifier.height(screenHeight * 0.05f))
+                Spacer(Modifier.height(40.dp))
 
                 Text(
                     text = "leaderboard",
@@ -269,6 +269,8 @@ private fun PodiumPosition(
             maxLines = 1,
             textAlign = TextAlign.Center
         )
+
+        Spacer(Modifier.height(4.dp))
 
         Row(verticalAlignment = Alignment.Bottom) {
             Text(

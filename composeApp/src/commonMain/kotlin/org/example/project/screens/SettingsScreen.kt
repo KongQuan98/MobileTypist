@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.example.project.MobileTypistTheme
@@ -46,7 +47,7 @@ fun SettingsScreen(
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = Color.Transparent,
+        color = MaterialTheme.colorScheme.background,
     ) {
         Column(
             modifier = Modifier
@@ -112,6 +113,8 @@ fun SettingsScreen(
 
             SettingNavRow(label = "language", value = "english")
 
+            Spacer(Modifier.height(32.dp))
+
             Text(
                 text = "reset statistics",
                 modifier = Modifier
@@ -122,7 +125,8 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 16.sp,
                     fontFamily = FontFamily.Monospace
-                )
+                ),
+                textAlign = TextAlign.Center
             )
 
             Text(
@@ -135,7 +139,8 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 16.sp,
                     fontFamily = FontFamily.Monospace
-                )
+                ),
+                textAlign = TextAlign.Center
             )
 
             Spacer(Modifier.height(64.dp))
@@ -163,8 +168,9 @@ private fun SettingSectionHeader(title: String) {
         text = title,
         style = TextStyle(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp,
-            fontFamily = FontFamily.Monospace
+            fontSize = 18.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.ExtraBold
         ),
         modifier = Modifier.padding(vertical = 8.dp)
     )
@@ -195,7 +201,8 @@ private fun SettingNavRow(label: String, value: String) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = FontFamily.Monospace
-                )
+                ),
+                textAlign = TextAlign.End,
             )
             Spacer(Modifier.width(8.dp))
             Text(

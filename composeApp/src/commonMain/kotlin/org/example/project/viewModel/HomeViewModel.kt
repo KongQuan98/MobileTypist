@@ -21,7 +21,7 @@ class HomeViewModel(
 ) {
 
     val modes = listOf(TypingMode.TIME, TypingMode.WORDS, TypingMode.QUOTES)
-    val timeOptions = listOf(30, 60)
+    val timeOptions = listOf(15, 30, 60)
     val wordOptions = listOf(25, 50, 100)
 
     var selectedTime by mutableStateOf(30)
