@@ -19,7 +19,6 @@ kamelImage = "1.0.8"
 kotlin = "2.2.0"
 kotlinStdlib = "2.2.0"
 ktorClientOkhttp = "3.3.1"
-liquid = "1.1.1"
 lottieCompose = "6.6.10"
 lottieComposeMultiplatform = "1.6.1"
 runner = "1.5.2"
@@ -50,7 +49,6 @@ androidx-core = { group = "androidx.test", name = "core", version.ref = "core" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientOkhttp" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktorClientOkhttp" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktorClientOkhttp" }
-liquid = { module = "io.github.fletchmckee.liquid:liquid", version.ref = "liquid" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 lottie-compose-multiplatform = { module = "io.github.alexzhirkevich:lottie-compose-multiplatform", version.ref = "lottieComposeMultiplatform" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
