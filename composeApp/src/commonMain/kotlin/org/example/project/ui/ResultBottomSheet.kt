@@ -47,6 +47,7 @@ fun ResultBottomSheet(
     onReset: () -> Unit,
     onBack: () -> Unit = {},
 ) {
+    // drawPath need Color
     val yellow = Color(0xFFe2b714)
 
     val wpm = calculateWpm(correctCount, selectedTime)
@@ -59,11 +60,13 @@ fun ResultBottomSheet(
         exit = fadeOut() + scaleOut(targetScale = 0.9f)
     ) {
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.background
         ) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -73,7 +76,7 @@ fun ResultBottomSheet(
                 ) {
                     Text(
                         text = wpm.toString(), style = TextStyle(
-                            fontSize = 120.sp,
+                            fontSize = 60.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
                             fontFamily = FontFamily.Monospace
@@ -81,18 +84,20 @@ fun ResultBottomSheet(
                     )
                     Text(
                         text = "WORDS PER MINUTE", style = TextStyle(
-                            fontSize = 14.sp,
+                            fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontFamily = FontFamily.Monospace,
                             letterSpacing = 2.sp
                         )
                     )
 
-                    Spacer(Modifier.height(64.dp))
+                    Spacer(Modifier.height(16.dp))
 
                     // Dynamic Performance Graph
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(150.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
                             .padding(horizontal = 16.dp)
                     ) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -130,7 +135,7 @@ fun ResultBottomSheet(
                         }
                     }
 
-                    Spacer(Modifier.height(64.dp))
+                    Spacer(Modifier.height(16.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -153,23 +158,25 @@ fun ResultBottomSheet(
                         )
                     }
 
-                    Spacer(Modifier.height(48.dp))
+                    Spacer(Modifier.height(16.dp))
 
                     Text(
                         text = "$keystrokes keystrokes", style = TextStyle(
-                            fontSize = 18.sp,
+                            fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontFamily = FontFamily.Monospace
                         )
                     )
 
-                    Spacer(Modifier.height(64.dp))
+                    Spacer(Modifier.height(32.dp))
 
                     Button(
                         onClick = onReset,
-                        modifier = Modifier.fillMaxWidth(0.85f).border(
-                            2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)
-                        ),
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .border(
+                                2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)
+                            ),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
                             contentColor = MaterialTheme.colorScheme.primary
@@ -178,7 +185,7 @@ fun ResultBottomSheet(
                     ) {
                         Text(
                             text = "restart test", style = TextStyle(
-                                fontSize = 22.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace
                             )
@@ -204,7 +211,7 @@ fun ResultBottomSheet(
                         Text(
                             text = "back",
                             style = TextStyle(
-                                fontSize = 22.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace
                             )
@@ -221,7 +228,7 @@ private fun StatItem(label: String, value: String, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value, style = TextStyle(
-                fontSize = 42.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = color,
                 fontFamily = FontFamily.Monospace
@@ -229,7 +236,7 @@ private fun StatItem(label: String, value: String, color: Color) {
         )
         Text(
             text = label, style = TextStyle(
-                fontSize = 12.sp,
+                fontSize = 8.sp,
                 color = Color(0xFF646669),
                 fontFamily = FontFamily.Monospace,
                 letterSpacing = 1.sp

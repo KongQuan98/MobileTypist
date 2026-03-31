@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
@@ -75,116 +78,132 @@ fun LeaderboardScreen(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-        ) {
-            Spacer(Modifier.height(40.dp))
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val screenHeight = maxHeight
+            val screenWidth = maxWidth
 
-            Text(
-                text = "leaderboard",
-                style = TextStyle(
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontFamily = FontFamily.Monospace
-                )
-            )
+            // Proportional sizing
+            val titleSize = (screenWidth.value * 0.08f).coerceIn(24f, 32f).sp
+            val podiumSectionHeight = screenHeight * 0.35f
+            val listSectionHeight = screenHeight * 0.45f
 
-            Spacer(Modifier.height(24.dp))
-
-            // Custom Tab Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
             ) {
-                tabs.forEachIndexed { index, title ->
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickableWithoutRipple { selectedTab = index },
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = title,
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                color = if (selectedTab == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontFamily = FontFamily.Monospace
+                Spacer(Modifier.height(screenHeight * 0.05f))
+
+                Text(
+                    text = "leaderboard",
+                    style = TextStyle(
+                        fontSize = titleSize,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily.Monospace
+                    )
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                // Custom Tab Bar
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickableWithoutRipple { selectedTab = index },
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = title,
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    color = if (selectedTab == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontFamily = FontFamily.Monospace
+                                )
                             )
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        if (selectedTab == index) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(0.6f)
-                                    .height(2.dp)
-                                    .background(MaterialTheme.colorScheme.primary)
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(1.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                            alpha = 0.2f
+                            Spacer(Modifier.height(8.dp))
+                            if (selectedTab == index) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.6f)
+                                        .height(2.dp)
+                                        .background(MaterialTheme.colorScheme.primary)
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(1.dp)
+                                        .background(
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                alpha = 0.2f
+                                            )
                                         )
-                                    )
-                            )
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(24.dp))
 
-            // Podium Section
-            if (entries.size >= 3) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    // 2nd Place
-                    PodiumPosition(
-                        entry = entries[1],
-                        rank = 2,
-                        height = 100.dp,
-                        modifier = Modifier.weight(1f)
-                    )
+                // Podium Section - Responsive
+                if (entries.size >= 3) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(podiumSectionHeight),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        // 2nd Place
+                        PodiumPosition(
+                            entry = entries[1],
+                            rank = 2,
+                            relativeHeight = 0.6f,
+                            containerHeight = podiumSectionHeight,
+                            modifier = Modifier.weight(1f)
+                        )
 
-                    // 1st Place
-                    PodiumPosition(
-                        entry = entries[0],
-                        rank = 1,
-                        height = 160.dp, // Significantly taller than 2nd and 3rd
-                        modifier = Modifier.weight(1.2f),
-                        showCrown = true
-                    )
+                        // 1st Place
+                        PodiumPosition(
+                            entry = entries[0],
+                            rank = 1,
+                            relativeHeight = 0.9f,
+                            containerHeight = podiumSectionHeight,
+                            modifier = Modifier.weight(1.2f),
+                            showCrown = true
+                        )
 
-                    // 3rd Place
-                    PodiumPosition(
-                        entry = entries[2],
-                        rank = 3,
-                        height = 80.dp,
-                        modifier = Modifier.weight(1f)
-                    )
+                        // 3rd Place
+                        PodiumPosition(
+                            entry = entries[2],
+                            rank = 3,
+                            relativeHeight = 0.5f,
+                            containerHeight = podiumSectionHeight,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
-            }
 
-            Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(24.dp))
 
-            // Remaining List
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                itemsIndexed(entries.drop(3)) { index, entry ->
-                    LeaderboardListItem(rank = index + 4, entry = entry)
+                // Remaining List
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f), // Take remaining space
+                    contentPadding = PaddingValues(bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    itemsIndexed(entries.drop(3)) { index, entry ->
+                        LeaderboardListItem(rank = index + 4, entry = entry)
+                    }
                 }
             }
         }
@@ -195,10 +214,14 @@ fun LeaderboardScreen(
 private fun PodiumPosition(
     entry: LeaderboardEntry,
     rank: Int,
-    height: androidx.compose.ui.unit.Dp,
+    relativeHeight: Float, // 0.0 to 1.0
+    containerHeight: Dp,
     modifier: Modifier = Modifier,
     showCrown: Boolean = false
 ) {
+    val blockHeight = containerHeight * 0.5f * relativeHeight
+    val avatarSize = (containerHeight.value * 0.25f).coerceIn(40f, 70f).dp
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -209,14 +232,14 @@ private fun PodiumPosition(
                 imageVector = FeatherIcons.Award,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size((avatarSize.value * 0.4f).dp)
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
         }
 
         Box(
             modifier = Modifier
-                .size(if (rank == 1) 70.dp else 60.dp)
+                .size(if (rank == 1) avatarSize else avatarSize * 0.85f)
                 .clip(CircleShape)
                 .background(if (rank == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
@@ -224,41 +247,44 @@ private fun PodiumPosition(
             Text(
                 text = entry.initials,
                 style = TextStyle(
-                    fontSize = if (rank == 1) 24.sp else 20.sp,
+                    fontSize = (avatarSize.value * 0.35f).sp,
                     fontWeight = FontWeight.Bold,
                     color = if (rank == 1) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                     fontFamily = FontFamily.Monospace
-                )
+                ),
+                maxLines = 1,
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(8.dp))
 
         Text(
             text = entry.username,
             style = TextStyle(
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontFamily = FontFamily.Monospace
-            )
+            ),
+            maxLines = 1,
+            textAlign = TextAlign.Center
         )
 
         Row(verticalAlignment = Alignment.Bottom) {
             Text(
                 text = entry.wpm.toString(),
                 style = TextStyle(
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (rank == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace
-                )
+                ),
             )
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(2.dp))
             Text(
                 text = "wpm",
                 style = TextStyle(
-                    fontSize = 10.sp,
+                    fontSize = 9.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace
                 )
@@ -269,10 +295,10 @@ private fun PodiumPosition(
 
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(height)
+                .fillMaxWidth(0.85f)
+                .height(blockHeight)
                 .background(
-                    if (rank == 1) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    if (rank == 1) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
                     else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                     RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
                 )
@@ -286,7 +312,7 @@ private fun PodiumPosition(
             Text(
                 text = rank.toString(),
                 style = TextStyle(
-                    fontSize = if (rank == 1) 32.sp else 24.sp,
+                    fontSize = (blockHeight.value * 0.4f).coerceAtLeast(16f).sp,
                     fontWeight = FontWeight.Bold,
                     color = if (rank == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace
@@ -301,14 +327,14 @@ private fun LeaderboardListItem(rank: Int, entry: LeaderboardEntry) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "#$rank",
-            modifier = Modifier.width(40.dp),
+            modifier = Modifier.width(36.dp),
             style = TextStyle(
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontFamily = FontFamily.Monospace
             )
@@ -316,7 +342,7 @@ private fun LeaderboardListItem(rank: Int, entry: LeaderboardEntry) {
 
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(36.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
@@ -324,7 +350,7 @@ private fun LeaderboardListItem(rank: Int, entry: LeaderboardEntry) {
             Text(
                 text = entry.initials,
                 style = TextStyle(
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontFamily = FontFamily.Monospace
@@ -332,23 +358,24 @@ private fun LeaderboardListItem(rank: Int, entry: LeaderboardEntry) {
             )
         }
 
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(12.dp))
 
         Text(
             text = entry.username,
             modifier = Modifier.weight(1f),
             style = TextStyle(
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontFamily = FontFamily.Monospace
-            )
+            ),
+            maxLines = 1
         )
 
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 text = entry.wpm.toString(),
                 style = TextStyle(
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontFamily = FontFamily.Monospace
