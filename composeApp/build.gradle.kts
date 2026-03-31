@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -54,6 +53,7 @@ kotlin {
             implementation(libs.kamel.image.default)
             implementation(libs.multiplatform.settings)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.liquid)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
