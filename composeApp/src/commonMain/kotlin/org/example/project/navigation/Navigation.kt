@@ -23,6 +23,7 @@ import org.example.project.ui.MainScaffold
 fun Navigation(
     navigationManager: NavigationManager,
     storageManager: StorageManager,
+    onThemeChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Handle platform back button (Android) - no-op on iOS
@@ -67,6 +68,7 @@ fun Navigation(
                             is SettingsScreenAction.ClearAllData -> storageManager.clearAllData()
                             is SettingsScreenAction.SaveSettings -> {
                                 storageManager.saveSettings(action.settings)
+                                onThemeChange(action.settings.darkTheme)
                             }
                         }
                     },
