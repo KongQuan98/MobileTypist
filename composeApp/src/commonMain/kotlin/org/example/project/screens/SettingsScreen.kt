@@ -33,10 +33,10 @@ import org.example.project.MobileTypistTheme
 import org.example.project.data.model.AppSettings
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-sealed class SettingsScreenAction {
-    object Back : SettingsScreenAction()
-    object ClearAllData : SettingsScreenAction()
-    data class SaveSettings(val settings: AppSettings) : SettingsScreenAction()
+sealed interface SettingsScreenAction {
+    object Back : SettingsScreenAction
+    object ClearAllData : SettingsScreenAction
+    data class SaveSettings(val settings: AppSettings) : SettingsScreenAction
 }
 
 @Composable

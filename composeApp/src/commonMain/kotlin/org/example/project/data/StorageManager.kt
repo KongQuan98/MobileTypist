@@ -20,7 +20,7 @@ class StorageManager(private val settings: Settings) {
         private const val KEY_TOTAL_TESTS = "total_tests"
     }
 
-    private val _settingsFlow = MutableStateFlow(AppSettings())
+    private val _settingsFlow = MutableStateFlow(getSettings())
     val settingsFlow = _settingsFlow.asStateFlow()
     
     fun saveResult(result: TypingTestResult) {

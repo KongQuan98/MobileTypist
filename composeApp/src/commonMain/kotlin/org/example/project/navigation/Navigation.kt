@@ -1,10 +1,9 @@
 package org.example.project.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.example.project.data.StorageManager
+import org.example.project.data.model.AppSettings
 import org.example.project.navigation.model.Screen
 import org.example.project.screens.AboutScreen
 import org.example.project.screens.CreateAccountScreen
@@ -23,7 +22,7 @@ import org.example.project.ui.MainScaffold
 fun Navigation(
     navigationManager: NavigationManager,
     storageManager: StorageManager,
-    onThemeChange: (Boolean) -> Unit,
+    appSettings: AppSettings,
     modifier: Modifier = Modifier
 ) {
     // Handle platform back button (Android) - no-op on iOS
@@ -35,8 +34,6 @@ fun Navigation(
     )
 
     val currentScreen = navigationManager.currentScreen
-
-    val appSettings by storageManager.settingsFlow.collectAsState()
 
     MainScaffold(navigationManager = navigationManager) { scaffoldModifier ->
         when (currentScreen) {
@@ -68,7 +65,6 @@ fun Navigation(
                             is SettingsScreenAction.ClearAllData -> storageManager.clearAllData()
                             is SettingsScreenAction.SaveSettings -> {
                                 storageManager.saveSettings(action.settings)
-                                onThemeChange(action.settings.darkTheme)
                             }
                         }
                     },
