@@ -25,6 +25,7 @@ import org.example.project.navigation.NavigationManager
 import org.example.project.navigation.model.BottomNavigationTab
 import org.example.project.navigation.model.Screen
 import org.example.project.screens.SettingsScreen
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +71,8 @@ private fun BottomNavigation(
     currentScreen: Screen,
     navigationManager: NavigationManager,
 ) {
+    val haptics = LocalHaptics.current
+
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -79,11 +82,11 @@ private fun BottomNavigation(
             NavigationBarItem(
                 modifier = Modifier.padding(horizontal = 6.dp),
                 selected = currentScreen == tab.screenRoute,
-                onClick = { navigationManager.navigateTo(tab.screenRoute) },
-                icon = { Icon(tab.icon, contentDescription = tab.title) },
+                onClick = { haptics.wrap { navigationManager.navigateTo(tab.screenRoute) } },
+                icon = { Icon(tab.icon, contentDescription = stringResource(tab.title)) },
                 label = {
                     Text(
-                        text = tab.title,
+                        text = stringResource(tab.title),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )

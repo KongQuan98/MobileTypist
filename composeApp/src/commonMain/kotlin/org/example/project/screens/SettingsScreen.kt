@@ -1,6 +1,5 @@
 package org.example.project.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -20,8 +20,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -29,8 +31,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.app_name
+import mobiletypist.composeapp.generated.resources.settings_title
+import mobiletypist.composeapp.generated.resources.version
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.AppSettings
+import org.example.project.ui.LocalHaptics
+import org.example.project.ui.hapticClickable
+import org.example.project.ui.wrap
+import org.example.project.utils.Haptics
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 sealed interface SettingsScreenAction {
@@ -59,7 +70,7 @@ fun SettingsScreen(
 
             // Header
             Text(
-                text = "settings",
+                text = stringResource(Res.string.settings_title),
                 style = TextStyle(
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
@@ -119,7 +130,7 @@ fun SettingsScreen(
                 text = "reset statistics",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { action(SettingsScreenAction.ClearAllData) }
+                    .hapticClickable { action(SettingsScreenAction.ClearAllData) }
                     .padding(vertical = 12.dp),
                 style = TextStyle(
                     color = MaterialTheme.colorScheme.error,
@@ -133,7 +144,7 @@ fun SettingsScreen(
                 text = "sign out",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { /* Handle Sign Out */ }
+                    .hapticClickable { /* Handle Sign Out */ }
                     .padding(vertical = 12.dp),
                 style = TextStyle(
                     color = MaterialTheme.colorScheme.error,
@@ -148,7 +159,7 @@ fun SettingsScreen(
             // Footer
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "typekey v1.0.0",
+                    text = "${stringResource(Res.string.app_name)} ${stringResource(Res.string.version)}",
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         fontSize = 12.sp,
@@ -181,7 +192,6 @@ private fun SettingNavRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Navigate */ }
             .padding(vertical = 24.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -194,7 +204,15 @@ private fun SettingNavRow(label: String, value: String) {
                 fontFamily = FontFamily.Monospace
             )
         )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .hapticClickable {
+
+                }
+                .clip(RoundedCornerShape(12.dp))
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = value,
                 style = TextStyle(
@@ -228,6 +246,7 @@ private fun SettingToggleRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val haptics = LocalHaptics.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -245,7 +264,11 @@ private fun SettingToggleRow(
         )
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = {
+                haptics.wrap {
+                    onCheckedChange(it)
+                }
+            },
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onBackground,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,
@@ -265,15 +288,31 @@ private fun SettingToggleRow(
 @Preview
 @Composable
 private fun SettingsScreenPreview() {
-    MobileTypistTheme(darkTheme = false) {
-        SettingsScreen()
+    CompositionLocalProvider(
+        LocalHaptics provides PreviewHaptics
+    ) {
+        MobileTypistTheme(darkTheme = false) {
+            SettingsScreen()
+        }
     }
 }
 
 @Preview
 @Composable
 private fun SettingsScreenPreviewDarkTheme() {
-    MobileTypistTheme(darkTheme = true) {
-        SettingsScreen()
+    CompositionLocalProvider(
+        LocalHaptics provides PreviewHaptics
+    ) {
+        MobileTypistTheme(darkTheme = true) {
+            SettingsScreen()
+        }
     }
+}
+
+// for preview purpose
+object PreviewHaptics : Haptics {
+    override fun buttonClick() {}
+    override fun typingKey() {}
+    override fun notificationSuccess() {}
+    override fun selectionChange() {}
 }

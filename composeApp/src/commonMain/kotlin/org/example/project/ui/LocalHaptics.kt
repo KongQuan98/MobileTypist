@@ -1,0 +1,29 @@
+package org.example.project.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import org.example.project.utils.Haptics
+
+val LocalHaptics = staticCompositionLocalOf<Haptics> {
+    error("No Haptics provided")
+}
+
+@Composable
+fun Modifier.hapticClickable(
+    onClick: () -> Unit
+): Modifier = composed {
+    val haptics = LocalHaptics.current
+
+    clickable {
+        haptics.buttonClick()
+        onClick()
+    }
+}
+
+fun Haptics.wrap(action: () -> Unit) {
+    buttonClick()
+    action()
+}

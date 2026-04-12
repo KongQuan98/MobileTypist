@@ -7,14 +7,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import org.example.project.data.initAppContext
+import org.example.project.utils.AppContextProvider
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        
+
         // Initialize app context for storage
         initAppContext(this)
+
+        AppContextProvider.context = applicationContext
 
         setContent {
             App()
