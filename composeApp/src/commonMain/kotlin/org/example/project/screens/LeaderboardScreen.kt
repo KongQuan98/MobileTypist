@@ -83,7 +83,6 @@ fun LeaderboardScreen(
             val screenWidth = maxWidth
 
             // Proportional sizing
-            val titleSize = (screenWidth.value * 0.08f).coerceIn(24f, 32f).sp
             val podiumSectionHeight = screenHeight * 0.35f
             val listSectionHeight = screenHeight * 0.45f
 
@@ -97,14 +96,14 @@ fun LeaderboardScreen(
                 Text(
                     text = "leaderboard",
                     style = TextStyle(
-                        fontSize = titleSize,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontFamily = FontFamily.Monospace
                     )
                 )
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(40.dp))
 
                 // Custom Tab Bar
                 Row(

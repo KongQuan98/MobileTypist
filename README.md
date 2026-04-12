@@ -1,4 +1,4 @@
-# Keyboard Warrior
+# Keyboard Typist
 
 A comprehensive typing practice app built with Kotlin Multiplatform for Android and iOS.
 
@@ -86,7 +86,7 @@ See [PUBLISHING.md](PUBLISHING.md) for detailed instructions on:
 
 ## Privacy
 
-Keyboard Warrior respects your privacy:
+Keyboard Typist respects your privacy:
 - All data is stored locally on your device
 - No data is transmitted or shared
 - No personal information is collected

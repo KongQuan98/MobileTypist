@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -41,13 +40,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Eye
 import compose.icons.feathericons.EyeOff
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.app_name
 import org.example.project.MobileTypistTheme
 import org.example.project.navigation.NavigationManager
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -83,26 +87,34 @@ fun LoginScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp)),
+                        .border(
+                            2.dp,
+                            MaterialTheme.colorScheme.primary,
+                            RoundedCornerShape(8.dp)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "T",
+                        "KT",
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+                        fontSize = 20.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.MiddleEllipsis,
+                        modifier = Modifier
+                            .padding(6.dp)
                     )
                 }
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = "mobileType",
+                    text = stringResource(Res.string.app_name),
                     style = TextStyle(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontFamily = FontFamily.Monospace
-                    )
+                    ),
+                    textAlign = TextAlign.Center
                 )
             }
 
@@ -112,7 +124,7 @@ fun LoginScreen(
             Text(
                 text = "sign in",
                 style = TextStyle(
-                    fontSize = 32.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontFamily = FontFamily.Monospace

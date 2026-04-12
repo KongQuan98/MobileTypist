@@ -1,7 +1,9 @@
-# Publishing Guide for Keyboard Warrior
+# Publishing Guide for Keyboard Typist
 
 ## Overview
-Keyboard Warrior is a comprehensive typing practice app built with Kotlin Multiplatform, supporting both Android and iOS platforms.
+
+Keyboard Typist is a comprehensive typing practice app built with Kotlin Multiplatform, supporting
+both Android and iOS platforms.
 
 ## Features
 - ✅ Time-based typing tests (15s, 30s, 60s)

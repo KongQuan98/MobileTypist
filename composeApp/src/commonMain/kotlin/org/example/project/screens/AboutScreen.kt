@@ -26,8 +26,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.app_name
 import org.example.project.MobileTypistTheme
 import org.example.project.navigation.NavigationManager
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -87,7 +90,7 @@ fun AboutScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Keyboard Warrior",
+                        text = stringResource(Res.string.app_name),
                         style = TextStyle(
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
@@ -123,7 +126,7 @@ fun AboutScreen(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = "About Keyboard Warrior",
+                        text = "About Keyboard Typist",
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -134,7 +137,7 @@ fun AboutScreen(
                     Spacer(Modifier.height(12.dp))
 
                     Text(
-                        text = "Keyboard Warrior is a comprehensive typing practice app designed to help you improve your typing speed and accuracy. " +
+                        text = "Keyboard Typist is a comprehensive typing practice app designed to help you improve your typing speed and accuracy. " +
                                 "With multiple game modes including time-based challenges, word count goals, and inspiring quotes, " +
                                 "you can practice typing in various engaging ways.",
                         style = TextStyle(
@@ -208,7 +211,7 @@ fun AboutScreen(
                     Spacer(Modifier.height(12.dp))
 
                     Text(
-                        text = "Keyboard Warrior respects your privacy. All typing test data is stored locally on your device. " +
+                        text = "Keyboard Typist respects your privacy. All typing test data is stored locally on your device. " +
                                 "We do not collect, transmit, or share any personal information.",
                         style = TextStyle(
                             fontSize = 14.sp,
@@ -247,7 +250,7 @@ fun AboutScreen(
                     Spacer(Modifier.height(12.dp))
 
                     Text(
-                        text = "By using Keyboard Warrior, you agree to use the app for its intended purpose of improving typing skills. " +
+                        text = "By using Keyboard Typist, you agree to use the app for its intended purpose of improving typing skills. " +
                                 "The app is provided as-is without warranties. We are not responsible for any data loss. " +
                                 "You may clear all data at any time through the settings menu.",
                         style = TextStyle(

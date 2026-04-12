@@ -1,6 +1,6 @@
 TEAM_ID=
 
-PRODUCT_NAME=MobileTypist
+PRODUCT_NAME=Keyboard Typist
 PRODUCT_BUNDLE_IDENTIFIER=org.example.project.MobileTypist$(TEAM_ID)
 
 CURRENT_PROJECT_VERSION=1

@@ -9,6 +9,7 @@ import compose.icons.feathericons.Settings
 import compose.icons.feathericons.User
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.home_title
+import mobiletypist.composeapp.generated.resources.leaderboard_title
 import mobiletypist.composeapp.generated.resources.profile_title
 import mobiletypist.composeapp.generated.resources.settings_title
 import mobiletypist.composeapp.generated.resources.statistics_title
@@ -37,7 +38,7 @@ sealed class BottomNavigationTab(
     )
 
     object LeaderBoard : BottomNavigationTab(
-        title = Res.string.statistics_title,
+        title = Res.string.leaderboard_title,
         icon = FeatherIcons.Clipboard,
         screenRoute = Screen.LeaderBoard,
     )

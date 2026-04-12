@@ -72,7 +72,7 @@ fun SettingsScreen(
             Text(
                 text = stringResource(Res.string.settings_title),
                 style = TextStyle(
-                    fontSize = 32.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontFamily = FontFamily.Monospace
@@ -96,7 +96,7 @@ fun SettingsScreen(
                 }
             )
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(40.dp))
 
             // Gameplay Section
             SettingSectionHeader("// gameplay")
@@ -117,14 +117,14 @@ fun SettingsScreen(
                 }
             )
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(40.dp))
 
             // Account Section
             SettingSectionHeader("// account")
 
             SettingNavRow(label = "language", value = "english")
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(40.dp))
 
             Text(
                 text = "reset statistics",

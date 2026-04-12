@@ -18,10 +18,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.statistics_title
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.navigation.NavigationManager
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class StatisticsScreenState(
@@ -55,14 +58,14 @@ fun StatisticsScreen(
         ) {
             item {
                 Text(
-                    text = "statistics",
+                    text = stringResource(Res.string.statistics_title),
                     style = TextStyle(
-                        fontSize = 32.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace
                     )
                 )
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(40.dp))
             }
 
             // Summary Stats Grid
