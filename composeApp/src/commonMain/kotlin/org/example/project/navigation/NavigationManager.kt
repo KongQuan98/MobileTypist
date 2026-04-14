@@ -7,16 +7,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import org.example.project.navigation.model.Screen
 
-class NavigationManager {
-    var currentScreen by mutableStateOf<Screen>(Screen.Home)
+class NavigationManager(
+    initialScreen: Screen = Screen.Home,
+    private val useComposeBottomBar: Boolean = true
+) {
+    var currentScreen by mutableStateOf<Screen>(initialScreen)
         private set
 
-    var showBottomBar by mutableStateOf(true)
+    var showBottomBar by mutableStateOf(useComposeBottomBar)
 
     fun navigateTo(screen: Screen) {
         currentScreen = screen
-        // Always show bottom bar when navigating to main screens
-        showBottomBar = true
+        // If iOS uses native tabs, keep Compose bottom bar hidden.
+        showBottomBar = useComposeBottomBar
     }
     
     fun navigateBack() {
@@ -25,7 +28,8 @@ class NavigationManager {
             is Screen.Settings,
             is Screen.About -> {
                 currentScreen = Screen.Home
-                showBottomBar = true
+                // Keep hidden on iOS native tab setup.
+                showBottomBar = useComposeBottomBar
             }
             else -> {}
         }
@@ -37,6 +41,9 @@ class NavigationManager {
 }
 
 @Composable
-fun rememberNavigationManager(): NavigationManager {
-    return remember { NavigationManager() }
+fun rememberNavigationManager(
+    initialScreen: Screen = Screen.Home,
+    useComposeBottomBar: Boolean = true
+): NavigationManager {
+    return remember { NavigationManager(initialScreen, useComposeBottomBar) }
 }

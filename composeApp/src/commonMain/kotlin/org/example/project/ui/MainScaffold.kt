@@ -25,6 +25,7 @@ import org.example.project.navigation.NavigationManager
 import org.example.project.navigation.model.BottomNavigationTab
 import org.example.project.navigation.model.Screen
 import org.example.project.screens.SettingsScreen
+import org.example.project.utils.isIOS
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -35,6 +36,7 @@ fun MainScaffold(
     content: @Composable (Modifier) -> Unit
 ) {
     val currentScreen = navigationManager.currentScreen
+    val shouldShowComposeBottomBar = navigationManager.showBottomBar && !isIOS()
     Scaffold(
         contentWindowInsets = WindowInsets(
             0,
@@ -44,7 +46,7 @@ fun MainScaffold(
         ), // Remove default insets to handle them manually
         bottomBar = {
             AnimatedVisibility(
-                visible = navigationManager.showBottomBar,
+                visible = shouldShowComposeBottomBar,
                 enter = slideInVertically(initialOffsetY = { it }),
                 exit = slideOutVertically(targetOffsetY = { it })
             ) {
@@ -57,7 +59,7 @@ fun MainScaffold(
     ) { innerPadding ->
         // When hidden, we don't want to keep the bottom padding
         val bottomPadding =
-            if (navigationManager.showBottomBar) innerPadding.calculateBottomPadding() else 0.dp
+            if (shouldShowComposeBottomBar) innerPadding.calculateBottomPadding() else 0.dp
         Box(
             modifier = Modifier.padding(bottom = bottomPadding)
         ) {
