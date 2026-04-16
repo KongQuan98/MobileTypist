@@ -23,7 +23,6 @@ import mobiletypist.composeapp.generated.resources.statistics_title
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
-import org.example.project.navigation.NavigationManager
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -35,7 +34,6 @@ data class StatisticsScreenState(
 
 @Composable
 fun StatisticsScreen(
-    navigationManager: NavigationManager,
     statisticsScreenState: StatisticsScreenState,
     modifier: Modifier = Modifier
 ) {
@@ -52,82 +50,87 @@ fun StatisticsScreen(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
-            contentPadding = PaddingValues(top = 40.dp, bottom = 40.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .padding(top = 40.dp)
         ) {
-            item {
-                Text(
-                    text = stringResource(Res.string.statistics_title),
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
-                    )
+            Text(
+                text = stringResource(Res.string.statistics_title),
+                style = TextStyle(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace
                 )
-                Spacer(Modifier.height(40.dp))
-            }
+            )
 
-            // Summary Stats Grid
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        StatCard(
-                            label = "AVG WPM",
-                            value = avgWpm.toString(),
-                            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f),
-                        )
-                        StatCard(
-                            label = "BEST WPM",
-                            value = bestWpm.toString(),
-                            textColor = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.weight(1f),
-                        )
+            Spacer(modifier = Modifier.height(40.dp))
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                // Summary Stats Grid
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            StatCard(
+                                label = "AVG WPM",
+                                value = avgWpm.toString(),
+                                textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f),
+                            )
+                            StatCard(
+                                label = "BEST WPM",
+                                value = bestWpm.toString(),
+                                textColor = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            StatCard(
+                                label = "TIME TYPED",
+                                value = "${hoursTyped}h ${minutesTyped}m",
+                                textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f),
+                            )
+                            StatCard(
+                                label = "TESTS",
+                                value = totalTests.toString(),
+                                textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        StatCard(
-                            label = "TIME TYPED",
-                            value = "${hoursTyped}h ${minutesTyped}m",
-                            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f),
-                        )
-                        StatCard(
-                            label = "TESTS",
-                            value = totalTests.toString(),
-                            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
+                    Spacer(Modifier.height(40.dp))
                 }
-                Spacer(Modifier.height(40.dp))
-            }
 
-            // WPM History Graph
-            item {
-                StatSectionLabel("WPM HISTORY (LAST 10)")
-                Spacer(Modifier.height(16.dp))
-                WpmHistoryGraph(
-                    results.takeLast(10).map { it.wpm },
-                    MaterialTheme.colorScheme.primary,
-                )
-                Spacer(Modifier.height(40.dp))
-            }
+                // WPM History Graph
+                item {
+                    StatSectionLabel("WPM HISTORY (LAST 10)")
+                    Spacer(Modifier.height(16.dp))
+                    WpmHistoryGraph(
+                        results.takeLast(10).map { it.wpm },
+                        MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(Modifier.height(40.dp))
+                }
 
-            // Accuracy Distribution
-            item {
-                StatSectionLabel("ACCURACY DISTRIBUTION")
-                Spacer(Modifier.height(16.dp))
-                AccuracyDistribution(results)
-                Spacer(Modifier.height(40.dp))
-            }
+                // Accuracy Distribution
+                item {
+                    StatSectionLabel("ACCURACY DISTRIBUTION")
+                    Spacer(Modifier.height(16.dp))
+                    AccuracyDistribution(results)
+                    Spacer(Modifier.height(40.dp))
+                }
 
-            // Activity Heatmap
-            item {
-                StatSectionLabel("ACTIVITY (30 DAYS)")
-                Spacer(Modifier.height(16.dp))
-                ActivityHeatmap()
-                Spacer(Modifier.height(40.dp))
+                // Activity Heatmap
+                item {
+                    StatSectionLabel("ACTIVITY (30 DAYS)")
+                    Spacer(Modifier.height(16.dp))
+                    ActivityHeatmap()
+                    Spacer(Modifier.height(40.dp))
+                }
             }
         }
     }
@@ -351,7 +354,6 @@ private fun StatisticsScreenPreview() {
 
     MobileTypistTheme(darkTheme = false) {
         StatisticsScreen(
-            navigationManager = NavigationManager(),
             statisticsScreenState = dummyProfileScreenState
         )
     }
@@ -362,7 +364,6 @@ private fun StatisticsScreenPreview() {
 private fun StatisticsScreenPreviewDarkTheme() {
     MobileTypistTheme(darkTheme = true) {
         StatisticsScreen(
-            navigationManager = NavigationManager(),
             statisticsScreenState = StatisticsScreenState()
         )
     }

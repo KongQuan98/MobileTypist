@@ -82,93 +82,99 @@ fun SettingsScreen(
             Spacer(Modifier.height(40.dp))
 
             // Appearance Section
-            SettingSectionHeader("// appearance")
-
-            SettingNavRow(label = "theme", value = "dark minimal")
-            SettingNavRow(label = "font size", value = "medium")
-            SettingNavRow(label = "font family", value = "jetbrains mono")
-
-            SettingToggleRow(
-                label = "dark theme",
-                checked = appSettings.darkTheme,
-                onCheckedChange = {
-                    action(SettingsScreenAction.SaveSettings(appSettings.copy(darkTheme = it)))
-                }
-            )
-
-            Spacer(Modifier.height(40.dp))
-
-            // Gameplay Section
-            SettingSectionHeader("// gameplay")
-
-            SettingToggleRow(
-                label = "sound effects",
-                checked = appSettings.soundEnabled,
-                onCheckedChange = {
-                    action(SettingsScreenAction.SaveSettings(appSettings.copy(soundEnabled = it)))
-                }
-            )
-
-            SettingToggleRow(
-                label = "haptic feedback",
-                checked = appSettings.vibrationEnabled,
-                onCheckedChange = {
-                    action(SettingsScreenAction.SaveSettings(appSettings.copy(vibrationEnabled = it)))
-                }
-            )
-
-            Spacer(Modifier.height(40.dp))
-
-            // Account Section
-            SettingSectionHeader("// account")
-
-            SettingNavRow(label = "language", value = "english")
-
-            Spacer(Modifier.height(40.dp))
-
-            Text(
-                text = "reset statistics",
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .hapticClickable { action(SettingsScreenAction.ClearAllData) }
-                    .padding(vertical = 12.dp),
-                style = TextStyle(
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily.Monospace
-                ),
-                textAlign = TextAlign.Center
-            )
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                SettingSectionHeader("// appearance")
 
-            Text(
-                text = "sign out",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .hapticClickable { /* Handle Sign Out */ }
-                    .padding(vertical = 12.dp),
-                style = TextStyle(
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily.Monospace
-                ),
-                textAlign = TextAlign.Center
-            )
+                SettingNavRow(label = "theme", value = "dark minimal")
+                SettingNavRow(label = "font size", value = "medium")
+                SettingNavRow(label = "font family", value = "jetbrains mono")
 
-            Spacer(Modifier.height(64.dp))
-
-            // Footer
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = "${stringResource(Res.string.app_name)} ${stringResource(Res.string.version)}",
-                    style = TextStyle(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        fontSize = 12.sp,
-                        fontFamily = FontFamily.Monospace
-                    )
+                SettingToggleRow(
+                    label = "dark theme",
+                    checked = appSettings.darkTheme,
+                    onCheckedChange = {
+                        action(SettingsScreenAction.SaveSettings(appSettings.copy(darkTheme = it)))
+                    }
                 )
-            }
 
-            Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(40.dp))
+
+                // Gameplay Section
+                SettingSectionHeader("// gameplay")
+
+                SettingToggleRow(
+                    label = "sound effects",
+                    checked = appSettings.soundEnabled,
+                    onCheckedChange = {
+                        action(SettingsScreenAction.SaveSettings(appSettings.copy(soundEnabled = it)))
+                    }
+                )
+
+                SettingToggleRow(
+                    label = "haptic feedback",
+                    checked = appSettings.vibrationEnabled,
+                    onCheckedChange = {
+                        action(SettingsScreenAction.SaveSettings(appSettings.copy(vibrationEnabled = it)))
+                    }
+                )
+
+                Spacer(Modifier.height(40.dp))
+
+                // Account Section
+                SettingSectionHeader("// account")
+
+                SettingNavRow(label = "language", value = "english")
+
+                Spacer(Modifier.height(40.dp))
+
+                Text(
+                    text = "reset statistics",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .hapticClickable { action(SettingsScreenAction.ClearAllData) }
+                        .padding(vertical = 12.dp),
+                    style = TextStyle(
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Monospace
+                    ),
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = "sign out",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .hapticClickable { /* Handle Sign Out */ }
+                        .padding(vertical = 12.dp),
+                    style = TextStyle(
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Monospace
+                    ),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(Modifier.height(64.dp))
+
+                // Footer
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "${stringResource(Res.string.app_name)} ${stringResource(Res.string.version)}",
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    )
+                }
+
+                Spacer(Modifier.height(40.dp))
+            }
         }
     }
 }
@@ -192,7 +198,7 @@ private fun SettingNavRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 24.dp),
+            .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

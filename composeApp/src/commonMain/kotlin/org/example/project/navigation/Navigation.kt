@@ -47,7 +47,6 @@ fun Navigation(
 
             is Screen.Statistics -> {
                 StatisticsScreen(
-                    navigationManager = navigationManager,
                     statisticsScreenState = StatisticsScreenState(
                         results = storageManager.getResults(),
                         bestWpm = storageManager.getBestWpm(),

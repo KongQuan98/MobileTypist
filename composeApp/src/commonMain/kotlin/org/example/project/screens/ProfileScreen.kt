@@ -71,19 +71,19 @@ fun ProfileScreen(
         0
     }
     Surface(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(vertical = 40.dp, horizontal = 24.dp),
+        modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        LazyColumn(
+        Column(
             modifier = Modifier
-                .padding(top = 20.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(horizontal = 24.dp)
+                .padding(top = 40.dp)
         ) {
             // Profile Header Section
-            item {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -165,109 +165,116 @@ fun ProfileScreen(
                 Spacer(Modifier.height(20.dp))
             }
 
-            // Summary Stats Cards
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    StatBox(
-                        label = "avg wpm",
-                        value = averageWpm.toString(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatBox(
-                        label = "best",
-                        value = bestWpm.toString(),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatBox(
-                        label = "tests",
-                        value = totalTests.toString(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Spacer(Modifier.height(32.dp))
-            }
-
-            // Global Accuracy
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "global accuracy",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-
-                    Text(
-                        text = "$averageAccuracy%",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    )
-                }
-                Spacer(Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = { averageAccuracy / 100f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.background
-                )
-
-                Spacer(Modifier.height(40.dp))
-            }
-
-            // Recent Tests Section
-            item {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "RECENT TESTS",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontFamily = FontFamily.Monospace,
-                            letterSpacing = 1.sp
-                        )
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            if (results.isEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                // Summary Stats Cards
                 item {
-                    Text(
-                        text = "no tests completed yet",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontFamily = FontFamily.Monospace
-                        ),
-                        modifier = Modifier.padding(top = 20.dp)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        StatBox(
+                            label = "avg wpm",
+                            value = averageWpm.toString(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatBox(
+                            label = "best",
+                            value = bestWpm.toString(),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatBox(
+                            label = "tests",
+                            value = totalTests.toString(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Spacer(Modifier.height(32.dp))
                 }
-            } else {
-                items(results.reversed()) { result ->
-                    ProfileResultItem(result)
+
+                // Global Accuracy
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "global accuracy",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Text(
+                            text = "$averageAccuracy%",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        )
+                    }
                     Spacer(Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { averageAccuracy / 100f },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.background
+                    )
+
+                    Spacer(Modifier.height(40.dp))
+                }
+
+                // Recent Tests Section
+                item {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "RECENT TESTS (${results.size})",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontFamily = FontFamily.Monospace,
+                                letterSpacing = 1.sp
+                            )
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+                }
+
+                if (results.isEmpty()) {
+                    item {
+                        Text(
+                            text = "no tests completed yet",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontFamily = FontFamily.Monospace
+                            ),
+                            modifier = Modifier.padding(top = 20.dp)
+                        )
+                    }
+                } else {
+                    items(results.reversed()) { result ->
+                        ProfileResultItem(result)
+                        Spacer(Modifier.height(8.dp))
+                    }
                 }
             }
         }
