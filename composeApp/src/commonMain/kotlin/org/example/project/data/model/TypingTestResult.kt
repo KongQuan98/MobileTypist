@@ -14,7 +14,7 @@ data class TypingTestResult(
     val correctChars: Int,
     val errorCount: Int,
     val timestamp: Long = Clock.System.now().toEpochMilliseconds(),
-    val duration: Int, // in seconds
+    val duration: Int = 0, // in seconds
     val wordsTyped: Int = 0
 )
 

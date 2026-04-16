@@ -35,6 +35,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.example.project.data.model.TypingMode
+import org.example.project.data.model.TypingTestResult
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -46,6 +48,7 @@ fun ResultBottomSheet(
     wpmHistory: List<Int>,
     onReset: () -> Unit,
     onBack: () -> Unit = {},
+    onTestComplete: (TypingTestResult) -> Unit = {},
 ) {
     // drawPath need Color
     val yellow = Color(0xFFe2b714)
@@ -53,6 +56,17 @@ fun ResultBottomSheet(
     val wpm = calculateWpm(correctCount, selectedTime)
     val accuracy = calculateAccuracy(correctCount, errorCount)
     val keystrokes = correctCount + errorCount
+
+    onTestComplete(
+        TypingTestResult(
+            wpm = wpm,
+            accuracy = accuracy,
+            correctChars = correctCount,
+            errorCount = errorCount,
+            wordsTyped = keystrokes,
+            mode = TypingMode.TIME
+        )
+    )
 
     AnimatedVisibility(
         visible = visible,

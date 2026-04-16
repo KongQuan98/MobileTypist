@@ -51,9 +51,9 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
     private var timerJob: Job? = null
     private var startTime by mutableStateOf(0L)
     var targetText = ""
-    private var selectedTime = 0
+    var selectedTime = 0
     private var selectedWords = 0
-    private var mode: TypingMode = TypingMode.TIME
+    var mode: TypingMode = TypingMode.TIME
 
     fun initialize(mode: TypingMode, targetText: String, selectedTime: Int, selectedWords: Int) {
         this.mode = mode
