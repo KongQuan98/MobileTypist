@@ -24,6 +24,7 @@ sealed class Screen {
     object Register : Screen()
     object Profile : Screen()
     object LeaderBoard : Screen()
+    object EditProfile : Screen()
 }
 
 sealed class BottomNavigationTab(

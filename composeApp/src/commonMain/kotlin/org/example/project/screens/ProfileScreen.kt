@@ -2,6 +2,8 @@ package org.example.project.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,11 +43,14 @@ import compose.icons.feathericons.Edit3
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
-import org.example.project.navigation.NavigationManager
+import org.example.project.data.model.UserProfile
+import org.example.project.ui.LocalHaptics
+import org.example.project.ui.hapticClickable
 import org.example.project.utils.formatDate
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class ProfileScreenState(
+    val userProfile: UserProfile,
     val recentTestResult: List<TypingTestResult> = emptyList(),
     val averageWpm: Int = 0,
     val bestWpm: Int = 0,
@@ -51,8 +59,8 @@ data class ProfileScreenState(
 
 @Composable
 fun ProfileScreen(
-    navigationManager: NavigationManager,
     profileScreenState: ProfileScreenState,
+    onEditProfileClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val results = profileScreenState.recentTestResult
@@ -70,6 +78,14 @@ fun ProfileScreen(
     } else {
         0
     }
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val borderColor =
+        if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+            alpha = 0.3f
+        )
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -92,7 +108,9 @@ fun ProfileScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "SP", // Initials
+                        text = if (profileScreenState.userProfile.username.length >= 2)
+                            profileScreenState.userProfile.username.take(2).uppercase()
+                        else "??",
                         style = TextStyle(
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
@@ -105,7 +123,7 @@ fun ProfileScreen(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = "@speedtyper",
+                    text = profileScreenState.userProfile.displayName,
                     style = TextStyle(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
@@ -132,17 +150,23 @@ fun ProfileScreen(
                     modifier = Modifier
                         .border(
                             1.dp,
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            borderColor,
                             RoundedCornerShape(8.dp)
                         )
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .clip(RoundedCornerShape(8.dp))
+                        .hapticClickable(
+                            interactionSource = interactionSource,
+                            onClick = onEditProfileClicked
+                        ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Spacer(Modifier.width(16.dp))
                     Icon(
                         imageVector = FeatherIcons.Edit3,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier
+                            .size(14.dp)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
@@ -151,9 +175,12 @@ fun ProfileScreen(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontFamily = FontFamily.Monospace
-                        )
+                        ),
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
+                    Spacer(Modifier.width(16.dp))
                 }
+
 
                 Spacer(Modifier.height(20.dp))
 
@@ -286,7 +313,7 @@ private fun StatBox(label: String, value: String, color: Color, modifier: Modifi
     Column(
         modifier = modifier
             .background(
-                Color(MaterialTheme.colorScheme.surface.value).copy(alpha = 0.5f),
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
                 RoundedCornerShape(12.dp)
             )
             .padding(vertical = 16.dp),
@@ -409,6 +436,7 @@ private fun ProfileResultItem(
 @Composable
 private fun ProfileScreenPreviewDark() {
     val dummyProfileScreenState = ProfileScreenState(
+        userProfile = UserProfile(),
         recentTestResult = listOf(
             TypingTestResult(
                 id = "",
@@ -445,11 +473,15 @@ private fun ProfileScreenPreviewDark() {
         totalTests = 25,
     )
 
-    MobileTypistTheme(darkTheme = true) {
-        ProfileScreen(
-            navigationManager = NavigationManager(),
-            profileScreenState = dummyProfileScreenState,
-        )
+    CompositionLocalProvider(
+        LocalHaptics provides PreviewHaptics
+    ) {
+        MobileTypistTheme(darkTheme = true) {
+            ProfileScreen(
+                onEditProfileClicked = {},
+                profileScreenState = dummyProfileScreenState,
+            )
+        }
     }
 }
 
@@ -457,6 +489,7 @@ private fun ProfileScreenPreviewDark() {
 @Composable
 private fun ProfileScreenPreview() {
     val dummyProfileScreenState = ProfileScreenState(
+        userProfile = UserProfile(),
         recentTestResult = listOf(
             TypingTestResult(
                 id = "",
@@ -493,10 +526,14 @@ private fun ProfileScreenPreview() {
         totalTests = 25,
     )
 
-    MobileTypistTheme(darkTheme = false) {
-        ProfileScreen(
-            navigationManager = NavigationManager(),
-            profileScreenState = dummyProfileScreenState,
-        )
+    CompositionLocalProvider(
+        LocalHaptics provides PreviewHaptics
+    ) {
+        MobileTypistTheme(darkTheme = false) {
+            ProfileScreen(
+                onEditProfileClicked = {},
+                profileScreenState = dummyProfileScreenState,
+            )
+        }
     }
 }

@@ -1,6 +1,7 @@
 package org.example.project.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -13,11 +14,14 @@ val LocalHaptics = staticCompositionLocalOf<Haptics> {
 
 @Composable
 fun Modifier.hapticClickable(
-    onClick: () -> Unit
+    interactionSource: MutableInteractionSource? = null,
+    onClick: () -> Unit,
 ): Modifier = composed {
     val haptics = LocalHaptics.current
 
-    clickable {
+    clickable(
+        interactionSource = interactionSource
+    ) {
         haptics.buttonClick()
         onClick()
     }

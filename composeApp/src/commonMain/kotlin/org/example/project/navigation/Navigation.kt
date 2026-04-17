@@ -1,12 +1,16 @@
 package org.example.project.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.example.project.data.StorageManager
 import org.example.project.data.model.AppSettings
 import org.example.project.navigation.model.Screen
 import org.example.project.screens.AboutScreen
 import org.example.project.screens.CreateAccountScreen
+import org.example.project.screens.EditProfileScreen
 import org.example.project.screens.HomeScreen
 import org.example.project.screens.LeaderboardScreen
 import org.example.project.screens.LoginScreen
@@ -34,6 +38,15 @@ fun Navigation(
     )
 
     val currentScreen = navigationManager.currentScreen
+    val userProfile by storageManager.userProfileFlow.collectAsState()
+
+    // Show/Hide bottom bar logic
+    LaunchedEffect(currentScreen) {
+        navigationManager.showBottomBar = when (currentScreen) {
+            is Screen.EditProfile, is Screen.Login, is Screen.Register -> false
+            else -> true
+        }
+    }
 
     MainScaffold(navigationManager = navigationManager) { scaffoldModifier ->
         when (currentScreen) {
@@ -109,13 +122,27 @@ fun Navigation(
 
             is Screen.Profile -> {
                 ProfileScreen(
-                    navigationManager = navigationManager,
+                    onEditProfileClicked = { navigationManager.navigateTo(Screen.EditProfile) },
                     profileScreenState = ProfileScreenState(
+                        userProfile = userProfile,
                         recentTestResult = storageManager.getResults(),
                         bestWpm = storageManager.getBestWpm(),
                         totalTests = storageManager.getTotalTests(),
                     ),
                     modifier = modifier.then(scaffoldModifier)
+                )
+            }
+
+            is Screen.EditProfile -> {
+                EditProfileScreen(
+                    userProfile = userProfile,
+                    onSaveClicked = { updatedProfile ->
+                        storageManager.saveUserProfile(updatedProfile)
+                        navigationManager.navigateTo(Screen.Profile)
+                    },
+                    onBackClicked = {
+                        navigationManager.navigateTo(Screen.Profile)
+                    }
                 )
             }
 

@@ -11,7 +11,7 @@ class NavigationManager(
     initialScreen: Screen = Screen.Home,
     private val useComposeBottomBar: Boolean = true
 ) {
-    var currentScreen by mutableStateOf<Screen>(initialScreen)
+    var currentScreen by mutableStateOf(initialScreen)
         private set
 
     var showBottomBar by mutableStateOf(useComposeBottomBar)

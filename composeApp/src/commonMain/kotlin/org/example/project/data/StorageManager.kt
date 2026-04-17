@@ -9,6 +9,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.example.project.data.model.AppSettings
 import org.example.project.data.model.TypingTestResult
+import org.example.project.data.model.UserProfile
 
 class StorageManager(private val settings: Settings) {
     private val json = Json { ignoreUnknownKeys = true }
@@ -18,10 +19,14 @@ class StorageManager(private val settings: Settings) {
         private const val KEY_SETTINGS = "app_settings"
         private const val KEY_BEST_WPM = "best_wpm"
         private const val KEY_TOTAL_TESTS = "total_tests"
+        private const val KEY_USER_PROFILE = "user_profile"
     }
 
     private val _settingsFlow = MutableStateFlow(getSettings())
     val settingsFlow = _settingsFlow.asStateFlow()
+
+    private val _userProfileFlow = MutableStateFlow(getUserProfile())
+    val userProfileFlow = _userProfileFlow.asStateFlow()
     
     fun saveResult(result: TypingTestResult) {
         val results = getResults().toMutableList()
@@ -77,11 +82,26 @@ class StorageManager(private val settings: Settings) {
         this.settings[KEY_SETTINGS] = json.encodeToString(settings)
         _settingsFlow.value = settings
     }
+
+    fun getUserProfile(): UserProfile {
+        val jsonString = settings.getStringOrNull(KEY_USER_PROFILE) ?: return UserProfile()
+        return try {
+            json.decodeFromString<UserProfile>(jsonString)
+        } catch (e: Exception) {
+            UserProfile()
+        }
+    }
+
+    fun saveUserProfile(profile: UserProfile) {
+        this.settings[KEY_USER_PROFILE] = json.encodeToString(profile)
+        _userProfileFlow.value = profile
+    }
     
     fun clearAllData() {
         settings.remove(KEY_RESULTS)
         settings.remove(KEY_BEST_WPM)
         settings.remove(KEY_TOTAL_TESTS)
+        settings.remove(KEY_USER_PROFILE)
     }
     
     private fun Settings.getStringOrNull(key: String): String? {
@@ -100,5 +120,3 @@ class StorageManager(private val settings: Settings) {
         }
     }
 }
-
-
