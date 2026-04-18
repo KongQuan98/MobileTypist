@@ -9,11 +9,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import org.example.project.data.Difficulty
-import org.example.project.data.StorageManager
-import org.example.project.data.WordsRepository
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
+import org.example.project.data.repo.Difficulty
+import org.example.project.data.repo.WordsRepository
+import org.example.project.data.storage.StorageManager
 
 class HomeViewModel(
     private val storageManager: StorageManager,

@@ -92,9 +92,11 @@ fun ProfileScreen(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val borderColor =
-        if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-            alpha = 0.3f
-        )
+        if (isPressed) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+        }
 
     Surface(
         modifier = modifier.fillMaxSize(),

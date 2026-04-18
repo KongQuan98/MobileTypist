@@ -148,7 +148,7 @@ fun LeaderboardScreen(
                     }
                 }
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(20.dp))
 
                 Column(
                     modifier = Modifier

@@ -8,8 +8,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import org.example.project.data.StorageManager
-import org.example.project.data.createSettings
+import org.example.project.data.storage.StorageManager
+import org.example.project.data.storage.createSettings
 import org.example.project.navigation.Navigation
 import org.example.project.navigation.model.Screen
 import org.example.project.navigation.rememberNavigationManager
@@ -62,6 +62,5 @@ fun App(
                     .safeDrawingPadding()
             )
         }
-
     }
 }

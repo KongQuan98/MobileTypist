@@ -57,9 +57,9 @@ import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.app_icon
 import mobiletypist.composeapp.generated.resources.app_name
 import org.example.project.MobileTypistTheme
-import org.example.project.data.StorageManager
-import org.example.project.data.createSettings
 import org.example.project.data.model.TypingMode
+import org.example.project.data.storage.StorageManager
+import org.example.project.data.storage.createSettings
 import org.example.project.navigation.NavigationManager
 import org.example.project.ui.LocalHaptics
 import org.example.project.ui.wrap

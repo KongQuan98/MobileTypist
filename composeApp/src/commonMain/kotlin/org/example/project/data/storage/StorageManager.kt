@@ -1,4 +1,4 @@
-package org.example.project.data
+package org.example.project.data.storage
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.get

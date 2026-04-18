@@ -8,5 +8,6 @@ data class UserProfile(
     val displayName: String = "Speed Typer",
     val email: String = "speedtyper@email.com",
     val bio: String = "just a monkey typing away...",
-    val profilePicture: String? = null // Store as a base64 string or local path
+    val avatarId: String = "monkey",
+    val profilePicture: String? = null
 )

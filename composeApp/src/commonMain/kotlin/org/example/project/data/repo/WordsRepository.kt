@@ -1,4 +1,4 @@
-package org.example.project.data
+package org.example.project.data.repo
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json

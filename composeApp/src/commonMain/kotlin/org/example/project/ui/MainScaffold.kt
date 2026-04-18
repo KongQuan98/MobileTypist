@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -61,7 +63,9 @@ fun MainScaffold(
         val bottomPadding =
             if (shouldShowComposeBottomBar) innerPadding.calculateBottomPadding() else 0.dp
         Box(
-            modifier = Modifier.padding(bottom = bottomPadding)
+            modifier = Modifier
+                .padding(bottom = bottomPadding)
+                .windowInsetsPadding(WindowInsets.systemBars)
         ) {
             content(Modifier)
         }

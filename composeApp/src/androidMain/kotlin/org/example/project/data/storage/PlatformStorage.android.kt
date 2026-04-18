@@ -1,4 +1,4 @@
-package org.example.project.data
+package org.example.project.data.storage
 
 import android.content.Context
 import com.russhwolf.settings.Settings

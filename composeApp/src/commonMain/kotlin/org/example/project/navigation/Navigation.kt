@@ -5,8 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import org.example.project.data.StorageManager
 import org.example.project.data.model.AppSettings
+import org.example.project.data.storage.StorageManager
 import org.example.project.navigation.model.Screen
 import org.example.project.screens.AboutScreen
 import org.example.project.screens.CreateAccountScreen
@@ -16,6 +16,7 @@ import org.example.project.screens.LeaderboardScreen
 import org.example.project.screens.LoginScreen
 import org.example.project.screens.ProfileScreen
 import org.example.project.screens.ProfileScreenState
+import org.example.project.screens.SelectAvatarScreen
 import org.example.project.screens.SettingsScreen
 import org.example.project.screens.SettingsScreenAction
 import org.example.project.screens.StatisticsScreen
@@ -43,7 +44,7 @@ fun Navigation(
     // Show/Hide bottom bar logic
     LaunchedEffect(currentScreen) {
         navigationManager.showBottomBar = when (currentScreen) {
-            is Screen.EditProfile, is Screen.Login, is Screen.Register -> false
+            is Screen.EditProfile, is Screen.Login, is Screen.Register, is Screen.SelectAvatar -> false
             else -> true
         }
     }
@@ -136,6 +137,22 @@ fun Navigation(
                     },
                     onBackClicked = {
                         navigationManager.navigateTo(Screen.Profile)
+                    },
+                    onNavigateToSelectAvatar = {
+                        navigationManager.navigateTo(Screen.SelectAvatar)
+                    }
+                )
+            }
+
+            is Screen.SelectAvatar -> {
+                SelectAvatarScreen(
+                    currentAvatarId = userProfile.avatarId,
+                    onAvatarSelected = { newId ->
+                        storageManager.saveUserProfile(userProfile.copy(avatarId = newId))
+                        navigationManager.navigateTo(Screen.EditProfile)
+                    },
+                    onBackClicked = {
+                        navigationManager.navigateTo(Screen.EditProfile)
                     }
                 )
             }

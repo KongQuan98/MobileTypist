@@ -179,7 +179,7 @@ fun SettingsScreen(
                     )
                 }
 
-                Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(20.dp))
             }
         }
     }

@@ -51,13 +51,15 @@ import compose.icons.feathericons.Smile
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.UserProfile
 import org.example.project.ui.LocalHaptics
+import org.example.project.ui.hapticClickable
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun EditProfileScreen(
     userProfile: UserProfile,
-    onSaveClicked: (UserProfile) -> Unit,
-    onBackClicked: () -> Unit,
+    onSaveClicked: (UserProfile) -> Unit = {},
+    onBackClicked: () -> Unit = {},
+    onNavigateToSelectAvatar: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var username by remember { mutableStateOf(userProfile.username) }
@@ -75,8 +77,6 @@ fun EditProfileScreen(
                 .padding(horizontal = 24.dp)
                 .padding(top = 40.dp)
         ) {
-            Spacer(Modifier.height(40.dp))
-
             // Header
             Box(modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -162,7 +162,7 @@ fun EditProfileScreen(
                                     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                                     CircleShape
                                 )
-                                .clickable { /* Change avatar */ },
+                                .hapticClickable { onNavigateToSelectAvatar() },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -210,26 +210,66 @@ fun EditProfileScreen(
                 )
 
                 Spacer(Modifier.height(48.dp))
+            }
 
-                // Action Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+            Spacer(Modifier.height(40.dp))
+
+            // Action Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { onBackClicked() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
                 ) {
-                    OutlinedButton(
-                        onClick = { onBackClicked() },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(56.dp),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
-                    ) {
+                    Text(
+                        text = "cancel",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        onSaveClicked(
+                            userProfile.copy(
+                                username = username,
+                                displayName = displayName,
+                                email = email,
+                                bio = bio
+                            )
+                        )
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.background
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = FeatherIcons.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "cancel",
+                            text = "save",
                             style = TextStyle(
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
@@ -237,48 +277,10 @@ fun EditProfileScreen(
                             )
                         )
                     }
-
-                    Button(
-                        onClick = {
-                            onSaveClicked(
-                                userProfile.copy(
-                                    username = username,
-                                    displayName = displayName,
-                                    email = email,
-                                    bio = bio
-                                )
-                            )
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.background
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = FeatherIcons.Check,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "save",
-                                style = TextStyle(
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Monospace
-                                )
-                            )
-                        }
-                    }
                 }
-
-                Spacer(Modifier.height(40.dp))
             }
+
+            Spacer(Modifier.height(40.dp))
         }
     }
 }
