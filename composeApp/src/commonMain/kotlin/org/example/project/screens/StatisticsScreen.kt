@@ -65,13 +65,19 @@ fun StatisticsScreen(
                 )
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(Modifier.height(20.dp))
+
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+            )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 // Summary Stats Grid
                 item {
+                    Spacer(Modifier.height(20.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatCard(

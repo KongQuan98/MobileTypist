@@ -79,7 +79,12 @@ fun SettingsScreen(
                 )
             )
 
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(20.dp))
+
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+            )
 
             // Appearance Section
             Column(
@@ -87,6 +92,7 @@ fun SettingsScreen(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
             ) {
+                Spacer(Modifier.height(20.dp))
                 SettingSectionHeader("// appearance")
 
                 SettingNavRow(label = "theme", value = "dark minimal")

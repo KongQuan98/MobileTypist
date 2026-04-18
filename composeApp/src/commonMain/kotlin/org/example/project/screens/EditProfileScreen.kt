@@ -121,14 +121,13 @@ fun EditProfileScreen(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
             )
 
-            Spacer(Modifier.height(20.dp))
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
             ) {
+                Spacer(Modifier.height(20.dp))
                 // Avatar Section
                 Column(
                     modifier = Modifier.fillMaxWidth(),
