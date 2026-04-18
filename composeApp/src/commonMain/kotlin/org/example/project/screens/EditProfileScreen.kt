@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -45,8 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowLeft
-import compose.icons.feathericons.Camera
 import compose.icons.feathericons.Check
+import compose.icons.feathericons.Smile
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.UserProfile
 import org.example.project.ui.LocalHaptics
@@ -113,7 +114,14 @@ fun EditProfileScreen(
                 )
             }
 
-            Spacer(Modifier.height(48.dp))
+            Spacer(Modifier.height(20.dp))
+
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+            )
+
+            Spacer(Modifier.height(20.dp))
 
             Column(
                 modifier = Modifier
@@ -159,7 +167,7 @@ fun EditProfileScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = FeatherIcons.Camera,
+                                imageVector = FeatherIcons.Smile,
                                 contentDescription = "Change Avatar",
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(18.dp)
@@ -168,7 +176,7 @@ fun EditProfileScreen(
                     }
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = "tap camera to change avatar",
+                        text = "tap icon to change avatar",
                         style = TextStyle(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp,

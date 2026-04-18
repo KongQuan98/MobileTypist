@@ -32,14 +32,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
+import compose.icons.feathericons.Award
+import compose.icons.feathericons.Clock
 import compose.icons.feathericons.Edit3
+import compose.icons.feathericons.Star
+import compose.icons.feathericons.Target
+import compose.icons.feathericons.Type
+import compose.icons.feathericons.Zap
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
@@ -268,6 +278,98 @@ fun ProfileScreen(
                     Spacer(Modifier.height(40.dp))
                 }
 
+                // Achievements Section
+                item {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "ACHIEVEMENTS",
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontFamily = FontFamily.Monospace,
+                                    letterSpacing = 1.sp
+                                )
+                            )
+                            Text(
+                                text = "3 / 24 unlocked",
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            )
+                        }
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // First Row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            AchievementCard(
+                                title = "Speed Demon",
+                                description = "Reach 100 WPM",
+                                icon = FeatherIcons.Zap,
+                                isUnlocked = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                            AchievementCard(
+                                title = "Sharpshooter",
+                                description = "100% Accuracy",
+                                icon = FeatherIcons.Target,
+                                isUnlocked = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                            AchievementCard(
+                                title = "On Streak",
+                                description = "10 Day Streak",
+                                icon = FeatherIcons.Star,
+                                isUnlocked = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Spacer(Modifier.height(12.dp))
+
+                        // Second Row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            AchievementCard(
+                                title = "Grandmaster",
+                                description = "Reach 150 WPM",
+                                icon = FeatherIcons.Award,
+                                isUnlocked = false,
+                                modifier = Modifier.weight(1f)
+                            )
+                            AchievementCard(
+                                title = "Marathon",
+                                description = "Type for 24h",
+                                icon = FeatherIcons.Clock,
+                                isUnlocked = false,
+                                modifier = Modifier.weight(1f)
+                            )
+                            AchievementCard(
+                                title = "Wordsmith",
+                                description = "1M Keystrokes",
+                                icon = FeatherIcons.Type,
+                                isUnlocked = false,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Spacer(Modifier.height(40.dp))
+                    }
+                }
+
                 // Recent Tests Section
                 item {
                     Box(modifier = Modifier.fillMaxWidth()) {
@@ -305,6 +407,76 @@ fun ProfileScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AchievementCard(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    isUnlocked: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .background(
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                RoundedCornerShape(12.dp)
+            )
+            .then(
+                if (isUnlocked) Modifier.border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(MaterialTheme.colorScheme.primary, Color.Transparent)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) else Modifier
+            )
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(if (isUnlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isUnlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = title,
+            style = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
+                fontFamily = FontFamily.Monospace
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        Text(
+            text = description,
+            style = TextStyle(
+                fontSize = 10.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                fontFamily = FontFamily.Monospace
+            ),
+            textAlign = TextAlign.Center
+        )
     }
 }
 
