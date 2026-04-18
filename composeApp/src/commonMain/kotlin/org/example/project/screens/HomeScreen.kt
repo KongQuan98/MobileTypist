@@ -54,12 +54,16 @@ import compose.icons.feathericons.Play
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.app_icon
 import mobiletypist.composeapp.generated.resources.app_name
 import org.example.project.MobileTypistTheme
 import org.example.project.data.StorageManager
 import org.example.project.data.createSettings
 import org.example.project.data.model.TypingMode
 import org.example.project.navigation.NavigationManager
+import org.example.project.ui.LocalHaptics
+import org.example.project.ui.wrap
+import org.example.project.utils.Haptics
 import org.example.project.viewModel.HomeViewModel
 import org.example.project.viewModel.TypingScreenAction
 import org.jetbrains.compose.resources.stringResource
@@ -94,10 +98,12 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager,
 ) {
+    val haptics = LocalHaptics.current
     // Sync bottom bar visibility with HomeScreen content state
     LaunchedEffect(viewModel.showContent) {
         navigationManager.showBottomBar = viewModel.showContent
     }
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -110,7 +116,10 @@ fun HomeScreenContent(
             TitleSection(showTitleBar = viewModel.showContent)
 
             TypingModeBar(
-                viewModel = viewModel, coroutineScope = coroutineScope, pagerState = pagerState
+                viewModel = viewModel,
+                coroutineScope = coroutineScope,
+                pagerState = pagerState,
+                haptics = haptics,
             )
 
             Box(
@@ -154,8 +163,10 @@ fun HomeScreenContent(
                             .size(180.dp)
                             .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f)),
                         onClick = {
-                            viewModel.onStartTapped()
-                            navigationManager.showBottomBar = false
+                            haptics.wrap {
+                                viewModel.onStartTapped()
+                                navigationManager.showBottomBar = false
+                            }
                         },
                     ) {
                         Icon(
@@ -200,7 +211,7 @@ private fun TitleSection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "KT",
+                    stringResource(Res.string.app_icon),
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
@@ -230,6 +241,7 @@ private fun TypingModeBar(
     viewModel: HomeViewModel,
     coroutineScope: CoroutineScope,
     pagerState: PagerState,
+    haptics: Haptics,
 ) {
     AnimatedVisibility(
         visible = viewModel.showContent,
@@ -254,6 +266,7 @@ private fun TypingModeBar(
                         pagerState = pagerState,
                         mode = mode,
                         title = mode.name.toUpperCase(Locale.current),
+                        haptics = haptics,
                     )
                 }
             }
@@ -275,7 +288,12 @@ private fun TypingModeBar(
                                 modifier = Modifier.weight(1f),
                                 title = "${time}s",
                                 isSelected = viewModel.selectedTime == time,
-                                onClick = { viewModel.selectedTime = time })
+                                onClick = {
+                                    haptics.wrap {
+                                        viewModel.selectedTime = time
+                                    }
+                                }
+                            )
                         }
                     } else if (currentMode == TypingMode.WORDS) {
                         viewModel.wordOptions.forEach { count ->
@@ -283,7 +301,12 @@ private fun TypingModeBar(
                                 modifier = Modifier.weight(1f),
                                 title = count.toString(),
                                 isSelected = viewModel.selectedWords == count,
-                                onClick = { viewModel.selectedWords = count })
+                                onClick = {
+                                    haptics.wrap {
+                                        viewModel.selectedWords = count
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -299,11 +322,14 @@ private fun ScreenSelectionButton(
     pagerState: PagerState,
     mode: TypingMode,
     title: String,
+    haptics: Haptics,
 ) {
     Button(
         onClick = {
-            coroutineScope.launch {
-                pagerState.animateScrollToPage(mode.ordinal)
+            haptics.wrap {
+                coroutineScope.launch {
+                    pagerState.animateScrollToPage(mode.ordinal)
+                }
             }
         },
         colors = ButtonDefaults.buttonColors(
@@ -324,7 +350,10 @@ private fun ScreenSelectionButton(
 
 @Composable
 private fun ChildSelectionButton(
-    modifier: Modifier, title: String, isSelected: Boolean, onClick: () -> Unit
+    modifier: Modifier,
+    title: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,

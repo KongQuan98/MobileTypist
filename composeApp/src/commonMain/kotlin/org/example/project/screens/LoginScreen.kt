@@ -48,15 +48,21 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.Eye
 import compose.icons.feathericons.EyeOff
 import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.app_icon
 import mobiletypist.composeapp.generated.resources.app_name
+import mobiletypist.composeapp.generated.resources.continue_as_guest
+import mobiletypist.composeapp.generated.resources.email_header
+import mobiletypist.composeapp.generated.resources.forgot_password
+import mobiletypist.composeapp.generated.resources.no_account
+import mobiletypist.composeapp.generated.resources.password_header
+import mobiletypist.composeapp.generated.resources.sign_in_button
+import mobiletypist.composeapp.generated.resources.sign_up_arrow_button
 import org.example.project.MobileTypistTheme
-import org.example.project.navigation.NavigationManager
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun LoginScreen(
-    navigationManager: NavigationManager,
     onSignInClick: (String, String) -> Unit = { _, _ -> },
     onForgotPasswordClick: () -> Unit = {},
     onGuestClick: () -> Unit = {},
@@ -95,7 +101,7 @@ fun LoginScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "KT",
+                        stringResource(Res.string.app_icon),
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
@@ -135,7 +141,7 @@ fun LoginScreen(
 
             // Email Field
             Text(
-                text = "email",
+                text = stringResource(Res.string.email_header),
                 style = TextStyle(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -172,7 +178,7 @@ fun LoginScreen(
 
             // Password Field
             Text(
-                text = "password",
+                text = stringResource(Res.string.password_header),
                 style = TextStyle(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -222,7 +228,7 @@ fun LoginScreen(
             // Forgot Password
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                 Text(
-                    text = "forgot password?",
+                    text = stringResource(Res.string.forgot_password),
                     modifier = Modifier.clickable { onForgotPasswordClick() },
                     style = TextStyle(
                         fontSize = 14.sp,
@@ -247,7 +253,7 @@ fun LoginScreen(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = "sign in",
+                    text = stringResource(Res.string.sign_in_button),
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -300,7 +306,7 @@ fun LoginScreen(
                 )
             ) {
                 Text(
-                    text = "continue as guest",
+                    text = stringResource(Res.string.continue_as_guest),
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -317,7 +323,7 @@ fun LoginScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "no account? ",
+                    text = stringResource(Res.string.no_account),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -325,7 +331,7 @@ fun LoginScreen(
                     )
                 )
                 Text(
-                    text = "sign up ->",
+                    text = stringResource(Res.string.sign_up_arrow_button),
                     modifier = Modifier.clickable { onSignUpClick() },
                     style = TextStyle(
                         fontSize = 14.sp,
@@ -343,9 +349,7 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     MobileTypistTheme(darkTheme = false) {
-        LoginScreen(
-            navigationManager = NavigationManager()
-        )
+        LoginScreen()
     }
 }
 
@@ -353,8 +357,6 @@ fun LoginScreenPreview() {
 @Composable
 fun LoginScreenPreviewDark() {
     MobileTypistTheme(darkTheme = true) {
-        LoginScreen(
-            navigationManager = NavigationManager()
-        )
+        LoginScreen()
     }
 }

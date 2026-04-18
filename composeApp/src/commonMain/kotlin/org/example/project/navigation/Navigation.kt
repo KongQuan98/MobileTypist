@@ -94,7 +94,6 @@ fun Navigation(
 
             is Screen.Login -> {
                 LoginScreen(
-                    navigationManager = navigationManager,
                     onSignInClick = { _, _ -> },
                     onForgotPasswordClick = {},
                     onGuestClick = {
@@ -108,12 +107,7 @@ fun Navigation(
 
             is Screen.Register -> {
                 CreateAccountScreen(
-                    navigationManager = navigationManager,
                     onSignInClick = { _, _ -> },
-                    onForgotPasswordClick = {},
-                    onGuestClick = {
-                        navigationManager.navigateTo(Screen.Home)
-                    },
                     onSignUpClick = {
                         navigationManager.navigateTo(Screen.Register)
                     }

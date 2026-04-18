@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">keyboard typist</string>
+    <string name="app_name">Speed typing</string>
+    <string name="app_icon">St</string>
     <string name="version">1.0.0</string>
+
+    // screen title
     <string name="settings_title">settings</string>
     <string name="statistics_title">statistics</string>
     <string name="about_title">about</string>
@@ -9,4 +12,24 @@
     <string name="leaderboard_title">leaderboard</string>
     <string name="home_title">home</string>
     <string name="profile_title">profile</string>
+
+
+    // create account
+    <string name="create_account_title">create account</string>
+    <string name="username_header">username</string>
+    <string name="email_header">email</string>
+    <string name="password_header">password</string>
+    <string name="confirm_password_header">confirm password</string>
+    <string name="create_account_button">create account</string>
+    <string name="have_an_account">have an account? </string>
+    <string name="sign_in_arrow_button">sign in -></string>
+
+    // sign in
+    <string name="sign_in_title">sign in</string>
+    <string name="forgot_password">forgot password?</string>
+    <string name="sign_in_button">sign in</string>
+    <string name="continue_as_guest">continue as guest</string>
+    <string name="no_account">no account? </string>
+    <string name="sign_up_arrow_button">sign up -></string>
+
 </resources>

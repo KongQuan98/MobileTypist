@@ -43,16 +43,24 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Eye
 import compose.icons.feathericons.EyeOff
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.app_icon
+import mobiletypist.composeapp.generated.resources.app_name
+import mobiletypist.composeapp.generated.resources.confirm_password_header
+import mobiletypist.composeapp.generated.resources.create_account_button
+import mobiletypist.composeapp.generated.resources.create_account_title
+import mobiletypist.composeapp.generated.resources.email_header
+import mobiletypist.composeapp.generated.resources.have_an_account
+import mobiletypist.composeapp.generated.resources.password_header
+import mobiletypist.composeapp.generated.resources.sign_in_arrow_button
+import mobiletypist.composeapp.generated.resources.username_header
 import org.example.project.MobileTypistTheme
-import org.example.project.navigation.NavigationManager
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun CreateAccountScreen(
-    navigationManager: NavigationManager,
     onSignInClick: (String, String) -> Unit = { _, _ -> },
-    onForgotPasswordClick: () -> Unit = {},
-    onGuestClick: () -> Unit = {},
     onSignUpClick: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
@@ -78,7 +86,7 @@ fun CreateAccountScreen(
 
             // Username Field
             Text(
-                text = "Username",
+                text = stringResource(Res.string.username_header),
                 style = TextStyle(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -115,7 +123,7 @@ fun CreateAccountScreen(
 
             // Email Field
             Text(
-                text = "Email",
+                text = stringResource(Res.string.email_header),
                 style = TextStyle(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -152,7 +160,7 @@ fun CreateAccountScreen(
 
             // Password Field
             Text(
-                text = "Password",
+                text = stringResource(Res.string.password_header),
                 style = TextStyle(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -201,7 +209,7 @@ fun CreateAccountScreen(
 
             // Confirm Password Field
             Text(
-                text = "Confirm password",
+                text = stringResource(Res.string.confirm_password_header),
                 style = TextStyle(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -261,7 +269,7 @@ fun CreateAccountScreen(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = "Create account",
+                    text = stringResource(Res.string.create_account_button),
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -278,7 +286,7 @@ fun CreateAccountScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Have an account? ",
+                    text = stringResource(Res.string.have_an_account),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -286,7 +294,7 @@ fun CreateAccountScreen(
                     )
                 )
                 Text(
-                    text = "sign in ->",
+                    text = stringResource(Res.string.sign_in_arrow_button),
                     modifier = Modifier.clickable { onSignUpClick() },
                     style = TextStyle(
                         fontSize = 14.sp,
@@ -312,7 +320,7 @@ private fun HeaderTitle() {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                "T",
+                stringResource(Res.string.app_icon),
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
@@ -320,7 +328,7 @@ private fun HeaderTitle() {
         }
         Spacer(Modifier.width(12.dp))
         Text(
-            text = "mobileType",
+            text = stringResource(Res.string.app_name),
             style = TextStyle(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -334,7 +342,7 @@ private fun HeaderTitle() {
 
     // Heading
     Text(
-        text = "Create account",
+        text = stringResource(Res.string.create_account_title),
         style = TextStyle(
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
@@ -348,7 +356,7 @@ private fun HeaderTitle() {
 @Composable
 fun CreateAccountScreenPreview() {
     MobileTypistTheme(darkTheme = false) {
-        CreateAccountScreen(navigationManager = NavigationManager())
+        CreateAccountScreen()
     }
 }
 
@@ -356,6 +364,6 @@ fun CreateAccountScreenPreview() {
 @Composable
 fun CreateAccountScreenPreviewDark() {
     MobileTypistTheme(darkTheme = true) {
-        CreateAccountScreen(navigationManager = NavigationManager())
+        CreateAccountScreen()
     }
 }
