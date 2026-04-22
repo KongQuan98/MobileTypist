@@ -9,6 +9,7 @@ import org.example.project.data.model.AppSettings
 import org.example.project.data.storage.StorageManager
 import org.example.project.navigation.model.Screen
 import org.example.project.screens.AboutScreen
+import org.example.project.screens.AchievementsScreen
 import org.example.project.screens.CreateAccountScreen
 import org.example.project.screens.EditProfileScreen
 import org.example.project.screens.HomeScreen
@@ -124,7 +125,10 @@ fun Navigation(
                         bestWpm = storageManager.getBestWpm(),
                         totalTests = storageManager.getTotalTests(),
                     ),
-                    modifier = modifier.then(scaffoldModifier)
+                    modifier = modifier.then(scaffoldModifier),
+                    onViewMoreAchievements = {
+                        navigationManager.navigateTo(Screen.Achievements)
+                    }
                 )
             }
 
@@ -161,6 +165,15 @@ fun Navigation(
                 LeaderboardScreen(
                     navigationManager = navigationManager,
                     modifier = modifier.then(scaffoldModifier)
+                )
+            }
+
+            is Screen.Achievements -> {
+                AchievementsScreen(
+                    onBackClicked = {
+                        navigationManager.navigateTo(Screen.Profile)
+                    },
+                    modifier = modifier
                 )
             }
         }

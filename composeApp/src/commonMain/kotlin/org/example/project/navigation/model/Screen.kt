@@ -26,6 +26,7 @@ sealed class Screen {
     object LeaderBoard : Screen()
     object EditProfile : Screen()
     object SelectAvatar : Screen()
+    object Achievements : Screen()
 }
 
 sealed class BottomNavigationTab(

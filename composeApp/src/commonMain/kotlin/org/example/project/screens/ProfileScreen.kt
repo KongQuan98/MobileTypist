@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -34,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -43,14 +45,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.Award
-import compose.icons.feathericons.Clock
 import compose.icons.feathericons.Edit3
-import compose.icons.feathericons.Star
-import compose.icons.feathericons.Target
-import compose.icons.feathericons.Type
-import compose.icons.feathericons.Zap
 import org.example.project.MobileTypistTheme
+import org.example.project.data.model.Achievement
+import org.example.project.data.model.AchievementRepository
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
@@ -71,6 +69,7 @@ data class ProfileScreenState(
 fun ProfileScreen(
     profileScreenState: ProfileScreenState,
     onEditProfileClicked: () -> Unit,
+    onViewMoreAchievements: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val results = profileScreenState.recentTestResult
@@ -92,11 +91,9 @@ fun ProfileScreen(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val borderColor =
-        if (isPressed) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-        }
+        if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+            alpha = 0.3f
+        )
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -209,6 +206,7 @@ fun ProfileScreen(
                     .padding(top = 20.dp)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(bottom = 32.dp)
             ) {
                 // Summary Stats Cards
                 item {
@@ -298,8 +296,10 @@ fun ProfileScreen(
                                     letterSpacing = 1.sp
                                 )
                             )
+                            val unlockedCount =
+                                AchievementRepository.achievements.count { it.isUnlocked }
                             Text(
-                                text = "3 / 24 unlocked",
+                                text = "$unlockedCount / ${AchievementRepository.achievements.size} unlocked",
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.primary,
@@ -310,61 +310,37 @@ fun ProfileScreen(
 
                         Spacer(Modifier.height(16.dp))
 
-                        // First Row
+                        // Showcase top 3 achievements
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            AchievementCard(
-                                title = "Speed Demon",
-                                description = "Reach 100 WPM",
-                                icon = FeatherIcons.Zap,
-                                isUnlocked = true,
-                                modifier = Modifier.weight(1f)
-                            )
-                            AchievementCard(
-                                title = "Sharpshooter",
-                                description = "100% Accuracy",
-                                icon = FeatherIcons.Target,
-                                isUnlocked = true,
-                                modifier = Modifier.weight(1f)
-                            )
-                            AchievementCard(
-                                title = "On Streak",
-                                description = "10 Day Streak",
-                                icon = FeatherIcons.Star,
-                                isUnlocked = true,
-                                modifier = Modifier.weight(1f)
-                            )
+                            AchievementRepository.achievements.filter { it.isUnlocked }.take(3)
+                                .forEach { achievement ->
+                                    AchievementCard(
+                                        achievement = achievement,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
                         }
 
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(24.dp))
 
-                        // Second Row
-                        Row(
+                        Button(
+                            onClick = onViewMoreAchievements,
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            shape = RoundedCornerShape(8.dp)
                         ) {
-                            AchievementCard(
-                                title = "Grandmaster",
-                                description = "Reach 150 WPM",
-                                icon = FeatherIcons.Award,
-                                isUnlocked = false,
-                                modifier = Modifier.weight(1f)
-                            )
-                            AchievementCard(
-                                title = "Marathon",
-                                description = "Type for 24h",
-                                icon = FeatherIcons.Clock,
-                                isUnlocked = false,
-                                modifier = Modifier.weight(1f)
-                            )
-                            AchievementCard(
-                                title = "Wordsmith",
-                                description = "1M Keystrokes",
-                                icon = FeatherIcons.Type,
-                                isUnlocked = false,
-                                modifier = Modifier.weight(1f)
+                            Text(
+                                text = "view more achievements",
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontFamily = FontFamily.Monospace
+                                )
                             )
                         }
 
@@ -414,10 +390,7 @@ fun ProfileScreen(
 
 @Composable
 private fun AchievementCard(
-    title: String,
-    description: String,
-    icon: ImageVector,
-    isUnlocked: Boolean,
+    achievement: Achievement,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -427,7 +400,7 @@ private fun AchievementCard(
                 RoundedCornerShape(12.dp)
             )
             .then(
-                if (isUnlocked) Modifier.border(
+                if (achievement.isUnlocked) Modifier.border(
                     width = 1.dp,
                     brush = Brush.verticalGradient(
                         colors = listOf(MaterialTheme.colorScheme.primary, Color.Transparent)
@@ -442,13 +415,13 @@ private fun AchievementCard(
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(if (isUnlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent),
+                .background(if (achievement.isUnlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = icon,
+                imageVector = achievement.icon,
                 contentDescription = null,
-                tint = if (isUnlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                tint = if (achievement.isUnlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -456,11 +429,11 @@ private fun AchievementCard(
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = title,
+            text = achievement.title,
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
+                color = if (achievement.isUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
                 fontFamily = FontFamily.Monospace
             ),
             maxLines = 1,
@@ -471,19 +444,26 @@ private fun AchievementCard(
         Spacer(Modifier.height(4.dp))
 
         Text(
-            text = description,
+            text = achievement.description,
             style = TextStyle(
                 fontSize = 10.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 fontFamily = FontFamily.Monospace
             ),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
 
 @Composable
-private fun StatBox(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
+private fun StatBox(
+    label: String,
+    value: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .background(
@@ -653,6 +633,7 @@ private fun ProfileScreenPreviewDark() {
         MobileTypistTheme(darkTheme = true) {
             ProfileScreen(
                 onEditProfileClicked = {},
+                onViewMoreAchievements = {},
                 profileScreenState = dummyProfileScreenState,
             )
         }
@@ -706,6 +687,7 @@ private fun ProfileScreenPreview() {
         MobileTypistTheme(darkTheme = false) {
             ProfileScreen(
                 onEditProfileClicked = {},
+                onViewMoreAchievements = {},
                 profileScreenState = dummyProfileScreenState,
             )
         }
