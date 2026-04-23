@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -15,29 +16,23 @@ import org.example.project.navigation.model.Screen
 import org.example.project.navigation.rememberNavigationManager
 import org.example.project.ui.LocalHaptics
 import org.example.project.utils.TypingHapticFeedback
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
-@Composable
-@Preview
-fun App() {
-    App(
-        startScreen = Screen.Home,
-        useComposeBottomBar = true
-    )
-}
 
 @Composable
 fun App(
     startScreen: Screen = Screen.Home,
-    useComposeBottomBar: Boolean = true
+    onToggleTabBar: ((Boolean) -> Unit)? = null // Callback to bridge to iOS native TabBar
 ) {
     // Create shared instances
     val navigationManager = rememberNavigationManager(
         initialScreen = startScreen,
-        useComposeBottomBar = useComposeBottomBar
     )
     val storageManager = remember {
         StorageManager(settings = createSettings())
+    }
+
+    // Observe changes and notify the native platform
+    LaunchedEffect(navigationManager.showBottomBar) {
+        onToggleTabBar?.invoke(navigationManager.showBottomBar)
     }
 
     // Load theme from settings and manage state

@@ -9,27 +9,26 @@ import org.example.project.navigation.model.Screen
 
 class NavigationManager(
     initialScreen: Screen = Screen.Home,
-    private val useComposeBottomBar: Boolean = true
 ) {
     var currentScreen by mutableStateOf(initialScreen)
         private set
 
-    var showBottomBar by mutableStateOf(useComposeBottomBar)
+    var showBottomBar by mutableStateOf(true)
 
     fun navigateTo(screen: Screen) {
         currentScreen = screen
-        // If iOS uses native tabs, keep Compose bottom bar hidden.
-        showBottomBar = useComposeBottomBar
+        showBottomBar = true
     }
     
     fun navigateBack() {
         when (currentScreen) {
             is Screen.Profile,
             is Screen.Settings,
-            is Screen.About -> {
+            is Screen.About,
+            is Screen.LeaderBoard,
+            is Screen.Statistics -> {
                 currentScreen = Screen.Home
-                // Keep hidden on iOS native tab setup.
-                showBottomBar = useComposeBottomBar
+                showBottomBar = true
             }
             else -> {}
         }
@@ -43,7 +42,6 @@ class NavigationManager(
 @Composable
 fun rememberNavigationManager(
     initialScreen: Screen = Screen.Home,
-    useComposeBottomBar: Boolean = true
 ): NavigationManager {
-    return remember { NavigationManager(initialScreen, useComposeBottomBar) }
+    return remember { NavigationManager(initialScreen) }
 }

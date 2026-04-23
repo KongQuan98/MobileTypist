@@ -14,35 +14,43 @@ class MainTabBarController: UITabBarController {
         super.viewDidLoad()
 
         delegate = self
+
+        // Define a shared toggle closure to handle visibility across all tabs
+        // Kotlin Boolean is bridged as KotlinBoolean in Swift
+        let onToggle: (KotlinBoolean) -> Void = { [weak self] isVisible in
+            // Convert KotlinBoolean to Swift Bool using .boolValue
+            self?.tabBar.isHidden = !isVisible.boolValue
+        }
+        
         let homeVC = createTab(
             title: "Home",
             imageName: "house.fill",
             tag: 0,
-            viewController: MainViewControllerKt.HomeTabViewController()
+            viewController: MainViewControllerKt.HomeTabViewController(onToggleTabBar: onToggle)
         )
         let statsVC = createTab(
             title: "Stats",
             imageName: "chart.bar.fill",
             tag: 1,
-            viewController: MainViewControllerKt.StatisticsTabViewController()
+            viewController: MainViewControllerKt.StatisticsTabViewController(onToggleTabBar: onToggle)
         )
         let settingsVC = createTab(
             title: "Settings",
             imageName: "gearshape.fill",
             tag: 2,
-            viewController: MainViewControllerKt.SettingsTabViewController()
+            viewController: MainViewControllerKt.SettingsTabViewController(onToggleTabBar: onToggle)
         )
         let profileVC = createTab(
             title: "Profile",
             imageName: "person.fill",
             tag: 3,
-            viewController: MainViewControllerKt.ProfileTabViewController()
+            viewController: MainViewControllerKt.ProfileTabViewController(onToggleTabBar: onToggle)
         )
         let leaderboardVC = createTab(
             title: "Leaderboard",
             imageName: "trophy.fill",
             tag: 4,
-            viewController: MainViewControllerKt.LeaderboardTabViewController()
+            viewController: MainViewControllerKt.LeaderboardTabViewController(onToggleTabBar: onToggle)
         )
 
         viewControllers = [settingsVC, leaderboardVC, homeVC, statsVC, profileVC]
@@ -87,7 +95,7 @@ extension MainTabBarController: UITabBarControllerDelegate {
         animationControllerForTransitionFrom fromVC: UIViewController,
         to toVC: UIViewController
     ) -> UIViewControllerAnimatedTransitioning? {
-        guard let viewControllers else {
+        guard let viewControllers = self.viewControllers else {
             return nil
         }
         guard

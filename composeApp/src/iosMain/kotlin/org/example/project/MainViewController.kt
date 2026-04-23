@@ -5,37 +5,37 @@ import org.example.project.navigation.model.Screen
 
 fun MainViewController() = ComposeUIViewController { App() }
 
-fun HomeTabViewController() = ComposeUIViewController {
+fun HomeTabViewController(onToggleTabBar: (Boolean) -> Unit) = ComposeUIViewController {
     App(
         startScreen = Screen.Home,
-        useComposeBottomBar = false
+        onToggleTabBar = onToggleTabBar
     )
 }
 
-fun StatisticsTabViewController() = ComposeUIViewController {
+fun StatisticsTabViewController(onToggleTabBar: (Boolean) -> Unit) = ComposeUIViewController {
     App(
         startScreen = Screen.Statistics,
-        useComposeBottomBar = false
+        onToggleTabBar = onToggleTabBar
     )
 }
 
-fun SettingsTabViewController() = ComposeUIViewController {
+fun SettingsTabViewController(onToggleTabBar: (Boolean) -> Unit) = ComposeUIViewController {
     App(
         startScreen = Screen.Settings,
-        useComposeBottomBar = false
+        onToggleTabBar = onToggleTabBar
     )
 }
 
-fun ProfileTabViewController() = ComposeUIViewController {
+fun ProfileTabViewController(onToggleTabBar: (Boolean) -> Unit) = ComposeUIViewController {
     App(
         startScreen = Screen.Profile,
-        useComposeBottomBar = false
+        onToggleTabBar = onToggleTabBar
     )
 }
 
-fun LeaderboardTabViewController() = ComposeUIViewController {
+fun LeaderboardTabViewController(onToggleTabBar: (Boolean) -> Unit) = ComposeUIViewController {
     App(
         startScreen = Screen.LeaderBoard,
-        useComposeBottomBar = false
+        onToggleTabBar = onToggleTabBar
     )
 }
