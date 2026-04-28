@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -70,7 +71,8 @@ fun ProfileScreen(
     profileScreenState: ProfileScreenState,
     onEditProfileClicked: () -> Unit,
     onViewMoreAchievements: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    refreshData: () -> Unit = {},
 ) {
     val results = profileScreenState.recentTestResult
     val bestWpm = profileScreenState.bestWpm
@@ -95,6 +97,9 @@ fun ProfileScreen(
             alpha = 0.3f
         )
 
+    LaunchedEffect(Unit) {
+        refreshData.invoke()
+    }
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background

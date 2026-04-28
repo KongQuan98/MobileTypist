@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +36,8 @@ data class StatisticsScreenState(
 @Composable
 fun StatisticsScreen(
     statisticsScreenState: StatisticsScreenState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    refreshData: () -> Unit = {},
 ) {
     val results = statisticsScreenState.results
     val bestWpm = statisticsScreenState.bestWpm
@@ -45,6 +47,10 @@ fun StatisticsScreen(
     val totalSeconds = results.sumOf { it.duration }
     val hoursTyped = totalSeconds / 3600
     val minutesTyped = (totalSeconds % 3600) / 60
+
+    LaunchedEffect(Unit) {
+        refreshData.invoke()
+    }
 
     Surface(
         modifier = modifier.fillMaxSize(),

@@ -13,7 +13,7 @@ import org.example.project.data.model.UserProfile
 
 class StorageManager(private val settings: Settings) {
     private val json = Json { ignoreUnknownKeys = true }
-    
+
     companion object {
         private const val KEY_RESULTS = "typing_test_results"
         private const val KEY_SETTINGS = "app_settings"
@@ -27,20 +27,44 @@ class StorageManager(private val settings: Settings) {
 
     private val _userProfileFlow = MutableStateFlow(getUserProfile())
     val userProfileFlow = _userProfileFlow.asStateFlow()
-    
+
+    // Add reactive flows for statistics
+    private val _resultsFlow = MutableStateFlow(getResults())
+    val resultsFlow = _resultsFlow.asStateFlow()
+
+    private val _bestWpmFlow = MutableStateFlow(getBestWpm())
+    val bestWpmFlow = _bestWpmFlow.asStateFlow()
+
+    private val _totalTestsFlow = MutableStateFlow(getTotalTests())
+    val totalTestsFlow = _totalTestsFlow.asStateFlow()
+
     fun saveResult(result: TypingTestResult) {
         val results = getResults().toMutableList()
-        results.add(0, result) // Add to beginning
-        // Keep only last 100 results
+        results.add(0, result)
         val limitedResults = results.take(100)
         settings[KEY_RESULTS] = json.encodeToString(limitedResults)
-        
-        // Update statistics
+
+        // Update statistics in storage
         updateBestWpm(result.wpm)
         incrementTotalTests()
+
+        // Trigger reactive updates for the current instance
+        refreshStats()
     }
-    
-    fun getResults(): List<TypingTestResult> {
+
+    /**
+     * Call this to force a refresh from the disk.
+     * Useful for iOS where different tabs might have modified the data.
+     */
+    fun refreshStats() {
+        _resultsFlow.value = getResults()
+        _bestWpmFlow.value = getBestWpm()
+        _totalTestsFlow.value = getTotalTests()
+        _userProfileFlow.value = getUserProfile()
+        _settingsFlow.value = getSettings()
+    }
+
+    private fun getResults(): List<TypingTestResult> {
         val jsonString = settings.getStringOrNull(KEY_RESULTS) ?: return emptyList()
         return try {
             json.decodeFromString<List<TypingTestResult>>(jsonString)
@@ -48,27 +72,27 @@ class StorageManager(private val settings: Settings) {
             emptyList()
         }
     }
-    
+
     fun getBestWpm(): Int {
         return settings.getIntOrNull(KEY_BEST_WPM) ?: 0
     }
-    
+
     private fun updateBestWpm(wpm: Int) {
         val currentBest = getBestWpm()
         if (wpm > currentBest) {
             settings[KEY_BEST_WPM] = wpm
         }
     }
-    
+
     fun getTotalTests(): Int {
         return settings.getIntOrNull(KEY_TOTAL_TESTS) ?: 0
     }
-    
+
     private fun incrementTotalTests() {
         val current = getTotalTests()
         settings[KEY_TOTAL_TESTS] = current + 1
     }
-    
+
     fun getSettings(): AppSettings {
         val jsonString = settings.getStringOrNull(KEY_SETTINGS) ?: return AppSettings()
         return try {
@@ -77,7 +101,7 @@ class StorageManager(private val settings: Settings) {
             AppSettings()
         }
     }
-    
+
     fun saveSettings(settings: AppSettings) {
         this.settings[KEY_SETTINGS] = json.encodeToString(settings)
         _settingsFlow.value = settings
@@ -96,14 +120,14 @@ class StorageManager(private val settings: Settings) {
         this.settings[KEY_USER_PROFILE] = json.encodeToString(profile)
         _userProfileFlow.value = profile
     }
-    
+
     fun clearAllData() {
         settings.remove(KEY_RESULTS)
         settings.remove(KEY_BEST_WPM)
         settings.remove(KEY_TOTAL_TESTS)
-        settings.remove(KEY_USER_PROFILE)
+        refreshStats()
     }
-    
+
     private fun Settings.getStringOrNull(key: String): String? {
         return try {
             get<String>(key)
@@ -111,7 +135,7 @@ class StorageManager(private val settings: Settings) {
             null
         }
     }
-    
+
     private fun Settings.getIntOrNull(key: String): Int? {
         return try {
             get<Int>(key)

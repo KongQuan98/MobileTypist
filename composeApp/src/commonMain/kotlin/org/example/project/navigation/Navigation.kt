@@ -40,7 +40,12 @@ fun Navigation(
     )
 
     val currentScreen = navigationManager.currentScreen
+
+    // Reactive data collection from StorageManager flows
     val userProfile by storageManager.userProfileFlow.collectAsState()
+    val results by storageManager.resultsFlow.collectAsState()
+    val bestWpm by storageManager.bestWpmFlow.collectAsState()
+    val totalTests by storageManager.totalTestsFlow.collectAsState()
 
     // Show/Hide bottom bar logic
     LaunchedEffect(currentScreen) {
@@ -63,11 +68,12 @@ fun Navigation(
             is Screen.Statistics -> {
                 StatisticsScreen(
                     statisticsScreenState = StatisticsScreenState(
-                        results = storageManager.getResults(),
-                        bestWpm = storageManager.getBestWpm(),
-                        totalTests = storageManager.getTotalTests(),
+                        results = results,
+                        bestWpm = bestWpm,
+                        totalTests = totalTests,
                     ),
-                    modifier = modifier.then(scaffoldModifier)
+                    modifier = modifier.then(scaffoldModifier),
+                    refreshData = { storageManager.refreshStats() }
                 )
             }
 
@@ -121,14 +127,15 @@ fun Navigation(
                     onEditProfileClicked = { navigationManager.navigateTo(Screen.EditProfile) },
                     profileScreenState = ProfileScreenState(
                         userProfile = userProfile,
-                        recentTestResult = storageManager.getResults(),
-                        bestWpm = storageManager.getBestWpm(),
-                        totalTests = storageManager.getTotalTests(),
+                        recentTestResult = results,
+                        bestWpm = bestWpm,
+                        totalTests = totalTests,
                     ),
                     modifier = modifier.then(scaffoldModifier),
                     onViewMoreAchievements = {
                         navigationManager.navigateTo(Screen.Achievements)
-                    }
+                    },
+                    refreshData = { storageManager.refreshStats() }
                 )
             }
 
