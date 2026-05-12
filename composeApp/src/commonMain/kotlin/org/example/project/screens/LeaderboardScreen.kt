@@ -1,5 +1,8 @@
 package org.example.project.screens
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,15 +19,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,7 +49,6 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Award
 import org.example.project.MobileTypistTheme
-import org.example.project.navigation.NavigationManager
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class LeaderboardEntry(
@@ -56,13 +60,17 @@ data class LeaderboardEntry(
 
 @Composable
 fun LeaderboardScreen(
-    navigationManager: NavigationManager,
     modifier: Modifier = Modifier
 ) {
     val tabs = listOf("15s", "30s", "60s", "all")
     var selectedTab by remember { mutableStateOf(1) } // 30s selected by default
+    var animateStart by remember { mutableStateOf(false) }
 
-    // Mock data based on screenshot
+    LaunchedEffect(Unit) {
+        animateStart = true
+    }
+
+    // Mock data
     val entries = listOf(
         LeaderboardEntry("fastfinger", 142, 99, "FF"),
         LeaderboardEntry("keymaster", 138, 97, "KM"),
@@ -81,28 +89,28 @@ fun LeaderboardScreen(
             val screenHeight = maxHeight
             val screenWidth = maxWidth
 
-            // Proportional sizing
+            // Responsive sizing: Use percentages of screen height
             val podiumSectionHeight = screenHeight * 0.35f
-            val listSectionHeight = screenHeight * 0.45f
+            val listWeight = 1f // LazyColumn takes remaining space
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp)
             ) {
-                Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(screenHeight * 0.04f))
 
                 Text(
                     text = "leaderboard",
                     style = TextStyle(
-                        fontSize = 24.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontFamily = FontFamily.Monospace
                     )
                 )
 
-                Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(24.dp))
 
                 // Custom Tab Bar
                 Row(
@@ -125,83 +133,81 @@ fun LeaderboardScreen(
                                 )
                             )
                             Spacer(Modifier.height(8.dp))
-                            if (selectedTab == index) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(0.6f)
-                                        .height(2.dp)
-                                        .background(MaterialTheme.colorScheme.primary)
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(1.dp)
-                                        .background(
-                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                alpha = 0.2f
-                                            )
-                                        )
-                                )
-                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.6f)
+                                    .height(if (selectedTab == index) 2.dp else 1.dp)
+                                    .background(
+                                        if (selectedTab == index) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+                                    )
+                            )
                         }
                     }
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(24.dp))
 
-                Column(
+                // Podium Section - Height is relative to screen
+                if (entries.size >= 3) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(podiumSectionHeight),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        // 2nd Place (Left)
+                        PodiumPosition(
+                            entry = entries[1],
+                            rank = 2,
+                            heightMultiplier = 0.6f, // 60% of the max possible block height
+                            containerHeight = podiumSectionHeight,
+                            animate = animateStart,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        // 1st Place (Center)
+                        PodiumPosition(
+                            entry = entries[0],
+                            rank = 1,
+                            heightMultiplier = 1.0f, // 100% of the max possible block height
+                            containerHeight = podiumSectionHeight,
+                            animate = animateStart,
+                            modifier = Modifier.weight(1.2f),
+                            showCrown = true
+                        )
+
+                        // 3rd Place (Right)
+                        PodiumPosition(
+                            entry = entries[2],
+                            rank = 3,
+                            heightMultiplier = 0.45f, // 45% of the max possible block height
+                            containerHeight = podiumSectionHeight,
+                            animate = animateStart,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                // Remaining List - Takes up the rest of the screen
+                LazyColumn(
                     modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
+                        .fillMaxWidth()
+                        .weight(listWeight),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Podium Section - Responsive
-                    if (entries.size >= 3) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(podiumSectionHeight),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            // 2nd Place
-                            PodiumPosition(
-                                entry = entries[1],
-                                rank = 2,
-                                relativeHeight = 0.6f,
-                                containerHeight = podiumSectionHeight,
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            // 1st Place
-                            PodiumPosition(
-                                entry = entries[0],
-                                rank = 1,
-                                relativeHeight = 0.9f,
-                                containerHeight = podiumSectionHeight,
-                                modifier = Modifier.weight(1.2f),
-                                showCrown = true
-                            )
-
-                            // 3rd Place
-                            PodiumPosition(
-                                entry = entries[2],
-                                rank = 3,
-                                relativeHeight = 0.5f,
-                                containerHeight = podiumSectionHeight,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-
-                    Spacer(Modifier.height(24.dp))
-
-                    // Remaining List
-                    entries.forEachIndexed { index, entry ->
+                    itemsIndexed(entries.drop(3)) { index, entry ->
                         LeaderboardListItem(rank = index + 4, entry = entry)
-                    }
 
-                    Spacer(Modifier.height(24.dp))
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                        )
+                    }
                 }
             }
         }
@@ -212,13 +218,33 @@ fun LeaderboardScreen(
 private fun PodiumPosition(
     entry: LeaderboardEntry,
     rank: Int,
-    relativeHeight: Float, // 0.0 to 1.0
+    heightMultiplier: Float, // Proportional height
     containerHeight: Dp,
+    animate: Boolean,
     modifier: Modifier = Modifier,
     showCrown: Boolean = false
 ) {
-    val blockHeight = containerHeight * 0.5f * relativeHeight
-    val avatarSize = (containerHeight.value * 0.25f).coerceIn(40f, 70f).dp
+    // Blocks take up about 45% of the section height at max
+    val maxBlockHeight = containerHeight * 0.45f
+    val targetBlockHeight = maxBlockHeight * heightMultiplier
+
+    // Animate the height rising
+    val animatedHeight by animateDpAsState(
+        targetValue = if (animate) targetBlockHeight else 0.dp,
+        animationSpec = tween(
+            durationMillis = 1000,
+            delayMillis = when (rank) {
+                3 -> 0 // 3rd rises first
+                2 -> 200 // then 2nd
+                1 -> 400 // finally 1st
+                else -> 0
+            },
+            easing = FastOutSlowInEasing
+        )
+    )
+
+    // Avatar size relative to container
+    val avatarSize = (containerHeight.value * 0.22f).coerceIn(44f, 72f).dp
 
     Column(
         modifier = modifier,
@@ -230,7 +256,7 @@ private fun PodiumPosition(
                 imageVector = FeatherIcons.Award,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size((avatarSize.value * 0.4f).dp)
+                modifier = Modifier.size(20.dp)
             )
             Spacer(Modifier.height(4.dp))
         }
@@ -245,7 +271,7 @@ private fun PodiumPosition(
             Text(
                 text = entry.initials,
                 style = TextStyle(
-                    fontSize = (avatarSize.value * 0.35f).sp,
+                    fontSize = if (rank == 1) 18.sp else 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (rank == 1) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                     fontFamily = FontFamily.Monospace
@@ -267,8 +293,6 @@ private fun PodiumPosition(
             maxLines = 1,
             textAlign = TextAlign.Center
         )
-
-        Spacer(Modifier.height(4.dp))
 
         Row(verticalAlignment = Alignment.Bottom) {
             Text(
@@ -296,10 +320,10 @@ private fun PodiumPosition(
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.85f)
-                .height(blockHeight)
+                .height(animatedHeight)
                 .background(
-                    if (rank == 1) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    if (rank == 1) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
                     RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
                 )
                 .border(
@@ -307,12 +331,13 @@ private fun PodiumPosition(
                     color = if (rank == 1) MaterialTheme.colorScheme.primary else Color.Transparent,
                     shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.TopCenter
         ) {
             Text(
                 text = rank.toString(),
+                modifier = Modifier.padding(top = 8.dp),
                 style = TextStyle(
-                    fontSize = (blockHeight.value * 0.4f).coerceAtLeast(16f).sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (rank == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace
@@ -327,7 +352,7 @@ private fun LeaderboardListItem(rank: Int, entry: LeaderboardEntry) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 14.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -393,7 +418,6 @@ private fun LeaderboardListItem(rank: Int, entry: LeaderboardEntry) {
     }
 }
 
-// Helper to disable ripple
 fun Modifier.clickableWithoutRipple(onClick: () -> Unit): Modifier = composed {
     this.clickable(
         interactionSource = remember { MutableInteractionSource() },
@@ -406,9 +430,7 @@ fun Modifier.clickableWithoutRipple(onClick: () -> Unit): Modifier = composed {
 @Composable
 private fun LeaderboardScreenPreview() {
     MobileTypistTheme(darkTheme = false) {
-        LeaderboardScreen(
-            navigationManager = NavigationManager()
-        )
+        LeaderboardScreen()
     }
 }
 
@@ -416,8 +438,6 @@ private fun LeaderboardScreenPreview() {
 @Composable
 private fun LeaderboardScreenPreviewDark() {
     MobileTypistTheme(darkTheme = true) {
-        LeaderboardScreen(
-            navigationManager = NavigationManager()
-        )
+        LeaderboardScreen()
     }
 }

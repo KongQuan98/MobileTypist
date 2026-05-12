@@ -170,7 +170,6 @@ fun Navigation(
 
             is Screen.LeaderBoard -> {
                 LeaderboardScreen(
-                    navigationManager = navigationManager,
                     modifier = modifier.then(scaffoldModifier)
                 )
             }
