@@ -63,6 +63,7 @@ import org.example.project.data.storage.createSettings
 import org.example.project.navigation.NavigationManager
 import org.example.project.ui.LocalHaptics
 import org.example.project.ui.wrap
+import org.example.project.utils.AudioPlayer
 import org.example.project.utils.Haptics
 import org.example.project.viewModel.HomeViewModel
 import org.example.project.viewModel.TypingScreenAction
@@ -72,6 +73,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
+    audioPlayer: AudioPlayer? = null,
     navigationManager: NavigationManager,
     storageManager: StorageManager,
     modifier: Modifier = Modifier
@@ -86,6 +88,7 @@ fun HomeScreen(
         coroutineScope = coroutineScope,
         modifier = modifier,
         navigationManager = navigationManager,
+        audioPlayer = audioPlayer,
     )
 }
 
@@ -97,6 +100,7 @@ fun HomeScreenContent(
     coroutineScope: CoroutineScope,
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager,
+    audioPlayer: AudioPlayer? = null,
 ) {
     val haptics = LocalHaptics.current
     // Sync bottom bar visibility with HomeScreen content state
@@ -120,6 +124,7 @@ fun HomeScreenContent(
                 coroutineScope = coroutineScope,
                 pagerState = pagerState,
                 haptics = haptics,
+                audioPlayer = audioPlayer,
             )
 
             Box(
@@ -163,7 +168,9 @@ fun HomeScreenContent(
                             .size(180.dp)
                             .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f)),
                         onClick = {
-                            haptics.wrap {
+                            haptics.wrap(
+                                audioPlayer = audioPlayer,
+                            ) {
                                 viewModel.onStartTapped()
                                 navigationManager.showBottomBar = false
                             }
@@ -242,6 +249,7 @@ private fun TypingModeBar(
     coroutineScope: CoroutineScope,
     pagerState: PagerState,
     haptics: Haptics,
+    audioPlayer: AudioPlayer?,
 ) {
     AnimatedVisibility(
         visible = viewModel.showContent,
@@ -267,6 +275,7 @@ private fun TypingModeBar(
                         mode = mode,
                         title = mode.name.toUpperCase(Locale.current),
                         haptics = haptics,
+                        audioPlayer = audioPlayer,
                     )
                 }
             }
@@ -289,7 +298,7 @@ private fun TypingModeBar(
                                 title = "${time}s",
                                 isSelected = viewModel.selectedTime == time,
                                 onClick = {
-                                    haptics.wrap {
+                                    haptics.wrap(audioPlayer = audioPlayer) {
                                         viewModel.selectedTime = time
                                     }
                                 }
@@ -302,7 +311,7 @@ private fun TypingModeBar(
                                 title = count.toString(),
                                 isSelected = viewModel.selectedWords == count,
                                 onClick = {
-                                    haptics.wrap {
+                                    haptics.wrap(audioPlayer) {
                                         viewModel.selectedWords = count
                                     }
                                 }
@@ -323,10 +332,11 @@ private fun ScreenSelectionButton(
     mode: TypingMode,
     title: String,
     haptics: Haptics,
+    audioPlayer: AudioPlayer?,
 ) {
     Button(
         onClick = {
-            haptics.wrap {
+            haptics.wrap(audioPlayer = audioPlayer) {
                 coroutineScope.launch {
                     pagerState.animateScrollToPage(mode.ordinal)
                 }

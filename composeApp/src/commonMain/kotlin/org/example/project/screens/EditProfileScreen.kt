@@ -2,7 +2,6 @@ package org.example.project.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,12 +49,17 @@ import compose.icons.feathericons.Check
 import compose.icons.feathericons.Smile
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.UserProfile
+import org.example.project.ui.LocalAudioPlayer
 import org.example.project.ui.LocalHaptics
 import org.example.project.ui.hapticClickable
+import org.example.project.ui.wrap
+import org.example.project.utils.AudioPlayer
+import org.example.project.utils.SoundEffect
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun EditProfileScreen(
+    audioPlayer: AudioPlayer? = null,
     userProfile: UserProfile,
     onSaveClicked: (UserProfile) -> Unit = {},
     onBackClicked: () -> Unit = {},
@@ -83,7 +87,10 @@ fun EditProfileScreen(
                     .weight(1f),
             ) {
                 // Header
-                TopHeaderBar(onBackClicked)
+                TopHeaderBar(
+                    audioPlayer,
+                    onBackClicked
+                )
 
                 Spacer(Modifier.height(20.dp))
 
@@ -137,6 +144,7 @@ fun EditProfileScreen(
 
             // Action Buttons
             DoubleActionButton(
+                audioPlayer = audioPlayer,
                 onSaveClicked = onSaveClicked,
                 onBackClicked = onBackClicked,
                 userProfile = userProfile,
@@ -153,6 +161,7 @@ fun EditProfileScreen(
 
 @Composable
 private fun TopHeaderBar(
+    audioPlayer: AudioPlayer?,
     onBackClicked: () -> Unit,
 ) {
     Box(
@@ -161,7 +170,10 @@ private fun TopHeaderBar(
         Row(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .clickable { onBackClicked() },
+                .hapticClickable {
+                    audioPlayer?.play(SoundEffect.BUTTON_CLICK)
+                    onBackClicked()
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -257,6 +269,7 @@ private fun AvatarProfileIcon(
 
 @Composable
 private fun DoubleActionButton(
+    audioPlayer: AudioPlayer?,
     onSaveClicked: (UserProfile) -> Unit,
     onBackClicked: () -> Unit,
     userProfile: UserProfile,
@@ -265,6 +278,7 @@ private fun DoubleActionButton(
     email: String,
     bio: String
 ) {
+    val haptics = LocalHaptics.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -272,7 +286,11 @@ private fun DoubleActionButton(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         OutlinedButton(
-            onClick = { onBackClicked() },
+            onClick = {
+                haptics.wrap(audioPlayer) {
+                    onBackClicked()
+                }
+            },
             modifier = Modifier
                 .weight(1f)
                 .height(56.dp),
@@ -295,14 +313,16 @@ private fun DoubleActionButton(
 
         Button(
             onClick = {
-                onSaveClicked(
-                    userProfile.copy(
-                        username = username,
-                        displayName = displayName,
-                        email = email,
-                        bio = bio
+                haptics.wrap(audioPlayer) {
+                    onSaveClicked(
+                        userProfile.copy(
+                            username = username,
+                            displayName = displayName,
+                            email = email,
+                            bio = bio
+                        )
                     )
-                )
+                }
             },
             modifier = Modifier
                 .weight(1f)
@@ -395,7 +415,8 @@ private fun EditField(
 @Composable
 private fun EditProfileScreenPreview() {
     CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics
+        LocalHaptics provides PreviewHaptics,
+        LocalAudioPlayer provides PreviewAudioPlayer,
     ) {
         MobileTypistTheme(darkTheme = true) {
             EditProfileScreen(
@@ -411,7 +432,8 @@ private fun EditProfileScreenPreview() {
 @Composable
 private fun EditProfileScreenLightPreview() {
     CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics
+        LocalHaptics provides PreviewHaptics,
+        LocalAudioPlayer provides PreviewAudioPlayer,
     ) {
         MobileTypistTheme(darkTheme = false) {
             EditProfileScreen(

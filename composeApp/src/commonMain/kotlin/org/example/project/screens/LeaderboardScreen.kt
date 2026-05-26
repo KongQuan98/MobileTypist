@@ -294,6 +294,8 @@ private fun PodiumPosition(
             textAlign = TextAlign.Center
         )
 
+        Spacer(Modifier.height(4.dp))
+
         Row(verticalAlignment = Alignment.Bottom) {
             Text(
                 text = entry.wpm.toString(),

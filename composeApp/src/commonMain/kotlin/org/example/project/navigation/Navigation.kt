@@ -23,12 +23,14 @@ import org.example.project.screens.SettingsScreenAction
 import org.example.project.screens.StatisticsScreen
 import org.example.project.screens.StatisticsScreenState
 import org.example.project.ui.MainScaffold
+import org.example.project.utils.AudioPlayer
 
 @Composable
 fun Navigation(
     navigationManager: NavigationManager,
     storageManager: StorageManager,
     appSettings: AppSettings,
+    audioPlayer: AudioPlayer,
     modifier: Modifier = Modifier
 ) {
     // Handle platform back button (Android) - no-op on iOS
@@ -55,12 +57,16 @@ fun Navigation(
         }
     }
 
-    MainScaffold(navigationManager = navigationManager) { scaffoldModifier ->
+    MainScaffold(
+        navigationManager = navigationManager,
+        audioPlayer = audioPlayer,
+    ) { scaffoldModifier ->
         when (currentScreen) {
             is Screen.Home -> {
                 HomeScreen(
                     navigationManager = navigationManager,
                     storageManager = storageManager,
+                    audioPlayer = audioPlayer,
                     modifier = modifier.then(scaffoldModifier)
                 )
             }
@@ -89,6 +95,7 @@ fun Navigation(
                         }
                     },
                     appSettings = appSettings,
+                    audioPlayer = audioPlayer,
                     modifier = modifier.then(scaffoldModifier)
                 )
             }
@@ -141,6 +148,7 @@ fun Navigation(
 
             is Screen.EditProfile -> {
                 EditProfileScreen(
+                    audioPlayer = audioPlayer,
                     userProfile = userProfile,
                     onSaveClicked = { updatedProfile ->
                         storageManager.saveUserProfile(updatedProfile)

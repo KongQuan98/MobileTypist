@@ -27,6 +27,7 @@ import org.example.project.navigation.NavigationManager
 import org.example.project.navigation.model.BottomNavigationTab
 import org.example.project.navigation.model.Screen
 import org.example.project.screens.SettingsScreen
+import org.example.project.utils.AudioPlayer
 import org.example.project.utils.isIOS
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -35,6 +36,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun MainScaffold(
     navigationManager: NavigationManager,
+    audioPlayer: AudioPlayer? = null,
     content: @Composable (Modifier) -> Unit
 ) {
     val currentScreen = navigationManager.currentScreen
@@ -55,6 +57,7 @@ fun MainScaffold(
                 BottomNavigation(
                     currentScreen = currentScreen,
                     navigationManager = navigationManager,
+                    audioPlayer = audioPlayer,
                 )
             }
         }
@@ -76,6 +79,7 @@ fun MainScaffold(
 private fun BottomNavigation(
     currentScreen: Screen,
     navigationManager: NavigationManager,
+    audioPlayer: AudioPlayer?,
 ) {
     val haptics = LocalHaptics.current
 
@@ -88,7 +92,7 @@ private fun BottomNavigation(
             NavigationBarItem(
                 modifier = Modifier.padding(horizontal = 6.dp),
                 selected = currentScreen == tab.screenRoute,
-                onClick = { haptics.wrap { navigationManager.navigateTo(tab.screenRoute) } },
+                onClick = { haptics.wrap(audioPlayer) { navigationManager.navigateTo(tab.screenRoute) } },
                 icon = { Icon(tab.icon, contentDescription = stringResource(tab.title)) },
                 label = {
                     Text(

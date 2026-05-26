@@ -20,8 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -53,6 +51,7 @@ import org.example.project.data.model.AchievementRepository
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
+import org.example.project.ui.LocalAudioPlayer
 import org.example.project.ui.LocalHaptics
 import org.example.project.ui.hapticClickable
 import org.example.project.utils.formatDate
@@ -90,10 +89,17 @@ fun ProfileScreen(
         0
     }
 
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val borderColor =
-        if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+    val editProfileInteractionSource = remember { MutableInteractionSource() }
+    val viewMoreAchievementInteractionSource = remember { MutableInteractionSource() }
+    val isEditProfilePressed by editProfileInteractionSource.collectIsPressedAsState()
+    val isViewMoreAchievementPressed by viewMoreAchievementInteractionSource.collectIsPressedAsState()
+
+    val editProfileBorderColor =
+        if (isEditProfilePressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+            alpha = 0.3f
+        )
+    val viewMoreAchievementBorderColor =
+        if (isViewMoreAchievementPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
             alpha = 0.3f
         )
 
@@ -164,12 +170,12 @@ fun ProfileScreen(
                     modifier = Modifier
                         .border(
                             1.dp,
-                            borderColor,
+                            editProfileBorderColor,
                             RoundedCornerShape(8.dp)
                         )
                         .clip(RoundedCornerShape(8.dp))
                         .hapticClickable(
-                            interactionSource = interactionSource,
+                            interactionSource = editProfileInteractionSource,
                             onClick = onEditProfileClicked
                         ),
                     verticalAlignment = Alignment.CenterVertically
@@ -202,8 +208,6 @@ fun ProfileScreen(
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
                 )
-
-                Spacer(Modifier.height(20.dp))
             }
 
             LazyColumn(
@@ -331,21 +335,32 @@ fun ProfileScreen(
 
                         Spacer(Modifier.height(24.dp))
 
-                        Button(
-                            onClick = onViewMoreAchievements,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = MaterialTheme.colorScheme.onSurface
-                            ),
-                            shape = RoundedCornerShape(8.dp)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(
+                                    1.dp,
+                                    viewMoreAchievementBorderColor,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clip(RoundedCornerShape(8.dp))
+                                .hapticClickable(
+                                    interactionSource = viewMoreAchievementInteractionSource,
+                                    onClick = onViewMoreAchievements
+                                ),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = "view more achievements",
                                 style = TextStyle(
                                     fontSize = 14.sp,
-                                    fontFamily = FontFamily.Monospace
-                                )
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontFamily = FontFamily.Monospace,
+                                    textAlign = TextAlign.Center,
+                                ),
+                                modifier = Modifier
+                                    .padding(vertical = 8.dp)
+                                    .fillMaxWidth(),
                             )
                         }
 
@@ -383,7 +398,7 @@ fun ProfileScreen(
                         )
                     }
                 } else {
-                    items(results.reversed()) { result ->
+                    items(results) { result ->
                         ProfileResultItem(result)
                         Spacer(Modifier.height(8.dp))
                     }
@@ -633,7 +648,8 @@ private fun ProfileScreenPreviewDark() {
     )
 
     CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics
+        LocalHaptics provides PreviewHaptics,
+        LocalAudioPlayer provides PreviewAudioPlayer,
     ) {
         MobileTypistTheme(darkTheme = true) {
             ProfileScreen(
@@ -687,7 +703,8 @@ private fun ProfileScreenPreview() {
     )
 
     CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics
+        LocalHaptics provides PreviewHaptics,
+        LocalAudioPlayer provides PreviewAudioPlayer,
     ) {
         MobileTypistTheme(darkTheme = false) {
             ProfileScreen(

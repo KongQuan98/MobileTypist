@@ -14,7 +14,9 @@ import org.example.project.data.storage.createSettings
 import org.example.project.navigation.Navigation
 import org.example.project.navigation.model.Screen
 import org.example.project.navigation.rememberNavigationManager
+import org.example.project.ui.LocalAudioPlayer
 import org.example.project.ui.LocalHaptics
+import org.example.project.utils.AudioPlayer
 import org.example.project.utils.TypingHapticFeedback
 
 @Composable
@@ -30,11 +32,6 @@ fun App(
         StorageManager(settings = createSettings())
     }
 
-    // Observe changes and notify the native platform
-    LaunchedEffect(navigationManager.showBottomBar) {
-        onToggleTabBar?.invoke(navigationManager.showBottomBar)
-    }
-
     // Load theme from settings and manage state
     val settingState by storageManager.settingsFlow.collectAsState()
 
@@ -44,14 +41,29 @@ fun App(
         )
     }
 
+    // Load AudioPlayer for click sound effect
+    val audioPlayer = remember {
+        AudioPlayer(
+            isEnabled = { settingState.soundEnabled }
+        )
+    }
+
+    // Observe changes and notify the native platform
+    LaunchedEffect(navigationManager.showBottomBar) {
+        onToggleTabBar?.invoke(navigationManager.showBottomBar)
+        audioPlayer.preload()
+    }
+
     MobileTypistTheme(darkTheme = settingState.darkTheme) {
         CompositionLocalProvider(
-            LocalHaptics provides haptics
+            LocalHaptics provides haptics,
+            LocalAudioPlayer provides audioPlayer
         ) {
             Navigation(
                 navigationManager = navigationManager,
                 storageManager = storageManager,
                 appSettings = settingState,
+                audioPlayer = audioPlayer,
                 modifier = Modifier
                     .fillMaxSize()
                     .safeDrawingPadding()

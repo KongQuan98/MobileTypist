@@ -104,7 +104,10 @@ fun TypingScreenContent(
             errorCount = viewModel.errorCount,
             selectedTime = viewModel.selectedTime,
             wpmHistory = viewModel.wpmHistory,
-            onReset = { viewModel.resetTest() },
+            onReset = {
+                viewModel.resetTest()
+                viewModel.startTest()
+            },
             onBack = { onBack() },
             onTestComplete = onTestComplete,
         )

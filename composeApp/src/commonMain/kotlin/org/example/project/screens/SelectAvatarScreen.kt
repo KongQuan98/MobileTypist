@@ -52,6 +52,7 @@ import compose.icons.feathericons.Lock
 import org.example.project.MobileTypistTheme
 import org.example.project.data.repo.Avatar
 import org.example.project.data.repo.AvatarRepository
+import org.example.project.ui.LocalAudioPlayer
 import org.example.project.ui.LocalHaptics
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -317,7 +318,10 @@ private fun AvatarGridItem(
 @Preview
 @Composable
 private fun SelectAvatarScreenPreview() {
-    CompositionLocalProvider(LocalHaptics provides PreviewHaptics) {
+    CompositionLocalProvider(
+        LocalHaptics provides PreviewHaptics,
+        LocalAudioPlayer provides PreviewAudioPlayer,
+    ) {
         MobileTypistTheme(darkTheme = true) {
             SelectAvatarScreen(
                 currentAvatarId = "monkey",

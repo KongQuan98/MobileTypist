@@ -37,9 +37,11 @@ import mobiletypist.composeapp.generated.resources.settings_title
 import mobiletypist.composeapp.generated.resources.version
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.AppSettings
+import org.example.project.ui.LocalAudioPlayer
 import org.example.project.ui.LocalHaptics
 import org.example.project.ui.hapticClickable
 import org.example.project.ui.wrap
+import org.example.project.utils.AudioPlayer
 import org.example.project.utils.Haptics
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -54,6 +56,7 @@ sealed interface SettingsScreenAction {
 fun SettingsScreen(
     action: (SettingsScreenAction) -> Unit = {},
     appSettings: AppSettings = AppSettings(),
+    audioPlayer: AudioPlayer? = null,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -102,6 +105,7 @@ fun SettingsScreen(
                 SettingToggleRow(
                     label = "dark theme",
                     checked = appSettings.darkTheme,
+                    audioPlayer = audioPlayer,
                     onCheckedChange = {
                         action(SettingsScreenAction.SaveSettings(appSettings.copy(darkTheme = it)))
                     }
@@ -115,6 +119,7 @@ fun SettingsScreen(
                 SettingToggleRow(
                     label = "sound effects",
                     checked = appSettings.soundEnabled,
+                    audioPlayer = audioPlayer,
                     onCheckedChange = {
                         action(SettingsScreenAction.SaveSettings(appSettings.copy(soundEnabled = it)))
                     }
@@ -123,6 +128,7 @@ fun SettingsScreen(
                 SettingToggleRow(
                     label = "haptic feedback",
                     checked = appSettings.vibrationEnabled,
+                    audioPlayer = audioPlayer,
                     onCheckedChange = {
                         action(SettingsScreenAction.SaveSettings(appSettings.copy(vibrationEnabled = it)))
                     }
@@ -256,6 +262,7 @@ private fun SettingNavRow(label: String, value: String) {
 private fun SettingToggleRow(
     label: String,
     checked: Boolean,
+    audioPlayer: AudioPlayer?,
     onCheckedChange: (Boolean) -> Unit
 ) {
     val haptics = LocalHaptics.current
@@ -277,7 +284,7 @@ private fun SettingToggleRow(
         Switch(
             checked = checked,
             onCheckedChange = {
-                haptics.wrap {
+                haptics.wrap(audioPlayer) {
                     onCheckedChange(it)
                 }
             },
@@ -301,7 +308,8 @@ private fun SettingToggleRow(
 @Composable
 private fun SettingsScreenPreview() {
     CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics
+        LocalHaptics provides PreviewHaptics,
+        LocalAudioPlayer provides PreviewAudioPlayer,
     ) {
         MobileTypistTheme(darkTheme = false) {
             SettingsScreen()
@@ -313,7 +321,8 @@ private fun SettingsScreenPreview() {
 @Composable
 private fun SettingsScreenPreviewDarkTheme() {
     CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics
+        LocalHaptics provides PreviewHaptics,
+        LocalAudioPlayer provides PreviewAudioPlayer,
     ) {
         MobileTypistTheme(darkTheme = true) {
             SettingsScreen()
@@ -328,3 +337,7 @@ object PreviewHaptics : Haptics {
     override fun notificationSuccess() {}
     override fun selectionChange() {}
 }
+
+object PreviewAudioPlayer : AudioPlayer(
+    isEnabled = { true }
+)
