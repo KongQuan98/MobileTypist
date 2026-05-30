@@ -1,8 +1,11 @@
 package org.example.project.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Award
+import kotlinx.coroutines.delay
 import org.example.project.MobileTypistTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -199,14 +203,37 @@ fun LeaderboardScreen(
                         .weight(listWeight),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    itemsIndexed(entries.drop(3)) { index, entry ->
-                        LeaderboardListItem(rank = index + 4, entry = entry)
+                    itemsIndexed(
+                        items = entries.drop(3)
+                    ) { index, entry ->
+                        var visible by remember {
+                            mutableStateOf(false)
+                        }
 
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-                        )
+                        LaunchedEffect(Unit) {
+                            delay(index * 50L)
+                            visible = true
+                        }
+
+                        AnimatedVisibility(
+                            visible = visible,
+                            enter = fadeIn() + slideInVertically(
+                                initialOffsetY = { it / 2 }
+                            )
+                        ) {
+                            Column {
+                                LeaderboardListItem(
+                                    rank = index + 4,
+                                    entry = entry
+                                )
+
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                                )
+                            }
+                        }
                     }
                 }
             }

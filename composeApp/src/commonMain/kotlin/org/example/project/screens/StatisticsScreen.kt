@@ -1,19 +1,23 @@
 package org.example.project.screens
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -24,13 +28,15 @@ import mobiletypist.composeapp.generated.resources.statistics_title
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
+import org.example.project.ui.shimmerEffect
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class StatisticsScreenState(
     val results: List<TypingTestResult> = emptyList(),
     val bestWpm: Int = 0,
-    val totalTests: Int = 0
+    val totalTests: Int = 0,
+    val isLoading: Boolean = false
 )
 
 @Composable
@@ -42,11 +48,18 @@ fun StatisticsScreen(
     val results = statisticsScreenState.results
     val bestWpm = statisticsScreenState.bestWpm
     val totalTests = statisticsScreenState.totalTests
+    val isLoading = statisticsScreenState.isLoading
 
     val avgWpm = if (results.isNotEmpty()) results.map { it.wpm }.average().toInt() else 0
     val totalSeconds = results.sumOf { it.duration }
     val hoursTyped = totalSeconds / 3600
     val minutesTyped = (totalSeconds % 3600) / 60
+
+    // Animation trigger
+    var startAnimation by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        startAnimation = true
+    }
 
     LaunchedEffect(Unit) {
         refreshData.invoke()
@@ -84,33 +97,77 @@ fun StatisticsScreen(
                 // Summary Stats Grid
                 item {
                     Spacer(Modifier.height(20.dp))
+                    val animatedAvgWpm by animateFloatAsState(
+                        targetValue = if (startAnimation) avgWpm.toFloat() else 0f,
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            delayMillis = 0,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                    val animatedBestWpm by animateFloatAsState(
+                        targetValue = if (startAnimation) bestWpm.toFloat() else 0f,
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            delayMillis = 0,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                    val animatedTotalTests by animateFloatAsState(
+                        targetValue = if (startAnimation) totalTests.toFloat() else 0f,
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            delayMillis = 0,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                    val animatedHoursTyped by animateFloatAsState(
+                        targetValue = if (startAnimation) hoursTyped.toFloat() else 0f,
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            delayMillis = 0,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                    val animatedMinutesTyped by animateFloatAsState(
+                        targetValue = if (startAnimation) minutesTyped.toFloat() else 0f,
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            delayMillis = 0,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatCard(
                                 label = "AVG WPM",
-                                value = avgWpm.toString(),
+                                value = animatedAvgWpm.toInt().toString(),
                                 textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f),
+                                isLoading = isLoading
                             )
                             StatCard(
                                 label = "BEST WPM",
-                                value = bestWpm.toString(),
+                                value = animatedBestWpm.toInt().toString(),
                                 textColor = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.weight(1f),
+                                isLoading = isLoading
                             )
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatCard(
                                 label = "TIME TYPED",
-                                value = "${hoursTyped}h ${minutesTyped}m",
+                                value = "${animatedHoursTyped.toInt()}h ${animatedMinutesTyped.toInt()}m",
                                 textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f),
+                                isLoading = isLoading
                             )
                             StatCard(
                                 label = "TESTS",
-                                value = totalTests.toString(),
+                                value = animatedTotalTests.toInt().toString(),
                                 textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f),
+                                isLoading = isLoading
                             )
                         }
                     }
@@ -132,7 +189,10 @@ fun StatisticsScreen(
                 item {
                     StatSectionLabel("ACCURACY DISTRIBUTION")
                     Spacer(Modifier.height(16.dp))
-                    AccuracyDistribution(results)
+                    AccuracyDistribution(
+                        results = results,
+                        startAnimation = startAnimation,
+                    )
                     Spacer(Modifier.height(40.dp))
                 }
 
@@ -154,6 +214,7 @@ private fun StatCard(
     value: String,
     textColor: Color,
     modifier: Modifier,
+    isLoading: Boolean = false,
 ) {
     Column(
         modifier = modifier
@@ -172,20 +233,40 @@ private fun StatCard(
             )
         )
         Spacer(Modifier.height(8.dp))
-        Text(
-            text = value,
-            style = TextStyle(
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                fontFamily = FontFamily.Monospace
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+                    .height(28.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmerEffect()
             )
-        )
+        } else {
+            Text(
+                text = value,
+                style = TextStyle(
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor,
+                    fontFamily = FontFamily.Monospace
+                )
+            )
+        }
     }
 }
 
 @Composable
 private fun WpmHistoryGraph(data: List<Int>, yellow: Color) {
+    val animationProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(data) {
+        animationProgress.snapTo(0f)
+        animationProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing)
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -198,27 +279,30 @@ private fun WpmHistoryGraph(data: List<Int>, yellow: Color) {
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             if (data.size < 2) return@Canvas
-            val max = data.maxOrNull()?.coerceAtLeast(1) ?: 1
-            val stepX = size.width / (data.size - 1)
 
-            val path = Path().apply {
+            clipRect(right = size.width * animationProgress.value) {
+                val max = data.maxOrNull()?.coerceAtLeast(1) ?: 1
+                val stepX = size.width / (data.size - 1)
+
+                val path = Path().apply {
+                    data.forEachIndexed { index, value ->
+                        val x = index * stepX
+                        val y = size.height - (value.toFloat() / max * size.height)
+                        if (index == 0) moveTo(x, y) else lineTo(x, y)
+                    }
+                }
+                drawPath(path = path, color = yellow, style = Stroke(width = 3.dp.toPx()))
+
+                // Draw points
                 data.forEachIndexed { index, value ->
                     val x = index * stepX
                     val y = size.height - (value.toFloat() / max * size.height)
-                    if (index == 0) moveTo(x, y) else lineTo(x, y)
+                    drawCircle(
+                        color = yellow,
+                        radius = 4.dp.toPx(),
+                        center = androidx.compose.ui.geometry.Offset(x, y)
+                    )
                 }
-            }
-            drawPath(path = path, color = yellow, style = Stroke(width = 3.dp.toPx()))
-
-            // Draw points
-            data.forEachIndexed { index, value ->
-                val x = index * stepX
-                val y = size.height - (value.toFloat() / max * size.height)
-                drawCircle(
-                    color = yellow,
-                    radius = 4.dp.toPx(),
-                    center = androidx.compose.ui.geometry.Offset(x, y)
-                )
             }
         }
     }
@@ -227,6 +311,7 @@ private fun WpmHistoryGraph(data: List<Int>, yellow: Color) {
 @Composable
 private fun AccuracyDistribution(
     results: List<TypingTestResult>,
+    startAnimation: Boolean,
 ) {
     val brackets = listOf("98-100%", "95-98%", "90-95%", "< 90%")
     val counts = brackets.map { 0 }.toMutableList()
@@ -244,7 +329,16 @@ private fun AccuracyDistribution(
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         brackets.forEachIndexed { index, label ->
-            val percent = (counts[index].toFloat() / total * 100).toInt()
+            val targetPercent = counts[index].toFloat() / total
+            val animatedPercent by animateFloatAsState(
+                targetValue = if (startAnimation) targetPercent else 0f,
+                animationSpec = tween(
+                    durationMillis = 1000,
+                    delayMillis = index * 100,
+                    easing = FastOutSlowInEasing
+                )
+            )
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = label,
@@ -263,7 +357,7 @@ private fun AccuracyDistribution(
                         )
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth(percent / 100f).fillMaxHeight()
+                        modifier = Modifier.fillMaxWidth(animatedPercent).fillMaxHeight()
                             .background(
                                 MaterialTheme.colorScheme.primary,
                                 RoundedCornerShape(4.dp)
@@ -271,7 +365,7 @@ private fun AccuracyDistribution(
                     )
                 }
                 Text(
-                    text = "$percent%",
+                    text = "${(targetPercent * 100).toInt()}%",
                     modifier = Modifier.padding(start = 12.dp),
                     style = TextStyle(
                         fontSize = 12.sp,
@@ -362,6 +456,7 @@ private fun StatisticsScreenPreview() {
         ),
         bestWpm = 50,
         totalTests = 25,
+        isLoading = false
     )
 
     MobileTypistTheme(darkTheme = false) {
@@ -373,10 +468,10 @@ private fun StatisticsScreenPreview() {
 
 @Preview
 @Composable
-private fun StatisticsScreenPreviewDarkTheme() {
+private fun StatisticsScreenLoadingPreview() {
     MobileTypistTheme(darkTheme = true) {
         StatisticsScreen(
-            statisticsScreenState = StatisticsScreenState()
+            statisticsScreenState = StatisticsScreenState(isLoading = true)
         )
     }
 }

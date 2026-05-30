@@ -1,5 +1,12 @@
 package org.example.project.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,7 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -30,12 +37,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Edit3
+import kotlinx.coroutines.delay
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.Achievement
 import org.example.project.data.model.AchievementRepository
@@ -102,6 +113,11 @@ fun ProfileScreen(
         if (isViewMoreAchievementPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
             alpha = 0.3f
         )
+
+    var startAnimation by remember { mutableStateOf(false) }
+    LaunchedEffect(startAnimation) {
+        startAnimation = true
+    }
 
     LaunchedEffect(Unit) {
         refreshData.invoke()
@@ -248,42 +264,15 @@ fun ProfileScreen(
 
                 // Global Accuracy
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "global accuracy",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontFamily = FontFamily.Monospace
-                            )
+                    val animatedAverageAccuracy by animateFloatAsState(
+                        targetValue = if (startAnimation) averageAccuracy.toFloat() else 0f,
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            delayMillis = 0,
+                            easing = FastOutSlowInEasing
                         )
-
-                        Spacer(Modifier.height(16.dp))
-
-                        Text(
-                            text = "$averageAccuracy%",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
-                            )
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    LinearProgressIndicator(
-                        progress = { averageAccuracy / 100f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.background
                     )
-
+                    GlobalAccuracyBar(animatedAverageAccuracy)
                     Spacer(Modifier.height(40.dp))
                 }
 
@@ -296,7 +285,7 @@ fun ProfileScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "ACHIEVEMENTS",
+                                text = "achievements",
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
@@ -372,7 +361,7 @@ fun ProfileScreen(
                 item {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = "RECENT TESTS (${results.size})",
+                            text = "recent tests (${results.size})",
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
@@ -398,9 +387,25 @@ fun ProfileScreen(
                         )
                     }
                 } else {
-                    items(results) { result ->
-                        ProfileResultItem(result)
-                        Spacer(Modifier.height(8.dp))
+                    itemsIndexed(results) { index, result ->
+                        var visible by remember {
+                            mutableStateOf(false)
+                        }
+
+                        LaunchedEffect(Unit) {
+                            delay(index * 50L)
+                            visible = true
+                        }
+
+                        AnimatedVisibility(
+                            visible = visible,
+                            enter = fadeIn() + slideInVertically(
+                                initialOffsetY = { it / 2 }
+                            )
+                        ) {
+                            ProfileResultItem(result)
+                            Spacer(Modifier.height(8.dp))
+                        }
                     }
                 }
             }
@@ -484,6 +489,19 @@ private fun StatBox(
     color: Color,
     modifier: Modifier = Modifier
 ) {
+    val scale = remember { Animatable(1f) }
+
+    LaunchedEffect(value) {
+        scale.animateTo(
+            targetValue = 1.3f,
+            animationSpec = tween(200)
+        )
+        scale.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(200)
+        )
+    }
+
     Column(
         modifier = modifier
             .background(
@@ -509,9 +527,54 @@ private fun StatBox(
                 fontWeight = FontWeight.Bold,
                 color = color,
                 fontFamily = FontFamily.Monospace
+            ),
+            modifier = Modifier.graphicsLayer {
+                scaleX = scale.value
+                scaleY = scale.value
+            }
+        )
+    }
+}
+
+@Composable
+private fun GlobalAccuracyBar(
+    averageAccuracy: Float,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "global accuracy",
+            style = TextStyle(
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontFamily = FontFamily.Monospace
+            )
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = "${averageAccuracy.toInt()}%",
+            style = TextStyle(
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
             )
         )
     }
+    Spacer(Modifier.height(8.dp))
+    LinearProgressIndicator(
+        progress = { averageAccuracy / 100f },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(8.dp)
+            .clip(RoundedCornerShape(4.dp)),
+        color = MaterialTheme.colorScheme.primary,
+        trackColor = MaterialTheme.colorScheme.background
+    )
 }
 
 @Composable
