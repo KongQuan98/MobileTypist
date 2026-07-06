@@ -48,6 +48,9 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
     // Data for the graph
     val wpmHistory = mutableStateListOf<Int>()
 
+    var completedResult by mutableStateOf<TypingTestResult?>(null)
+        private set
+
     private var timerJob: Job? = null
     private var startTime by mutableStateOf(0L)
     var targetText = ""
@@ -145,6 +148,7 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
         timerJob?.cancel()
         isRunning = false
         isFinished = false
+        completedResult = null
         input = ""
         correctCount = 0
         errorCount = 0
@@ -180,6 +184,24 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
         if (wpmHistory.isEmpty() || wpmHistory.last() != currentWpm) {
             wpmHistory.add(currentWpm)
         }
+
+        val finishedAt = Clock.System.now().toEpochMilliseconds()
+        val durationSeconds = elapsedSeconds(finishedAt)
+        completedResult = TypingTestResult(
+            mode = mode,
+            wpm = calculateWpm(correctCount, durationSeconds),
+            accuracy = calculateAccuracy(correctCount, errorCount),
+            correctChars = correctCount,
+            errorCount = errorCount,
+            timestamp = finishedAt,
+            duration = durationSeconds,
+            wordsTyped = correctCount / 5,
+        )
+    }
+
+    private fun elapsedSeconds(finishedAt: Long): Int {
+        if (startTime <= 0L) return 0
+        return ((finishedAt - startTime) / 1000).toInt().coerceAtLeast(1)
     }
 
     private fun calculateWpm(correctChars: Int, elapsedSeconds: Int): Int {

@@ -25,6 +25,7 @@ runner = "1.5.2"
 core = "1.5.0"
 multiplatformSettings = "1.2.0"
 kotlinxSerialization = "1.7.3"
+kotlinxDatetime = "0.6.2"
 
 [libraries]
 backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
@@ -54,6 +55,7 @@ lottie-compose-multiplatform = { module = "io.github.alexzhirkevich:lottie-compo
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
 multiplatform-settings-no-arg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

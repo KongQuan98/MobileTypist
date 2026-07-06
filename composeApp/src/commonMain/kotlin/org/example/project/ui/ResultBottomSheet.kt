@@ -42,31 +42,13 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun ResultBottomSheet(
     visible: Boolean,
-    correctCount: Int,
-    errorCount: Int,
-    selectedTime: Int,
+    result: TypingTestResult,
     wpmHistory: List<Int>,
     onReset: () -> Unit,
     onBack: () -> Unit = {},
-    onTestComplete: (TypingTestResult) -> Unit = {},
 ) {
-    // drawPath need Color
     val yellow = Color(0xFFe2b714)
-
-    val wpm = calculateWpm(correctCount, selectedTime)
-    val accuracy = calculateAccuracy(correctCount, errorCount)
-    val keystrokes = correctCount + errorCount
-
-    onTestComplete(
-        TypingTestResult(
-            wpm = wpm,
-            accuracy = accuracy,
-            correctChars = correctCount,
-            errorCount = errorCount,
-            wordsTyped = keystrokes,
-            mode = TypingMode.TIME
-        )
-    )
+    val keystrokes = result.correctChars + result.errorCount
 
     AnimatedVisibility(
         visible = visible,
@@ -89,7 +71,7 @@ fun ResultBottomSheet(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = wpm.toString(), style = TextStyle(
+                        text = result.wpm.toString(), style = TextStyle(
                             fontSize = 60.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
@@ -107,7 +89,6 @@ fun ResultBottomSheet(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // Dynamic Performance Graph
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -157,17 +138,17 @@ fun ResultBottomSheet(
                     ) {
                         StatItem(
                             label = "ACCURACY",
-                            value = "$accuracy%",
+                            value = "${result.accuracy}%",
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         StatItem(
                             label = "CORRECT",
-                            value = correctCount.toString(),
+                            value = result.correctChars.toString(),
                             color = MaterialTheme.colorScheme.primary
                         )
                         StatItem(
                             label = "ERRORS",
-                            value = errorCount.toString(),
+                            value = result.errorCount.toString(),
                             color = MaterialTheme.colorScheme.error
                         )
                     }
@@ -259,28 +240,21 @@ private fun StatItem(label: String, value: String, color: Color) {
     }
 }
 
-private fun calculateWpm(correctChars: Int, elapsedSeconds: Int): Int {
-    if (elapsedSeconds <= 0) return 0
-    val words = correctChars / 5.0
-    val minutes = elapsedSeconds / 60.0
-    return kotlin.math.round(words / minutes).toInt()
-}
-
-private fun calculateAccuracy(correct: Int, errors: Int): Int {
-    val total = correct + errors
-    if (total == 0) return 100
-    return kotlin.math.round((correct.toDouble() / total.toDouble()) * 100.0).toInt()
-}
-
 @Preview
 @Composable
 private fun PreviewRealGraphDarkTheme() {
     _root_ide_package_.org.example.project.MobileTypistTheme(darkTheme = true) {
         ResultBottomSheet(
             visible = true,
-            correctCount = 100,
-            errorCount = 5,
-            selectedTime = 10,
+            result = TypingTestResult(
+                mode = TypingMode.TIME,
+                wpm = 75,
+                accuracy = 95,
+                correctChars = 100,
+                errorCount = 5,
+                timestamp = 1_700_000_000_000L,
+                duration = 60,
+            ),
             wpmHistory = listOf(30, 45, 40, 55, 60, 58, 65, 70, 68, 75),
             onReset = { },
         )
@@ -293,9 +267,15 @@ private fun PreviewRealGraph() {
     _root_ide_package_.org.example.project.MobileTypistTheme(darkTheme = false) {
         ResultBottomSheet(
             visible = true,
-            correctCount = 100,
-            errorCount = 5,
-            selectedTime = 10,
+            result = TypingTestResult(
+                mode = TypingMode.TIME,
+                wpm = 75,
+                accuracy = 95,
+                correctChars = 100,
+                errorCount = 5,
+                timestamp = 1_700_000_000_000L,
+                duration = 60,
+            ),
             wpmHistory = listOf(30, 45, 40, 55, 60, 58, 65, 70, 68, 75),
             onReset = { },
         )

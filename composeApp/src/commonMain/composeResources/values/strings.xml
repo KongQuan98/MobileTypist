@@ -13,6 +13,54 @@
     <string name="home_title">home</string>
     <string name="profile_title">profile</string>
 
+    // statistics heatmap
+    <string name="statistics_activity_title">activity</string>
+    <string name="heatmap_less">less</string>
+    <string name="heatmap_more">more</string>
+    <string name="heatmap_typed_on">%1$s typed on %2$s</string>
+    <string name="heatmap_no_activity">no typing on %1$s</string>
+    <string name="heatmap_month_year">%1$s %2$d</string>
+    <string name="heatmap_day_label">%1$s, %2$s %3$d</string>
+    <string name="heatmap_duration_zero">0s</string>
+    <string name="heatmap_duration_hours">%1$dh %2$dm</string>
+    <string name="heatmap_duration_minutes">%1$dm %2$ds</string>
+    <string name="heatmap_duration_seconds">%1$ds</string>
+    <string name="heatmap_fire_icon">🔥</string>
+    <string name="heatmap_select_month">select month</string>
+    <string name="heatmap_detail_placeholder"> </string>
+
+    // heatmap day headers (short)
+    <string name="heatmap_day_sun">S</string>
+    <string name="heatmap_day_mon">M</string>
+    <string name="heatmap_day_tue">T</string>
+    <string name="heatmap_day_wed">W</string>
+    <string name="heatmap_day_thu">T</string>
+    <string name="heatmap_day_fri">F</string>
+    <string name="heatmap_day_sat">S</string>
+
+    // heatmap day names (full)
+    <string name="heatmap_day_name_sunday">Sunday</string>
+    <string name="heatmap_day_name_monday">Monday</string>
+    <string name="heatmap_day_name_tuesday">Tuesday</string>
+    <string name="heatmap_day_name_wednesday">Wednesday</string>
+    <string name="heatmap_day_name_thursday">Thursday</string>
+    <string name="heatmap_day_name_friday">Friday</string>
+    <string name="heatmap_day_name_saturday">Saturday</string>
+
+    // heatmap months
+    <string name="heatmap_month_january">January</string>
+    <string name="heatmap_month_february">February</string>
+    <string name="heatmap_month_march">March</string>
+    <string name="heatmap_month_april">April</string>
+    <string name="heatmap_month_may">May</string>
+    <string name="heatmap_month_june">June</string>
+    <string name="heatmap_month_july">July</string>
+    <string name="heatmap_month_august">August</string>
+    <string name="heatmap_month_september">September</string>
+    <string name="heatmap_month_october">October</string>
+    <string name="heatmap_month_november">November</string>
+    <string name="heatmap_month_december">December</string>
+
 
     // create account
     <string name="create_account_title">create account</string>

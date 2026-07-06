@@ -8,6 +8,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,10 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.statistics_activity_title
 import mobiletypist.composeapp.generated.resources.statistics_title
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
+import org.example.project.ui.ActivityHeatmap
 import org.example.project.ui.shimmerEffect
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -36,6 +39,7 @@ data class StatisticsScreenState(
     val results: List<TypingTestResult> = emptyList(),
     val bestWpm: Int = 0,
     val totalTests: Int = 0,
+    val dailyActivityDurations: Map<String, Int> = emptyMap(),
     val isLoading: Boolean = false
 )
 
@@ -48,12 +52,13 @@ fun StatisticsScreen(
     val results = statisticsScreenState.results
     val bestWpm = statisticsScreenState.bestWpm
     val totalTests = statisticsScreenState.totalTests
+    val dailyActivityDurations = statisticsScreenState.dailyActivityDurations
     val isLoading = statisticsScreenState.isLoading
 
     val avgWpm = if (results.isNotEmpty()) results.map { it.wpm }.average().toInt() else 0
     val totalSeconds = results.sumOf { it.duration }
-    val hoursTyped = totalSeconds / 3600
     val minutesTyped = (totalSeconds % 3600) / 60
+    val secondsTyped = totalSeconds % 60
 
     // Animation trigger
     var startAnimation by remember { mutableStateOf(false) }
@@ -91,7 +96,15 @@ fun StatisticsScreen(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
             )
 
+            val listState = rememberLazyListState()
+            val isHeatmapVisible by remember {
+                derivedStateOf {
+                    listState.layoutInfo.visibleItemsInfo.any { it.key == "activity_heatmap" }
+                }
+            }
+
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
             ) {
                 // Summary Stats Grid
@@ -121,16 +134,16 @@ fun StatisticsScreen(
                             easing = FastOutSlowInEasing
                         )
                     )
-                    val animatedHoursTyped by animateFloatAsState(
-                        targetValue = if (startAnimation) hoursTyped.toFloat() else 0f,
+                    val animatedMinutesTyped by animateFloatAsState(
+                        targetValue = if (startAnimation) minutesTyped.toFloat() else 0f,
                         animationSpec = tween(
                             durationMillis = 1000,
                             delayMillis = 0,
                             easing = FastOutSlowInEasing
                         )
                     )
-                    val animatedMinutesTyped by animateFloatAsState(
-                        targetValue = if (startAnimation) minutesTyped.toFloat() else 0f,
+                    val animatedSecondsTyped by animateFloatAsState(
+                        targetValue = if (startAnimation) secondsTyped.toFloat() else 0f,
                         animationSpec = tween(
                             durationMillis = 1000,
                             delayMillis = 0,
@@ -157,7 +170,7 @@ fun StatisticsScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatCard(
                                 label = "TIME TYPED",
-                                value = "${animatedHoursTyped.toInt()}h ${animatedMinutesTyped.toInt()}m",
+                                value = "${animatedMinutesTyped.toInt()}m ${animatedSecondsTyped.toInt()}s",
                                 textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f),
                                 isLoading = isLoading
@@ -197,10 +210,23 @@ fun StatisticsScreen(
                 }
 
                 // Activity Heatmap
-                item {
-                    StatSectionLabel("ACTIVITY (30 DAYS)")
+                item(key = "activity_heatmap") {
+                    StatSectionLabel(stringResource(Res.string.statistics_activity_title))
                     Spacer(Modifier.height(16.dp))
-                    ActivityHeatmap()
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(280.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .shimmerEffect(),
+                        )
+                    } else {
+                        ActivityHeatmap(
+                            dailyDurations = dailyActivityDurations,
+                            isVisible = isHeatmapVisible,
+                        )
+                    }
                     Spacer(Modifier.height(40.dp))
                 }
             }
@@ -379,32 +405,6 @@ private fun AccuracyDistribution(
 }
 
 @Composable
-private fun ActivityHeatmap() {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        repeat(4) { rowIndex ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                repeat(7) { colIndex ->
-                    val intensity = (0..10).random() // Mock intensity
-                    val color = when {
-                        intensity > 8 -> MaterialTheme.colorScheme.primary
-                        intensity > 5 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                        intensity > 2 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        else -> MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
-                    }
-                    Box(
-                        modifier = Modifier.weight(1f).aspectRatio(1f)
-                            .clip(RoundedCornerShape(4.dp)).background(color)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun StatSectionLabel(text: String) {
     Text(
         text = text,
@@ -456,6 +456,10 @@ private fun StatisticsScreenPreview() {
         ),
         bestWpm = 50,
         totalTests = 25,
+        dailyActivityDurations = mapOf(
+            "2026-07-01" to 120,
+            "2026-07-05" to 600,
+        ),
         isLoading = false
     )
 

@@ -48,6 +48,7 @@ fun Navigation(
     val results by storageManager.resultsFlow.collectAsState()
     val bestWpm by storageManager.bestWpmFlow.collectAsState()
     val totalTests by storageManager.totalTestsFlow.collectAsState()
+    val dailyActivity by storageManager.dailyActivityFlow.collectAsState()
 
     // Show/Hide bottom bar logic
     LaunchedEffect(currentScreen) {
@@ -77,6 +78,7 @@ fun Navigation(
                         results = results,
                         bestWpm = bestWpm,
                         totalTests = totalTests,
+                        dailyActivityDurations = dailyActivity,
                     ),
                     modifier = modifier.then(scaffoldModifier),
                     refreshData = { storageManager.refreshStats() }

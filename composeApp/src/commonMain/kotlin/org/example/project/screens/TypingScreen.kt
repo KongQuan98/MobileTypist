@@ -98,19 +98,22 @@ fun TypingScreenContent(
     }
 
     if (viewModel.isFinished) {
-        ResultBottomSheet(
-            visible = true,
-            correctCount = viewModel.correctCount,
-            errorCount = viewModel.errorCount,
-            selectedTime = viewModel.selectedTime,
-            wpmHistory = viewModel.wpmHistory,
-            onReset = {
-                viewModel.resetTest()
-                viewModel.startTest()
-            },
-            onBack = { onBack() },
-            onTestComplete = onTestComplete,
-        )
+        viewModel.completedResult?.let { result ->
+            LaunchedEffect(result.id) {
+                onTestComplete(result)
+            }
+
+            ResultBottomSheet(
+                visible = true,
+                result = result,
+                wpmHistory = viewModel.wpmHistory,
+                onReset = {
+                    viewModel.resetTest()
+                    viewModel.startTest()
+                },
+                onBack = { onBack() },
+            )
+        }
     }
 
     Surface(

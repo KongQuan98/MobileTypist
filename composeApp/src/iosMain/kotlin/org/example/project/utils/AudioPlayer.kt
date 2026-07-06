@@ -13,6 +13,7 @@ import platform.CoreFoundation.CFURLRef
 import platform.Foundation.NSBundle
 import platform.Foundation.NSURL
 import platform.darwin.UInt32Var
+import platform.darwin.UInt32 as SystemSoundID
 
 actual open class AudioPlayer actual constructor(
     private val isEnabled: () -> Boolean,

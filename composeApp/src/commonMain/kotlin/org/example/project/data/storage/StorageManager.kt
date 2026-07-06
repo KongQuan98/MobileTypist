@@ -8,8 +8,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.example.project.data.model.AppSettings
+import org.example.project.data.model.DailyActivityDurations
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
+import org.example.project.data.repo.ActivityHeatmapRepository
 
 class StorageManager(private val settings: Settings) {
     private val json = Json { ignoreUnknownKeys = true }
@@ -20,6 +22,7 @@ class StorageManager(private val settings: Settings) {
         private const val KEY_BEST_WPM = "best_wpm"
         private const val KEY_TOTAL_TESTS = "total_tests"
         private const val KEY_USER_PROFILE = "user_profile"
+        private const val KEY_DAILY_ACTIVITY = "daily_activity_durations"
     }
 
     private val _settingsFlow = MutableStateFlow(getSettings())
@@ -38,6 +41,9 @@ class StorageManager(private val settings: Settings) {
     private val _totalTestsFlow = MutableStateFlow(getTotalTests())
     val totalTestsFlow = _totalTestsFlow.asStateFlow()
 
+    private val _dailyActivityFlow = MutableStateFlow(getDailyActivityDurations())
+    val dailyActivityFlow = _dailyActivityFlow.asStateFlow()
+
     fun saveResult(result: TypingTestResult) {
         val results = getResults().toMutableList()
         results.add(0, result)
@@ -47,6 +53,7 @@ class StorageManager(private val settings: Settings) {
         // Update statistics in storage
         updateBestWpm(result.wpm)
         incrementTotalTests()
+        addDailyActivity(result)
 
         // Trigger reactive updates for the current instance
         refreshStats()
@@ -62,6 +69,7 @@ class StorageManager(private val settings: Settings) {
         _totalTestsFlow.value = getTotalTests()
         _userProfileFlow.value = getUserProfile()
         _settingsFlow.value = getSettings()
+        _dailyActivityFlow.value = getDailyActivityDurations()
     }
 
     private fun getResults(): List<TypingTestResult> {
@@ -121,10 +129,46 @@ class StorageManager(private val settings: Settings) {
         _userProfileFlow.value = profile
     }
 
+    fun getDailyActivityDurations(): Map<String, Int> {
+        val stored = readDailyActivityDurations()
+        if (stored.isNotEmpty()) {
+            return stored
+        }
+
+        val migrated = ActivityHeatmapRepository.aggregateFromResults(getResults())
+        if (migrated.isNotEmpty()) {
+            writeDailyActivityDurations(migrated)
+        }
+        return migrated
+    }
+
+    private fun readDailyActivityDurations(): Map<String, Int> {
+        val jsonString = settings.getStringOrNull(KEY_DAILY_ACTIVITY) ?: return emptyMap()
+        return try {
+            json.decodeFromString<DailyActivityDurations>(jsonString).durations
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    private fun writeDailyActivityDurations(durations: Map<String, Int>) {
+        settings[KEY_DAILY_ACTIVITY] = json.encodeToString(DailyActivityDurations(durations))
+    }
+
+    private fun addDailyActivity(result: TypingTestResult) {
+        if (result.duration <= 0) return
+
+        val durations = getDailyActivityDurations().toMutableMap()
+        val dateKey = ActivityHeatmapRepository.dateKeyFromTimestamp(result.timestamp)
+        durations[dateKey] = (durations[dateKey] ?: 0) + result.duration
+        writeDailyActivityDurations(durations)
+    }
+
     fun clearAllData() {
         settings.remove(KEY_RESULTS)
         settings.remove(KEY_BEST_WPM)
         settings.remove(KEY_TOTAL_TESTS)
+        settings.remove(KEY_DAILY_ACTIVITY)
         refreshStats()
     }
 

@@ -14,5 +14,3 @@ actual fun createSettings(): Settings {
     val prefs = appContext.getSharedPreferences("keyboard_warrior_prefs", Context.MODE_PRIVATE)
     return SharedPreferencesSettings(prefs)
 }
-
-
