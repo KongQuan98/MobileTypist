@@ -47,7 +47,7 @@ class MainTabBarController: UITabBarController {
             viewController: MainViewControllerKt.ProfileTabViewController(onToggleTabBar: onToggle)
         )
         let leaderboardVC = createTab(
-            title: "Leaderboard",
+            title: "Board",
             imageName: "trophy.fill",
             tag: 4,
             viewController: MainViewControllerKt.LeaderboardTabViewController(onToggleTabBar: onToggle)
