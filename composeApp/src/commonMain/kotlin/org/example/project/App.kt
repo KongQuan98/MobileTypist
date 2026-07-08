@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import org.example.project.data.storage.StorageManager
 import org.example.project.data.storage.createSettings
 import org.example.project.navigation.Navigation
@@ -30,6 +31,12 @@ fun App(
     )
     val storageManager = remember {
         StorageManager(settings = createSettings())
+    }
+
+    // Refresh data when screen becomes visible (Crucial for iOS TabBar navigation)
+    LifecycleResumeEffect(Unit) {
+        storageManager.refreshStats()
+        onPauseOrDispose { }
     }
 
     // Load theme from settings and manage state
