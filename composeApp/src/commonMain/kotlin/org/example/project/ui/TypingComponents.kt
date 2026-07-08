@@ -1,8 +1,13 @@
 package org.example.project.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +34,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.withStyle
@@ -43,6 +49,34 @@ fun CleanTypingArea(
     input: String,
     enabled: Boolean,
     charStatuses: List<CharStatus>,
+    isQuoteMode: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    AnimatedContent(
+        targetState = targetText,
+        transitionSpec = {
+            fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(180))
+        },
+        label = "typingTextTransition",
+    ) { animatedTargetText ->
+        CleanTypingAreaContent(
+            targetText = animatedTargetText,
+            input = input,
+            enabled = enabled,
+            charStatuses = charStatuses,
+            isQuoteMode = isQuoteMode,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun CleanTypingAreaContent(
+    targetText: String,
+    input: String,
+    enabled: Boolean,
+    charStatuses: List<CharStatus>,
+    isQuoteMode: Boolean,
     modifier: Modifier = Modifier
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -77,10 +111,11 @@ fun CleanTypingArea(
     }
 
     val textStyle = TextStyle(
-        fontSize = 24.sp,
+        fontSize = if (isQuoteMode) 22.sp else 24.sp,
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Medium,
-        lineHeight = 36.sp,
+        fontStyle = if (isQuoteMode) FontStyle.Italic else FontStyle.Normal,
+        lineHeight = if (isQuoteMode) 34.sp else 36.sp,
         letterSpacing = 0.5.sp
     )
 

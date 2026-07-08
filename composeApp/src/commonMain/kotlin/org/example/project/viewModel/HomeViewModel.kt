@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.repo.Difficulty
+import org.example.project.data.repo.QuotesRepository
 import org.example.project.data.repo.WordsRepository
 import org.example.project.data.storage.StorageManager
 
@@ -34,22 +35,34 @@ class HomeViewModel(
 
     init {
         modes.forEach { _ -> typingTexts.add("") }
-        loadTexts()
+        refreshAllTexts()
 
-        // React to word count changes
         coroutineScope.launch {
-            snapshotFlow { selectedWords }.drop(1) // Skip initial value since loadTexts() handles it
+            snapshotFlow { selectedWords }
+                .drop(1)
                 .collectLatest {
                     loadTextsForMode(TypingMode.WORDS)
                 }
-            snapshotFlow { selectedTime }.drop(1) // Skip initial value since loadTexts() handles it
+        }
+
+        coroutineScope.launch {
+            snapshotFlow { selectedTime }
+                .drop(1)
                 .collectLatest {
                     loadTextsForMode(TypingMode.TIME)
                 }
         }
     }
 
-    private fun loadTexts() {
+    fun onHomeScreenVisible() {
+        refreshAllTexts()
+    }
+
+    fun refreshTextForMode(mode: TypingMode) {
+        loadTextsForMode(mode)
+    }
+
+    fun refreshAllTexts() {
         modes.forEach { mode ->
             loadTextsForMode(mode)
         }
@@ -67,8 +80,7 @@ class HomeViewModel(
                 TypingMode.WORDS -> WordsRepository.getRandomWords(Difficulty.EASY, selectedWords)
                     .joinToString(" ")
 
-                TypingMode.QUOTES -> WordsRepository.getRandomWords(Difficulty.EASY, 100)
-                    .joinToString(" ")
+                TypingMode.QUOTES -> QuotesRepository.getRandomQuote()
             }
             typingTexts[index] = text
         }
@@ -80,6 +92,7 @@ class HomeViewModel(
 
     fun onBack() {
         showContent = true
+        refreshAllTexts()
     }
 
     fun onTestComplete(result: TypingTestResult) {

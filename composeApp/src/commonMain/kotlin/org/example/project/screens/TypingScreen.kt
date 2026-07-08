@@ -176,6 +176,7 @@ fun TypingScreenContent(
                     input = viewModel.input,
                     enabled = !viewModel.isFinished,
                     charStatuses = viewModel.charStatuses.toList(),
+                    isQuoteMode = viewModel.mode == TypingMode.QUOTES,
                     modifier = Modifier.fillMaxWidth(0.9f)
                 )
             }

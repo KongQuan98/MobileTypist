@@ -34,8 +34,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Play
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.app_icon
@@ -62,6 +65,7 @@ import org.example.project.data.storage.StorageManager
 import org.example.project.data.storage.createSettings
 import org.example.project.navigation.NavigationManager
 import org.example.project.ui.LocalHaptics
+import org.example.project.ui.shimmerEffect
 import org.example.project.ui.wrap
 import org.example.project.utils.AudioPlayer
 import org.example.project.utils.Haptics
@@ -103,6 +107,25 @@ fun HomeScreenContent(
     audioPlayer: AudioPlayer? = null,
 ) {
     val haptics = LocalHaptics.current
+
+    LaunchedEffect(Unit) {
+        viewModel.onHomeScreenVisible()
+    }
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect { page ->
+                viewModel.refreshTextForMode(viewModel.modes[page])
+            }
+    }
+
+    LaunchedEffect(viewModel.showContent) {
+        if (viewModel.showContent) {
+            viewModel.refreshTextForMode(viewModel.modes[pagerState.currentPage])
+        }
+    }
+
     // Sync bottom bar visibility with HomeScreen content state
     LaunchedEffect(viewModel.showContent) {
         navigationManager.showBottomBar = viewModel.showContent
@@ -134,39 +157,35 @@ fun HomeScreenContent(
                     state = pagerState,
                     userScrollEnabled = viewModel.showContent,
                 ) { page ->
+                    val mode = viewModel.modes[page]
                     val textForPage = viewModel.typingTexts.getOrNull(page) ?: ""
 
-                    TypingScreen(
-                        mode = viewModel.modes[page],
-                        targetText = textForPage,
-                        timeOptions = if (viewModel.modes[page] == TypingMode.TIME) listOf(viewModel.selectedTime) else null,
-                        wordOptions = if (viewModel.modes[page] == TypingMode.WORDS) listOf(
-                            viewModel.selectedWords
-                        ) else null,
-                        action = {
-                            when (it) {
-                                is TypingScreenAction.OnTestComplete -> {
-                                    viewModel.onTestComplete(it.result)
-                                    // Bottom bar stays hidden during result screen (which is full screen)
-                                }
+                    key(mode, textForPage, viewModel.selectedTime, viewModel.selectedWords) {
+                        TypingScreen(
+                            mode = mode,
+                            targetText = textForPage,
+                            timeOptions = listOf(viewModel.selectedTime),
+                            wordOptions = listOf(viewModel.selectedWords),
+                            action = {
+                                when (it) {
+                                    is TypingScreenAction.OnTestComplete -> {
+                                        viewModel.onTestComplete(it.result)
+                                    }
 
-                                TypingScreenAction.OnNavigateBack -> {
-                                    viewModel.onBack()
-                                    navigationManager.showBottomBar = true
+                                    TypingScreenAction.OnNavigateBack -> {
+                                        viewModel.onBack()
+                                        navigationManager.showBottomBar = true
+                                    }
                                 }
-                            }
-                        },
-                        isStarted = !viewModel.showContent
-                    )
+                            },
+                            isStarted = !viewModel.showContent
+                        )
+                    }
                 }
 
                 if (viewModel.showContent) {
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .clip(CircleShape)
-                            .size(180.dp)
-                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f)),
+                    StartPlayButton(
+                        modifier = Modifier.align(Alignment.Center),
                         onClick = {
                             haptics.wrap(
                                 audioPlayer = audioPlayer,
@@ -175,20 +194,64 @@ fun HomeScreenContent(
                                 navigationManager.showBottomBar = false
                             }
                         },
-                    ) {
-                        Icon(
-                            FeatherIcons.Play,
-                            contentDescription = "Start",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(80.dp)
-                                .align(Alignment.Center)
-                        )
-                    }
+                    )
                 }
             }
 
             Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun StartPlayButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+//    val infiniteTransition = rememberInfiniteTransition(label = "playButtonGlow")
+//    val glowAlpha by infiniteTransition.animateFloat(
+//        initialValue = 0.16f,
+//        targetValue = 0.38f,
+//        animationSpec = infiniteRepeatable(
+//            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
+//            repeatMode = RepeatMode.Reverse,
+//        ),
+//        label = "glowAlpha",
+//    )
+//    val pulseScale by infiniteTransition.animateFloat(
+//        initialValue = 1f,
+//        targetValue = 1.05f,
+//        animationSpec = infiniteRepeatable(
+//            animation = tween(durationMillis = 2200, easing = FastOutSlowInEasing),
+//            repeatMode = RepeatMode.Reverse,
+//        ),
+//        label = "pulseScale",
+//    )
+
+    Box(
+        modifier = modifier
+            .size(180.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(CircleShape)
+                .shimmerEffect(),
+        )
+        IconButton(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.72f)),
+            onClick = onClick,
+        ) {
+            Icon(
+                imageVector = FeatherIcons.Play,
+                contentDescription = "Start",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(80.dp),
+            )
         }
     }
 }

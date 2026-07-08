@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 private val LightColors: ColorScheme = lightColorScheme(
@@ -35,14 +37,39 @@ private val DarkColors: ColorScheme = darkColorScheme(
     outline = Color(0xFF44474A)
 )
 
+data class CustomColors(
+    val shimmerEffect: Color,
+)
+
+// Define the Local
+val LocalCustomColors = staticCompositionLocalOf {
+    CustomColors(
+        shimmerEffect = Color.Unspecified,
+    )
+}
+
+// Helper object for easy access
+object MobileTypistTheme {
+    val customColors: CustomColors
+        @Composable
+        get() = LocalCustomColors.current
+}
+
 @Composable
 fun MobileTypistTheme(
     darkTheme: Boolean,
     content: @Composable () -> Unit,
 ) {
     val colors = if (darkTheme) DarkColors else LightColors
-    MaterialTheme(
-        colorScheme = colors,
-        content = content
+
+    val customColors = CustomColors(
+        shimmerEffect = if (darkTheme) Color(0xFF444444) else Color(0xFFCCCCCC),
     )
+
+    CompositionLocalProvider(LocalCustomColors provides customColors) {
+        MaterialTheme(
+            colorScheme = colors,
+            content = content
+        )
+    }
 }
