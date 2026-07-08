@@ -1,8 +1,12 @@
 package org.example.project.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,9 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -21,6 +25,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +57,25 @@ sealed interface SettingsScreenAction {
     data class SaveSettings(val settings: AppSettings) : SettingsScreenAction
 }
 
+private sealed interface SettingsListItem {
+    data class Header(val title: String) : SettingsListItem
+    data class NavRow(val label: String, val value: String) : SettingsListItem
+    data class Toggle(
+        val label: String,
+        val checked: Boolean,
+        val onCheckedChange: (Boolean) -> Unit,
+    ) : SettingsListItem
+
+    data class ActionRow(
+        val label: String,
+        val isDestructive: Boolean,
+        val onClick: () -> Unit,
+    ) : SettingsListItem
+
+    data object Spacer40 : SettingsListItem
+    data object Footer : SettingsListItem
+}
+
 @Composable
 fun SettingsScreen(
     action: (SettingsScreenAction) -> Unit = {},
@@ -59,6 +83,69 @@ fun SettingsScreen(
     audioPlayer: AudioPlayer? = null,
     modifier: Modifier = Modifier
 ) {
+    val appName = stringResource(Res.string.app_name)
+    val appVersion = stringResource(Res.string.version)
+
+    val items = remember(appSettings, appName, appVersion) {
+        listOf(
+            SettingsListItem.Header("// appearance"),
+            SettingsListItem.NavRow("theme", "dark minimal"),
+            SettingsListItem.NavRow("font size", "medium"),
+            SettingsListItem.NavRow("font family", "jetbrains mono"),
+            SettingsListItem.Toggle(
+                label = "dark theme",
+                checked = appSettings.darkTheme,
+                onCheckedChange = {
+                    action(
+                        SettingsScreenAction.SaveSettings(
+                            appSettings.copy(
+                                darkTheme = it
+                            )
+                        )
+                    )
+                },
+            ),
+            SettingsListItem.Spacer40,
+            SettingsListItem.Header("// gameplay"),
+            SettingsListItem.Toggle(
+                label = "sound effects",
+                checked = appSettings.soundEnabled,
+                onCheckedChange = {
+                    action(
+                        SettingsScreenAction.SaveSettings(
+                            appSettings.copy(
+                                soundEnabled = it
+                            )
+                        )
+                    )
+                },
+            ),
+            SettingsListItem.Toggle(
+                label = "haptic feedback",
+                checked = appSettings.vibrationEnabled,
+                onCheckedChange = {
+                    action(SettingsScreenAction.SaveSettings(appSettings.copy(vibrationEnabled = it)))
+                },
+            ),
+            SettingsListItem.Spacer40,
+            SettingsListItem.Header("// account"),
+            SettingsListItem.NavRow("language", "english"),
+            SettingsListItem.Spacer40,
+            SettingsListItem.ActionRow(
+                label = "reset statistics",
+                isDestructive = true,
+                onClick = { action(SettingsScreenAction.ClearAllData) },
+            ),
+            SettingsListItem.ActionRow(
+                label = "sign out",
+                isDestructive = true,
+                onClick = { },
+            ),
+            SettingsListItem.Spacer40,
+            SettingsListItem.Footer,
+        )
+    }
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
@@ -67,11 +154,9 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
         ) {
             Spacer(Modifier.height(40.dp))
 
-            // Header
             Text(
                 text = stringResource(Res.string.settings_title),
                 style = TextStyle(
@@ -89,103 +174,87 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
             )
 
-            // Appearance Section
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(top = 20.dp, bottom = 20.dp),
             ) {
-                Spacer(Modifier.height(20.dp))
-                SettingSectionHeader("// appearance")
+                itemsIndexed(
+                    items = items,
+                    key = { index, item ->
+                        when (item) {
+                            is SettingsListItem.Header -> "header-${item.title}"
+                            is SettingsListItem.NavRow -> "nav-${item.label}"
+                            is SettingsListItem.Toggle -> "toggle-${item.label}"
+                            is SettingsListItem.ActionRow -> "action-${item.label}"
+                            SettingsListItem.Spacer40 -> "spacer-$index"
+                            SettingsListItem.Footer -> "footer"
+                        }
+                    },
+                ) { index, item ->
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn() + slideInVertically(
+                            initialOffsetY = { it / 2 }
+                        ),
+                    ) {
+                        when (item) {
+                            is SettingsListItem.Header -> {
+                                SettingSectionHeader(item.title)
+                            }
 
-                SettingNavRow(label = "theme", value = "dark minimal")
-                SettingNavRow(label = "font size", value = "medium")
-                SettingNavRow(label = "font family", value = "jetbrains mono")
+                            is SettingsListItem.NavRow -> {
+                                SettingNavRow(label = item.label, value = item.value)
+                            }
 
-                SettingToggleRow(
-                    label = "dark theme",
-                    checked = appSettings.darkTheme,
-                    audioPlayer = audioPlayer,
-                    onCheckedChange = {
-                        action(SettingsScreenAction.SaveSettings(appSettings.copy(darkTheme = it)))
+                            is SettingsListItem.Toggle -> {
+                                SettingToggleRow(
+                                    label = item.label,
+                                    checked = item.checked,
+                                    audioPlayer = audioPlayer,
+                                    onCheckedChange = item.onCheckedChange,
+                                )
+                            }
+
+                            is SettingsListItem.ActionRow -> {
+                                Text(
+                                    text = item.label,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .hapticClickable(onClick = item.onClick)
+                                        .padding(vertical = 12.dp),
+                                    style = TextStyle(
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    ),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+
+                            SettingsListItem.Spacer40 -> Spacer(Modifier.height(40.dp))
+
+                            SettingsListItem.Footer -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 24.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = "$appName $appVersion",
+                                        style = TextStyle(
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                alpha = 0.5f
+                                            ),
+                                            fontSize = 12.sp,
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                    )
+                                }
+                            }
+                        }
                     }
-                )
-
-                Spacer(Modifier.height(40.dp))
-
-                // Gameplay Section
-                SettingSectionHeader("// gameplay")
-
-                SettingToggleRow(
-                    label = "sound effects",
-                    checked = appSettings.soundEnabled,
-                    audioPlayer = audioPlayer,
-                    onCheckedChange = {
-                        action(SettingsScreenAction.SaveSettings(appSettings.copy(soundEnabled = it)))
-                    }
-                )
-
-                SettingToggleRow(
-                    label = "haptic feedback",
-                    checked = appSettings.vibrationEnabled,
-                    audioPlayer = audioPlayer,
-                    onCheckedChange = {
-                        action(SettingsScreenAction.SaveSettings(appSettings.copy(vibrationEnabled = it)))
-                    }
-                )
-
-                Spacer(Modifier.height(40.dp))
-
-                // Account Section
-                SettingSectionHeader("// account")
-
-                SettingNavRow(label = "language", value = "english")
-
-                Spacer(Modifier.height(40.dp))
-
-                Text(
-                    text = "reset statistics",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hapticClickable { action(SettingsScreenAction.ClearAllData) }
-                        .padding(vertical = 12.dp),
-                    style = TextStyle(
-                        color = MaterialTheme.colorScheme.error,
-                        fontSize = 16.sp,
-                        fontFamily = FontFamily.Monospace
-                    ),
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "sign out",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hapticClickable { /* Handle Sign Out */ }
-                        .padding(vertical = 12.dp),
-                    style = TextStyle(
-                        color = MaterialTheme.colorScheme.error,
-                        fontSize = 16.sp,
-                        fontFamily = FontFamily.Monospace
-                    ),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(Modifier.height(64.dp))
-
-                // Footer
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "${stringResource(Res.string.app_name)} ${stringResource(Res.string.version)}",
-                        style = TextStyle(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    )
                 }
-
-                Spacer(Modifier.height(20.dp))
             }
         }
     }
@@ -224,9 +293,7 @@ private fun SettingNavRow(label: String, value: String) {
         )
         Row(
             modifier = Modifier
-                .hapticClickable {
-
-                }
+                .hapticClickable { }
                 .clip(RoundedCornerShape(12.dp))
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically

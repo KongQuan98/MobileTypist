@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Edit3
-import kotlinx.coroutines.delay
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.Achievement
 import org.example.project.data.model.AchievementRepository
@@ -388,17 +387,8 @@ fun ProfileScreen(
                     }
                 } else {
                     itemsIndexed(results) { index, result ->
-                        var visible by remember {
-                            mutableStateOf(false)
-                        }
-
-                        LaunchedEffect(Unit) {
-                            delay(index * 50L)
-                            visible = true
-                        }
-
                         AnimatedVisibility(
-                            visible = visible,
+                            visible = true,
                             enter = fadeIn() + slideInVertically(
                                 initialOffsetY = { it / 2 }
                             )
