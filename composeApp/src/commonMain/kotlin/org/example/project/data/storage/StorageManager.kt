@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.example.project.achievements.model.AchievementProgress
 import org.example.project.data.model.AppSettings
 import org.example.project.data.model.DailyActivityDurations
 import org.example.project.data.model.TypingTestResult
@@ -23,6 +24,8 @@ class StorageManager(private val settings: Settings) {
         private const val KEY_TOTAL_TESTS = "total_tests"
         private const val KEY_USER_PROFILE = "user_profile"
         private const val KEY_DAILY_ACTIVITY = "daily_activity_durations"
+        private const val KEY_ACHIEVEMENT_PROGRESS = "achievement_progress"
+        private const val KEY_SOCIAL_SHARES = "social_shares"
     }
 
     private val _settingsFlow = MutableStateFlow(getSettings())
@@ -43,6 +46,9 @@ class StorageManager(private val settings: Settings) {
 
     private val _dailyActivityFlow = MutableStateFlow(getDailyActivityDurations())
     val dailyActivityFlow = _dailyActivityFlow.asStateFlow()
+
+    private val _achievementProgressFlow = MutableStateFlow(getAchievementProgress())
+    val achievementProgressFlow = _achievementProgressFlow.asStateFlow()
 
     fun saveResult(result: TypingTestResult) {
         val results = getResults().toMutableList()
@@ -70,6 +76,36 @@ class StorageManager(private val settings: Settings) {
         _userProfileFlow.value = getUserProfile()
         _settingsFlow.value = getSettings()
         _dailyActivityFlow.value = getDailyActivityDurations()
+        _achievementProgressFlow.value = getAchievementProgress()
+    }
+
+    fun getAchievementProgress(): Map<String, AchievementProgress> {
+        val jsonString = settings.getStringOrNull(KEY_ACHIEVEMENT_PROGRESS) ?: return emptyMap()
+        return try {
+            json.decodeFromString<List<AchievementProgress>>(jsonString)
+                .associateBy { it.achievementId }
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    fun saveAchievementProgress(progress: List<AchievementProgress>) {
+        val current = getAchievementProgress().toMutableMap()
+        progress.forEach {
+            current[it.achievementId] = it
+        }
+        settings[KEY_ACHIEVEMENT_PROGRESS] = json.encodeToString(current.values.toList())
+        _achievementProgressFlow.value = current
+    }
+
+    fun getSocialShares(): Int {
+        return settings.getIntOrNull(KEY_SOCIAL_SHARES) ?: 0
+    }
+
+    fun incrementSocialShares() {
+        val current = getSocialShares()
+        settings[KEY_SOCIAL_SHARES] = current + 1
+        refreshStats()
     }
 
     private fun getResults(): List<TypingTestResult> {
@@ -169,6 +205,8 @@ class StorageManager(private val settings: Settings) {
         settings.remove(KEY_BEST_WPM)
         settings.remove(KEY_TOTAL_TESTS)
         settings.remove(KEY_DAILY_ACTIVITY)
+        settings.remove(KEY_ACHIEVEMENT_PROGRESS)
+        settings.remove(KEY_SOCIAL_SHARES)
         refreshStats()
     }
 

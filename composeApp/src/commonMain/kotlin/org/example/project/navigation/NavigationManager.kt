@@ -30,6 +30,10 @@ class NavigationManager(
                 currentScreen = Screen.Home
                 showBottomBar = true
             }
+            is Screen.Achievements -> {
+                currentScreen = Screen.Profile
+                showBottomBar = true
+            }
             else -> {}
         }
     }

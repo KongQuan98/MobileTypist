@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import org.example.project.achievements.repository.AchievementRepository
 import org.example.project.data.model.AppSettings
 import org.example.project.data.storage.StorageManager
 import org.example.project.navigation.model.Screen
@@ -29,6 +30,7 @@ import org.example.project.utils.AudioPlayer
 fun Navigation(
     navigationManager: NavigationManager,
     storageManager: StorageManager,
+    achievementRepository: AchievementRepository,
     appSettings: AppSettings,
     audioPlayer: AudioPlayer,
     modifier: Modifier = Modifier
@@ -49,6 +51,7 @@ fun Navigation(
     val bestWpm by storageManager.bestWpmFlow.collectAsState()
     val totalTests by storageManager.totalTestsFlow.collectAsState()
     val dailyActivity by storageManager.dailyActivityFlow.collectAsState()
+    val achievements by achievementRepository.achievements.collectAsState(emptyList())
 
     // Show/Hide bottom bar logic
     LaunchedEffect(currentScreen) {
@@ -56,6 +59,11 @@ fun Navigation(
             is Screen.EditProfile, is Screen.Login, is Screen.Register, is Screen.SelectAvatar -> false
             else -> true
         }
+    }
+
+    // Evaluate achievements when results change
+    LaunchedEffect(results) {
+        achievementRepository.evaluate()
     }
 
     MainScaffold(
@@ -139,6 +147,7 @@ fun Navigation(
                         recentTestResult = results,
                         bestWpm = bestWpm,
                         totalTests = totalTests,
+                        achievements = achievements,
                     ),
                     modifier = modifier.then(scaffoldModifier),
                     onViewMoreAchievements = {
@@ -186,8 +195,9 @@ fun Navigation(
 
             is Screen.Achievements -> {
                 AchievementsScreen(
+                    achievements = achievements,
                     onBackClicked = {
-                        navigationManager.navigateTo(Screen.Profile)
+                        navigationManager.navigateBack()
                     },
                     modifier = modifier
                 )

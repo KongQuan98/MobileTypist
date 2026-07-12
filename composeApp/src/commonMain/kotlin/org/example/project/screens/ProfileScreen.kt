@@ -56,8 +56,7 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Edit3
 import org.example.project.MobileTypistTheme
-import org.example.project.data.model.Achievement
-import org.example.project.data.model.AchievementRepository
+import org.example.project.achievements.model.Achievement
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
@@ -72,7 +71,8 @@ data class ProfileScreenState(
     val recentTestResult: List<TypingTestResult> = emptyList(),
     val averageWpm: Int = 0,
     val bestWpm: Int = 0,
-    val totalTests: Int = 0
+    val totalTests: Int = 0,
+    val achievements: List<Achievement> = emptyList()
 )
 
 @Composable
@@ -86,6 +86,7 @@ fun ProfileScreen(
     val results = profileScreenState.recentTestResult
     val bestWpm = profileScreenState.bestWpm
     val totalTests = profileScreenState.totalTests
+    val achievements = profileScreenState.achievements
 
     val averageWpm = if (results.isNotEmpty()) {
         results.map { it.wpm }.average().toInt()
@@ -294,9 +295,9 @@ fun ProfileScreen(
                                 )
                             )
                             val unlockedCount =
-                                AchievementRepository.achievements.count { it.isUnlocked }
+                                achievements.count { it.unlocked }
                             Text(
-                                text = "$unlockedCount / ${AchievementRepository.achievements.size} unlocked",
+                                text = "$unlockedCount / ${achievements.size} unlocked",
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.primary,
@@ -312,7 +313,7 @@ fun ProfileScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            AchievementRepository.achievements.filter { it.isUnlocked }.take(3)
+                            achievements.filter { it.unlocked }.take(3)
                                 .forEach { achievement ->
                                     AchievementCard(
                                         achievement = achievement,
@@ -415,7 +416,7 @@ private fun AchievementCard(
                 RoundedCornerShape(12.dp)
             )
             .then(
-                if (achievement.isUnlocked) Modifier.border(
+                if (achievement.unlocked) Modifier.border(
                     width = 1.dp,
                     brush = Brush.verticalGradient(
                         colors = listOf(MaterialTheme.colorScheme.primary, Color.Transparent)
@@ -430,13 +431,13 @@ private fun AchievementCard(
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(if (achievement.isUnlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent),
+                .background(if (achievement.unlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = achievement.icon,
                 contentDescription = null,
-                tint = if (achievement.isUnlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                tint = if (achievement.unlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -448,7 +449,7 @@ private fun AchievementCard(
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (achievement.isUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
+                color = if (achievement.unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
                 fontFamily = FontFamily.Monospace
             ),
             maxLines = 1,

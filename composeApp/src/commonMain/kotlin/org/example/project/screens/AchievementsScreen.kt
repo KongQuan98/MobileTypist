@@ -42,18 +42,18 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowLeft
 import org.example.project.MobileTypistTheme
-import org.example.project.data.model.Achievement
-import org.example.project.data.model.AchievementRepository
+import org.example.project.achievements.model.Achievement
 import org.example.project.ui.LocalHaptics
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AchievementsScreen(
+    achievements: List<Achievement>,
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val unlockedCount = AchievementRepository.achievements.count { it.isUnlocked }
-    val totalCount = AchievementRepository.achievements.size
+    val unlockedCount = achievements.count { it.unlocked }
+    val totalCount = achievements.size
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -148,7 +148,7 @@ fun AchievementsScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(AchievementRepository.achievements) { achievement ->
+                items(achievements) { achievement ->
                     AchievementGridItem(achievement)
                 }
             }
@@ -165,7 +165,7 @@ fun AchievementGridItem(achievement: Achievement) {
                 RoundedCornerShape(12.dp)
             )
             .then(
-                if (achievement.isUnlocked) Modifier.border(
+                if (achievement.unlocked) Modifier.border(
                     width = 1.dp,
                     brush = Brush.verticalGradient(
                         colors = listOf(MaterialTheme.colorScheme.primary, Color.Transparent)
@@ -180,13 +180,13 @@ fun AchievementGridItem(achievement: Achievement) {
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(if (achievement.isUnlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent),
+                .background(if (achievement.unlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = achievement.icon,
                 contentDescription = null,
-                tint = if (achievement.isUnlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                tint = if (achievement.unlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
                     alpha = 0.4f
                 ),
                 modifier = Modifier.size(20.dp)
@@ -200,7 +200,7 @@ fun AchievementGridItem(achievement: Achievement) {
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (achievement.isUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                color = if (achievement.unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(
                     alpha = 0.5f
                 ),
                 fontFamily = FontFamily.Monospace
@@ -232,7 +232,7 @@ fun AchievementGridItem(achievement: Achievement) {
 private fun AchievementsScreenPreview() {
     CompositionLocalProvider(LocalHaptics provides PreviewHaptics) {
         MobileTypistTheme(darkTheme = true) {
-            AchievementsScreen(onBackClicked = {})
+            AchievementsScreen(achievements = emptyList(), onBackClicked = {})
         }
     }
 }
