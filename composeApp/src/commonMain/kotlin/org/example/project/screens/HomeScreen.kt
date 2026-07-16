@@ -1,6 +1,12 @@
 package org.example.project.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -34,13 +40,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -54,16 +65,21 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Play
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.app_icon
 import mobiletypist.composeapp.generated.resources.app_name
 import org.example.project.MobileTypistTheme
+import org.example.project.achievements.events.AchievementEvent
+import org.example.project.achievements.model.Achievement
 import org.example.project.data.model.TypingMode
 import org.example.project.data.storage.StorageManager
 import org.example.project.data.storage.createSettings
 import org.example.project.navigation.NavigationManager
+import org.example.project.ui.AchievementUnlockPopup
+import org.example.project.ui.LocalAchievementRepository
 import org.example.project.ui.LocalHaptics
 import org.example.project.ui.shimmerEffect
 import org.example.project.ui.wrap
@@ -85,15 +101,33 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val viewModel = remember { HomeViewModel(storageManager, coroutineScope) }
     val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
+    val achievementRepository = LocalAchievementRepository.current
 
-    HomeScreenContent(
-        viewModel = viewModel,
-        pagerState = pagerState,
-        coroutineScope = coroutineScope,
-        modifier = modifier,
-        navigationManager = navigationManager,
-        audioPlayer = audioPlayer,
-    )
+    var unlockedAchievement by remember { mutableStateOf<Achievement?>(null) }
+
+    LaunchedEffect(achievementRepository) {
+        achievementRepository.events.collectLatest { event ->
+            if (event is AchievementEvent.Unlocked) {
+                unlockedAchievement = event.achievement
+            }
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        HomeScreenContent(
+            viewModel = viewModel,
+            pagerState = pagerState,
+            coroutineScope = coroutineScope,
+            modifier = modifier,
+            navigationManager = navigationManager,
+            audioPlayer = audioPlayer,
+        )
+
+        AchievementUnlockPopup(
+            achievement = unlockedAchievement,
+            onDismiss = { unlockedAchievement = null }
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -208,29 +242,31 @@ private fun StartPlayButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-//    val infiniteTransition = rememberInfiniteTransition(label = "playButtonGlow")
-//    val glowAlpha by infiniteTransition.animateFloat(
-//        initialValue = 0.16f,
-//        targetValue = 0.38f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
-//            repeatMode = RepeatMode.Reverse,
-//        ),
-//        label = "glowAlpha",
-//    )
-//    val pulseScale by infiniteTransition.animateFloat(
-//        initialValue = 1f,
-//        targetValue = 1.05f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(durationMillis = 2200, easing = FastOutSlowInEasing),
-//            repeatMode = RepeatMode.Reverse,
-//        ),
-//        label = "pulseScale",
-//    )
+    val infiniteTransition = rememberInfiniteTransition(label = "playButtonGlow")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.16f,
+        targetValue = 0.38f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "glowAlpha",
+    )
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "pulseScale",
+    )
 
     Box(
         modifier = modifier
-            .size(180.dp),
+            .size(180.dp)
+            .alpha(glowAlpha)
+            .scale(pulseScale),
         contentAlignment = Alignment.Center,
     ) {
         Box(

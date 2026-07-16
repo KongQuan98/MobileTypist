@@ -80,4 +80,9 @@
     <string name="no_account">no account? </string>
     <string name="sign_up_arrow_button">sign up -></string>
 
+    // achievement unlock
+    <string name="achievement_unlocked_label">ACHIEVEMENT UNLOCKED</string>
+    <string name="achievement_dismiss_button">Nice — keep going</string>
+    <string name="achievement_close_content_description">Close</string>
+
 </resources>
