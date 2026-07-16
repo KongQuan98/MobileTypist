@@ -24,7 +24,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,12 +41,11 @@ import mobiletypist.composeapp.generated.resources.settings_title
 import mobiletypist.composeapp.generated.resources.version
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.AppSettings
-import org.example.project.ui.LocalAudioPlayer
 import org.example.project.ui.LocalHaptics
+import org.example.project.ui.PreviewCompositionLocals
 import org.example.project.ui.hapticClickable
 import org.example.project.ui.wrap
 import org.example.project.utils.AudioPlayer
-import org.example.project.utils.Haptics
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -374,10 +372,7 @@ private fun SettingToggleRow(
 @Preview
 @Composable
 private fun SettingsScreenPreview() {
-    CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics,
-        LocalAudioPlayer provides PreviewAudioPlayer,
-    ) {
+    PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = false) {
             SettingsScreen()
         }
@@ -387,24 +382,9 @@ private fun SettingsScreenPreview() {
 @Preview
 @Composable
 private fun SettingsScreenPreviewDarkTheme() {
-    CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics,
-        LocalAudioPlayer provides PreviewAudioPlayer,
-    ) {
+    PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = true) {
             SettingsScreen()
         }
     }
 }
-
-// for preview purpose
-object PreviewHaptics : Haptics {
-    override fun buttonClick() {}
-    override fun typingKey() {}
-    override fun notificationSuccess() {}
-    override fun selectionChange() {}
-}
-
-object PreviewAudioPlayer : AudioPlayer(
-    isEnabled = { true }
-)

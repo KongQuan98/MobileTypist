@@ -31,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,8 +51,6 @@ import compose.icons.feathericons.Lock
 import org.example.project.MobileTypistTheme
 import org.example.project.data.repo.Avatar
 import org.example.project.data.repo.AvatarRepository
-import org.example.project.ui.LocalAudioPlayer
-import org.example.project.ui.LocalHaptics
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -318,16 +315,23 @@ private fun AvatarGridItem(
 @Preview
 @Composable
 private fun SelectAvatarScreenPreview() {
-    CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics,
-        LocalAudioPlayer provides PreviewAudioPlayer,
-    ) {
-        MobileTypistTheme(darkTheme = true) {
-            SelectAvatarScreen(
-                currentAvatarId = "monkey",
-                onAvatarSelected = {},
-                onBackClicked = {}
-            )
-        }
+    MobileTypistTheme(darkTheme = false) {
+        SelectAvatarScreen(
+            currentAvatarId = "monkey",
+            onAvatarSelected = {},
+            onBackClicked = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SelectAvatarScreenDarkPreview() {
+    MobileTypistTheme(darkTheme = true) {
+        SelectAvatarScreen(
+            currentAvatarId = "monkey",
+            onAvatarSelected = {},
+            onBackClicked = {}
+        )
     }
 }

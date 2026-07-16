@@ -3,19 +3,21 @@ package org.example.project.utils
 import android.media.SoundPool
 import org.example.project.R
 
-actual open class AudioPlayer actual constructor(
+private class AndroidAudioPlayer(
     private val isEnabled: () -> Boolean,
-) {
+) : AudioPlayerApi {
 
-    val context = AppContextProvider.context
+    private val context by lazy { AppContextProvider.context }
 
-    private val soundPool = SoundPool.Builder()
-        .setMaxStreams(10)
-        .build()
+    private val soundPool by lazy {
+        SoundPool.Builder()
+            .setMaxStreams(10)
+            .build()
+    }
 
     private val sounds = mutableMapOf<SoundEffect, Int>()
 
-    actual fun preload() {
+    override fun preload() {
         sounds[SoundEffect.BUTTON_CLICK] =
             soundPool.load(context, R.raw.button_switch, 1)
 
@@ -29,7 +31,7 @@ actual open class AudioPlayer actual constructor(
             soundPool.load(context, R.raw.game_finish, 1)
     }
 
-    actual fun play(sound: SoundEffect) {
+    override fun play(sound: SoundEffect) {
         if (!isEnabled()) return
 
         if (sounds[sound] == null) {
@@ -41,7 +43,11 @@ actual open class AudioPlayer actual constructor(
         }
     }
 
-    actual fun release() {
+    override fun release() {
+        if (sounds.isEmpty()) return
         soundPool.release()
     }
 }
+
+actual fun createAudioPlayer(isEnabled: () -> Boolean): AudioPlayerApi =
+    AndroidAudioPlayer(isEnabled)

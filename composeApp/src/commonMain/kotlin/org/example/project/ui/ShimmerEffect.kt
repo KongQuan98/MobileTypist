@@ -27,9 +27,9 @@ fun Modifier.shimmerEffect(): Modifier = composed {
     )
 
     val shimmerColors = listOf(
+        MobileTypistTheme.customColors.shimmerEffect.copy(alpha = 0.8f),
         MobileTypistTheme.customColors.shimmerEffect.copy(alpha = 0.3f),
-        MobileTypistTheme.customColors.shimmerEffect.copy(alpha = 0.1f),
-        MobileTypistTheme.customColors.shimmerEffect.copy(alpha = 0.3f)
+        MobileTypistTheme.customColors.shimmerEffect.copy(alpha = 0.8f)
     )
 
     val brush = Brush.linearGradient(

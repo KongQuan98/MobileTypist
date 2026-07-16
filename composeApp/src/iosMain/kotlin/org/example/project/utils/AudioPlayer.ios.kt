@@ -15,67 +15,25 @@ import platform.Foundation.NSURL
 import platform.darwin.UInt32Var
 import platform.darwin.UInt32 as SystemSoundID
 
-actual open class AudioPlayer actual constructor(
+private class IosAudioPlayer(
     private val isEnabled: () -> Boolean,
-) {
+) : AudioPlayerApi {
 
     private val players = mutableMapOf<SoundEffect, AVAudioPlayer>()
     private val systemSounds = mutableMapOf<SoundEffect, SystemSoundID>()
 
-    actual fun preload() {
-
-        // Ultra short sounds -> SystemSoundID
-        loadSystemSound(
-            SoundEffect.BUTTON_CLICK,
-            "button_click",
-            "wav"
-        )
-
-        loadSystemSound(
-            SoundEffect.KEY_PRESS_1,
-            "key1",
-            "wav"
-        )
-
-        loadSystemSound(
-            SoundEffect.KEY_PRESS_2,
-            "key2",
-            "wav"
-        )
-
-        loadSystemSound(
-            SoundEffect.KEY_PRESS_3,
-            "key3",
-            "wav"
-        )
-
-        loadSystemSound(
-            SoundEffect.TIMER_TICK,
-            "tick",
-            "wav"
-        )
-
-        // Richer sounds -> AVAudioPlayer
-        loadPlayer(
-            SoundEffect.NEW_RECORD,
-            "new_record",
-            "mp3"
-        )
-
-        loadPlayer(
-            SoundEffect.GAME_FINISH,
-            "finish",
-            "mp3"
-        )
-
-        loadPlayer(
-            SoundEffect.GAME_FAIL,
-            "fail",
-            "mp3"
-        )
+    override fun preload() {
+        loadSystemSound(SoundEffect.BUTTON_CLICK, "button_click", "wav")
+        loadSystemSound(SoundEffect.KEY_PRESS_1, "key1", "wav")
+        loadSystemSound(SoundEffect.KEY_PRESS_2, "key2", "wav")
+        loadSystemSound(SoundEffect.KEY_PRESS_3, "key3", "wav")
+        loadSystemSound(SoundEffect.TIMER_TICK, "tick", "wav")
+        loadPlayer(SoundEffect.NEW_RECORD, "new_record", "mp3")
+        loadPlayer(SoundEffect.GAME_FINISH, "finish", "mp3")
+        loadPlayer(SoundEffect.GAME_FAIL, "fail", "mp3")
     }
 
-    actual fun play(sound: SoundEffect) {
+    override fun play(sound: SoundEffect) {
         if (!isEnabled()) return
 
         systemSounds[sound]?.let {
@@ -89,7 +47,7 @@ actual open class AudioPlayer actual constructor(
         }
     }
 
-    actual fun release() {
+    override fun release() {
         systemSounds.values.forEach {
             AudioServicesDisposeSystemSoundID(it)
         }
@@ -104,16 +62,13 @@ actual open class AudioPlayer actual constructor(
         fileName: String,
         extension: String
     ) {
-
         val path = NSBundle.mainBundle.pathForResource(
             name = fileName,
             ofType = extension
         ) ?: return
 
         val url = NSURL.fileURLWithPath(path)
-
         val player = AVAudioPlayer(contentsOfURL = url, error = null)
-
         player?.prepareToPlay()
 
         if (player != null) {
@@ -127,24 +82,22 @@ actual open class AudioPlayer actual constructor(
         fileName: String,
         extension: String
     ) {
-
         val path = NSBundle.mainBundle.pathForResource(fileName, extension)
             ?: return
 
         val nsUrl = NSURL.fileURLWithPath(path)
-
         val cfUrl = nsUrl as CFURLRef
 
         memScoped {
-
             val soundIdVar = alloc<UInt32Var>()
-
             AudioServicesCreateSystemSoundID(
                 cfUrl,
                 soundIdVar.ptr
             )
-
             systemSounds[effect] = soundIdVar.value
         }
     }
 }
+
+actual fun createAudioPlayer(isEnabled: () -> Boolean): AudioPlayerApi =
+    IosAudioPlayer(isEnabled)

@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import org.example.project.utils.AudioPlayer
+import org.example.project.utils.AudioPlayerApi
 import org.example.project.utils.Haptics
 import org.example.project.utils.SoundEffect
 
@@ -14,7 +14,7 @@ val LocalHaptics = staticCompositionLocalOf<Haptics> {
     error("No Haptics provided")
 }
 
-val LocalAudioPlayer = staticCompositionLocalOf<AudioPlayer> {
+val LocalAudioPlayer = staticCompositionLocalOf<AudioPlayerApi> {
     error("No AudioPlayer provided")
 }
 
@@ -36,7 +36,7 @@ fun Modifier.hapticClickable(
 }
 
 fun Haptics.wrap(
-    audioPlayer: AudioPlayer?,
+    audioPlayer: AudioPlayerApi?,
     action: () -> Unit
 ) {
     buttonClick()

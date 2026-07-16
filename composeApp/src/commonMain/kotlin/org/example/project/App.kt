@@ -19,20 +19,21 @@ import org.example.project.navigation.rememberNavigationManager
 import org.example.project.ui.LocalAchievementRepository
 import org.example.project.ui.LocalAudioPlayer
 import org.example.project.ui.LocalHaptics
-import org.example.project.utils.AudioPlayer
 import org.example.project.utils.TypingHapticFeedback
+import org.example.project.utils.createAudioPlayer
 
 @Composable
 fun App(
     startScreen: Screen = Screen.Home,
-    onToggleTabBar: ((Boolean) -> Unit)? = null // Callback to bridge to iOS native TabBar
+    onToggleTabBar: ((Boolean) -> Unit)? = null, // Callback to bridge to iOS native TabBar
+    storageManagerOverride: StorageManager? = null,
 ) {
     // Create shared instances
     val navigationManager = rememberNavigationManager(
         initialScreen = startScreen,
     )
-    val storageManager = remember {
-        StorageManager(settings = createSettings())
+    val storageManager = remember(storageManagerOverride) {
+        storageManagerOverride ?: StorageManager(settings = createSettings())
     }
 
     val achievementRepository = remember {
@@ -56,7 +57,7 @@ fun App(
 
     // Load AudioPlayer for click sound effect
     val audioPlayer = remember {
-        AudioPlayer(
+        createAudioPlayer(
             isEnabled = { settingState.soundEnabled }
         )
     }

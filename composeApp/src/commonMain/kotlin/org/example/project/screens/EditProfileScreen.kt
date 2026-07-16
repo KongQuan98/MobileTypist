@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,8 +48,8 @@ import compose.icons.feathericons.Check
 import compose.icons.feathericons.Smile
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.UserProfile
-import org.example.project.ui.LocalAudioPlayer
 import org.example.project.ui.LocalHaptics
+import org.example.project.ui.PreviewCompositionLocals
 import org.example.project.ui.hapticClickable
 import org.example.project.ui.wrap
 import org.example.project.utils.AudioPlayer
@@ -414,10 +413,7 @@ private fun EditField(
 @Preview
 @Composable
 private fun EditProfileScreenPreview() {
-    CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics,
-        LocalAudioPlayer provides PreviewAudioPlayer,
-    ) {
+    PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = true) {
             EditProfileScreen(
                 onBackClicked = {},
@@ -431,10 +427,7 @@ private fun EditProfileScreenPreview() {
 @Preview
 @Composable
 private fun EditProfileScreenLightPreview() {
-    CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics,
-        LocalAudioPlayer provides PreviewAudioPlayer,
-    ) {
+    PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = false) {
             EditProfileScreen(
                 onBackClicked = {},

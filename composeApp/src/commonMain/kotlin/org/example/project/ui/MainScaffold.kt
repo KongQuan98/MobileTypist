@@ -116,15 +116,17 @@ private fun BottomNavigation(
 @Composable
 @Preview
 private fun MainScaffoldDarkThemePreview() {
-    MobileTypistTheme(darkTheme = true) {
-        MainScaffold(
-            navigationManager = NavigationManager(),
-            content = {
-                SettingsScreen(
-                    action = {},
-                    modifier = Modifier
-                )
-            }
-        )
+    PreviewCompositionLocals {
+        MobileTypistTheme(darkTheme = true) {
+            MainScaffold(
+                navigationManager = NavigationManager(),
+                content = {
+                    SettingsScreen(
+                        action = {},
+                        modifier = Modifier
+                    )
+                }
+            )
+        }
     }
 }

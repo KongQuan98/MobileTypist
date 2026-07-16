@@ -52,6 +52,7 @@ kotlin {
             implementation(libs.feather)
             implementation(libs.kamel.image.default)
             implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.test)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
         }
@@ -89,6 +90,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        compose = true
     }
 }
 

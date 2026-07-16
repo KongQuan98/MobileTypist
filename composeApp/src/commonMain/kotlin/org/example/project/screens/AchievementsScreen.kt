@@ -26,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,9 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowLeft
+import compose.icons.feathericons.Star
 import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
-import org.example.project.ui.LocalHaptics
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -230,9 +229,155 @@ fun AchievementGridItem(achievement: Achievement) {
 @Preview
 @Composable
 private fun AchievementsScreenPreview() {
-    CompositionLocalProvider(LocalHaptics provides PreviewHaptics) {
-        MobileTypistTheme(darkTheme = true) {
-            AchievementsScreen(achievements = emptyList(), onBackClicked = {})
-        }
+    MobileTypistTheme(darkTheme = false) {
+        AchievementsScreen(
+            achievements = listOf(
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = true,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = true,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = true,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = false,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = false,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = false,
+                    unlockedAt = null
+                ),
+            ),
+            onBackClicked = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AchievementsScreenDarkPreview() {
+    MobileTypistTheme(darkTheme = true) {
+        AchievementsScreen(
+            achievements = listOf(
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = true,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = true,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = true,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = false,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = false,
+                    unlockedAt = null
+                ),
+                Achievement(
+                    id = "first_game",
+                    title = "First Strike",
+                    description = "Completed your first typing test",
+                    icon = FeatherIcons.Star,
+                    hidden = false,
+                    progress = 1,
+                    target = 1,
+                    unlocked = false,
+                    unlockedAt = null
+                ),
+            ),
+            onBackClicked = {}
+        )
     }
 }

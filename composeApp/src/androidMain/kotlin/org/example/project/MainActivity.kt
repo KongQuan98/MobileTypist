@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import org.example.project.data.storage.initAppContext
+import org.example.project.ui.previewStorageManager
 import org.example.project.utils.AppContextProvider
 
 class MainActivity : ComponentActivity() {
@@ -28,5 +29,5 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App()
+    App(storageManagerOverride = previewStorageManager())
 }

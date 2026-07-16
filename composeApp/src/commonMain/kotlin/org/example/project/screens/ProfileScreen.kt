@@ -34,7 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,8 +59,7 @@ import org.example.project.achievements.model.Achievement
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
-import org.example.project.ui.LocalAudioPlayer
-import org.example.project.ui.LocalHaptics
+import org.example.project.ui.PreviewCompositionLocals
 import org.example.project.ui.hapticClickable
 import org.example.project.utils.formatDate
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -701,10 +699,7 @@ private fun ProfileScreenPreviewDark() {
         totalTests = 25,
     )
 
-    CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics,
-        LocalAudioPlayer provides PreviewAudioPlayer,
-    ) {
+    PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = true) {
             ProfileScreen(
                 onEditProfileClicked = {},
@@ -756,10 +751,7 @@ private fun ProfileScreenPreview() {
         totalTests = 25,
     )
 
-    CompositionLocalProvider(
-        LocalHaptics provides PreviewHaptics,
-        LocalAudioPlayer provides PreviewAudioPlayer,
-    ) {
+    PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = false) {
             ProfileScreen(
                 onEditProfileClicked = {},

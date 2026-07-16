@@ -54,6 +54,7 @@ lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "
 lottie-compose-multiplatform = { module = "io.github.alexzhirkevich:lottie-compose-multiplatform", version.ref = "lottieComposeMultiplatform" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
 multiplatform-settings-no-arg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
+multiplatform-settings-test = { module = "com.russhwolf:multiplatform-settings-test", version.ref = "multiplatformSettings" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
