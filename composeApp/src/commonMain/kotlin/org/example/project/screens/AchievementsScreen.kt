@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,6 +44,7 @@ import compose.icons.feathericons.ArrowLeft
 import compose.icons.feathericons.Star
 import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
+import org.example.project.ui.TooltipHint
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -148,7 +150,12 @@ fun AchievementsScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(achievements) { achievement ->
-                    AchievementGridItem(achievement)
+                    Box(
+                        modifier = Modifier.height(120.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AchievementGridItem(achievement)
+                    }
                 }
             }
         }
@@ -159,6 +166,7 @@ fun AchievementsScreen(
 fun AchievementGridItem(achievement: Achievement) {
     Column(
         modifier = Modifier
+            .fillMaxHeight()
             .background(
                 MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
                 RoundedCornerShape(12.dp)
@@ -194,35 +202,39 @@ fun AchievementGridItem(achievement: Achievement) {
 
         Spacer(Modifier.height(12.dp))
 
-        Text(
-            text = achievement.title,
-            style = TextStyle(
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (achievement.unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                    alpha = 0.5f
+        TooltipHint(hint = achievement.title) {
+            Text(
+                text = achievement.title,
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (achievement.unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                        alpha = 0.5f
+                    ),
+                    fontFamily = FontFamily.Monospace
                 ),
-                fontFamily = FontFamily.Monospace
-            ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+        }
 
         Spacer(Modifier.height(4.dp))
 
-        Text(
-            text = achievement.description,
-            style = TextStyle(
-                fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                fontFamily = FontFamily.Monospace
-            ),
-            textAlign = TextAlign.Center,
-            lineHeight = 14.sp,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+        TooltipHint(hint = achievement.description) {
+            Text(
+                text = achievement.description,
+                style = TextStyle(
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    fontFamily = FontFamily.Monospace
+                ),
+                textAlign = TextAlign.Center,
+                lineHeight = 14.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 

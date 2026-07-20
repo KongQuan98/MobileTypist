@@ -111,7 +111,7 @@ fun AchievementUnlockContent(
                 scaleY = scale.value
                 this.alpha = alpha.value
             },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.background,
         tonalElevation = 8.dp
     ) {

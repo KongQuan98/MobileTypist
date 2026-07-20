@@ -60,6 +60,7 @@ import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
 import org.example.project.ui.PreviewCompositionLocals
+import org.example.project.ui.TooltipHint
 import org.example.project.ui.hapticClickable
 import org.example.project.utils.formatDate
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -320,6 +321,23 @@ fun ProfileScreen(
                                 }
                         }
 
+                        if (achievements.none { it.unlocked }) {
+                            Text(
+                                text = "Keep practicing to achieve more",
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontFamily = FontFamily.Monospace,
+                                    textAlign = TextAlign.Center,
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 24.dp),
+                            )
+                        }
+
                         Spacer(Modifier.height(24.dp))
 
                         Row(
@@ -427,7 +445,7 @@ private fun AchievementCard(
     ) {
         Box(
             modifier = Modifier
-                .size(44.dp)
+                .size(64.dp)
                 .clip(CircleShape)
                 .background(if (achievement.unlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent),
             contentAlignment = Alignment.Center
@@ -442,32 +460,36 @@ private fun AchievementCard(
 
         Spacer(Modifier.height(12.dp))
 
-        Text(
-            text = achievement.title,
-            style = TextStyle(
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (achievement.unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
-                fontFamily = FontFamily.Monospace
-            ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
+        TooltipHint(hint = achievement.title) {
+            Text(
+                text = achievement.title,
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (achievement.unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
+                    fontFamily = FontFamily.Monospace
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+        }
 
         Spacer(Modifier.height(4.dp))
 
-        Text(
-            text = achievement.description,
-            style = TextStyle(
-                fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                fontFamily = FontFamily.Monospace
-            ),
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+        TooltipHint(hint = achievement.description) {
+            Text(
+                text = achievement.description,
+                style = TextStyle(
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    fontFamily = FontFamily.Monospace
+                ),
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
