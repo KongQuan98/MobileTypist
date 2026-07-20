@@ -312,13 +312,17 @@ fun ProfileScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            achievements.filter { it.unlocked }.take(3)
-                                .forEach { achievement ->
-                                    AchievementCard(
-                                        achievement = achievement,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
+                            val unlockedShowcase = achievements.filter { it.unlocked }.take(3)
+                            unlockedShowcase.forEach { achievement ->
+                                AchievementCard(
+                                    achievement = achievement,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            // Maintain 1/3 width per card by adding empty slots if less than 3
+                            repeat(3 - unlockedShowcase.size) {
+                                Box(modifier = Modifier.weight(1f))
+                            }
                         }
 
                         if (achievements.none { it.unlocked }) {
