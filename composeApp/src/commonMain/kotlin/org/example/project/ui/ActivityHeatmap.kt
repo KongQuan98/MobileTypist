@@ -64,7 +64,7 @@ import mobiletypist.composeapp.generated.resources.heatmap_fire_icon
 import mobiletypist.composeapp.generated.resources.heatmap_less
 import mobiletypist.composeapp.generated.resources.heatmap_more
 import mobiletypist.composeapp.generated.resources.heatmap_no_activity
-import mobiletypist.composeapp.generated.resources.heatmap_typed_on
+import mobiletypist.composeapp.generated.resources.heatmap_tests_on
 import org.example.project.MobileTypistTheme
 import org.example.project.data.repo.ActivityHeatmapRepository
 import org.example.project.data.repo.HeatmapCell
@@ -81,12 +81,12 @@ private val FireInferno = Color(0xFFE63946)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityHeatmap(
-    dailyDurations: Map<String, Int>,
+    dailyActivity: Map<String, Int>,
     isVisible: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
-    val availableMonths = remember(dailyDurations) {
-        ActivityHeatmapRepository.availableMonths(dailyDurations)
+    val availableMonths = remember(dailyActivity) {
+        ActivityHeatmapRepository.availableMonths(dailyActivity)
     }
     val pagerState = rememberPagerState(
         initialPage = (availableMonths.lastIndex).coerceAtLeast(0),
@@ -221,11 +221,11 @@ fun ActivityHeatmap(
                 beyondViewportPageCount = 1,
             ) { page ->
                 val yearMonth = availableMonths.getOrElse(page) { currentMonth }
-                val monthData = remember(yearMonth, dailyDurations) {
+                val monthData = remember(yearMonth, dailyActivity) {
                     ActivityHeatmapRepository.buildMonthGrid(
                         year = yearMonth.year,
                         month = yearMonth.month,
-                        dailyDurations = dailyDurations,
+                        dailyActivity = dailyActivity,
                     )
                 }
 
@@ -244,10 +244,10 @@ fun ActivityHeatmap(
             HeatmapLegend()
 
             val detailText = selectedCell?.let { cell ->
-                if (cell.day != null && cell.durationSeconds > 0) {
+                if (cell.day != null && cell.testCount > 0) {
                     stringResource(
-                        Res.string.heatmap_typed_on,
-                        heatmapFormatDuration(cell.durationSeconds),
+                        Res.string.heatmap_tests_on,
+                        heatmapFormatTestCount(cell.testCount),
                         heatmapDayLabel(currentMonth.year, currentMonth.month, cell.day),
                     )
                 } else if (cell.day != null) {
@@ -292,7 +292,7 @@ private fun MonthHeatmapGrid(
                 week.forEachIndexed { dayIndex, cell ->
                     HeatmapDayCell(
                         cell = cell,
-                        maxDurationSeconds = monthData.maxDurationSeconds,
+                        maxTestCount = monthData.maxTestCount,
                         isSelected = cell.dateKey != null && cell.dateKey == selectedCell?.dateKey,
                         animationEpoch = animationEpoch,
                         animationIndex = weekIndex * 7 + dayIndex,
@@ -308,7 +308,7 @@ private fun MonthHeatmapGrid(
 @Composable
 private fun HeatmapDayCell(
     cell: HeatmapCell,
-    maxDurationSeconds: Int,
+    maxTestCount: Int,
     isSelected: Boolean,
     animationEpoch: Int,
     animationIndex: Int,
@@ -316,10 +316,10 @@ private fun HeatmapDayCell(
     onClick: () -> Unit,
 ) {
     val fireIcon = stringResource(Res.string.heatmap_fire_icon)
-    val intensity = heatmapIntensity(cell.durationSeconds, maxDurationSeconds)
+    val intensity = heatmapIntensity(cell.testCount, maxTestCount)
     val cellColor = heatmapCellColor(intensity)
     val fireTint = heatmapFireTint(intensity)
-    val showFire = cell.day != null && cell.durationSeconds > 0
+    val showFire = cell.day != null && cell.testCount > 0
 
     val scale = remember(animationEpoch) { Animatable(0.72f) }
     val alpha = remember(animationEpoch) { Animatable(0f) }
@@ -412,8 +412,8 @@ private fun HeatmapDayCell(
                     text = cell.day.toString(),
                     style = TextStyle(
                         fontSize = 11.sp,
-                        fontWeight = if (cell.durationSeconds > 0) FontWeight.SemiBold else FontWeight.Normal,
-                        color = if (cell.durationSeconds > 0) {
+                        fontWeight = if (cell.testCount > 0) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (cell.testCount > 0) {
                             MaterialTheme.colorScheme.onSurface
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
@@ -482,9 +482,9 @@ private fun HeatmapLegend() {
     }
 }
 
-private fun heatmapIntensity(durationSeconds: Int, maxDurationSeconds: Int): Float {
-    if (durationSeconds <= 0) return 0f
-    return (durationSeconds.toFloat() / maxDurationSeconds.coerceAtLeast(1)).coerceIn(0f, 1f)
+private fun heatmapIntensity(testCount: Int, maxTestCount: Int): Float {
+    if (testCount <= 0) return 0f
+    return (testCount.toFloat() / maxTestCount.coerceAtLeast(1)).coerceIn(0f, 1f)
 }
 
 @Composable
@@ -511,18 +511,18 @@ private fun heatmapFireTint(intensity: Float): Color {
 @Preview
 @Composable
 private fun ActivityHeatmapPreview() {
-    val sampleDurations = mapOf(
-        "2026-07-01" to 120,
-        "2026-07-02" to 300,
-        "2026-07-03" to 45,
-        "2026-07-05" to 900,
-        "2026-07-10" to 1800,
-        "2026-07-15" to 600,
+    val sampleActivity = mapOf(
+        "2026-07-01" to 2,
+        "2026-07-02" to 5,
+        "2026-07-03" to 1,
+        "2026-07-05" to 10,
+        "2026-07-10" to 15,
+        "2026-07-15" to 4,
     )
 
     MobileTypistTheme(darkTheme = false) {
         ActivityHeatmap(
-            dailyDurations = sampleDurations,
+            dailyActivity = sampleActivity,
             isVisible = true,
         )
     }
@@ -531,15 +531,15 @@ private fun ActivityHeatmapPreview() {
 @Preview
 @Composable
 private fun ActivityHeatmapDarkPreview() {
-    val sampleDurations = mapOf(
-        "2026-07-01" to 120,
-        "2026-07-05" to 900,
-        "2026-07-10" to 1800,
+    val sampleActivity = mapOf(
+        "2026-07-01" to 2,
+        "2026-07-05" to 10,
+        "2026-07-10" to 15,
     )
 
     MobileTypistTheme(darkTheme = true) {
         ActivityHeatmap(
-            dailyDurations = sampleDurations,
+            dailyActivity = sampleActivity,
             isVisible = true,
         )
     }

@@ -29,6 +29,8 @@ import mobiletypist.composeapp.generated.resources.heatmap_month_november
 import mobiletypist.composeapp.generated.resources.heatmap_month_october
 import mobiletypist.composeapp.generated.resources.heatmap_month_september
 import mobiletypist.composeapp.generated.resources.heatmap_month_year
+import mobiletypist.composeapp.generated.resources.heatmap_test_count_many
+import mobiletypist.composeapp.generated.resources.heatmap_test_count_one
 import org.example.project.data.repo.YearMonth
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -68,6 +70,15 @@ fun heatmapFormatDuration(seconds: Int): String {
         hours > 0 -> stringResource(Res.string.heatmap_duration_hours, hours, minutes)
         minutes > 0 -> stringResource(Res.string.heatmap_duration_minutes, minutes, secs)
         else -> stringResource(Res.string.heatmap_duration_seconds, secs)
+    }
+}
+
+@Composable
+fun heatmapFormatTestCount(count: Int): String {
+    return if (count == 1) {
+        stringResource(Res.string.heatmap_test_count_one, count)
+    } else {
+        stringResource(Res.string.heatmap_test_count_many, count)
     }
 }
 

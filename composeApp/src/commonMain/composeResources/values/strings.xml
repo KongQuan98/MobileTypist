@@ -13,6 +13,10 @@
     <string name="home_title">home</string>
     <string name="profile_title">profile</string>
 
+    // statistics screen
+    <string name="statistics_summary_title">summary</string>
+
+
     // statistics heatmap
     <string name="statistics_activity_title">activity</string>
     <string name="heatmap_less">less</string>
@@ -28,6 +32,9 @@
     <string name="heatmap_fire_icon">🔥</string>
     <string name="heatmap_select_month">select month</string>
     <string name="heatmap_detail_placeholder"> </string>
+    <string name="heatmap_test_count_one">%1$d test</string>
+    <string name="heatmap_test_count_many">%1$d tests</string>
+    <string name="heatmap_tests_on">%1$s on %2$s</string>
 
     // heatmap day headers (short)
     <string name="heatmap_day_sun">S</string>

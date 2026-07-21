@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.statistics_activity_title
+import mobiletypist.composeapp.generated.resources.statistics_summary_title
 import mobiletypist.composeapp.generated.resources.statistics_title
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
@@ -39,7 +40,7 @@ data class StatisticsScreenState(
     val results: List<TypingTestResult> = emptyList(),
     val bestWpm: Int = 0,
     val totalTests: Int = 0,
-    val dailyActivityDurations: Map<String, Int> = emptyMap(),
+    val dailyActivity: Map<String, Int> = emptyMap(),
     val isLoading: Boolean = false
 )
 
@@ -52,7 +53,7 @@ fun StatisticsScreen(
     val results = statisticsScreenState.results
     val bestWpm = statisticsScreenState.bestWpm
     val totalTests = statisticsScreenState.totalTests
-    val dailyActivityDurations = statisticsScreenState.dailyActivityDurations
+    val dailyActivity = statisticsScreenState.dailyActivity
     val isLoading = statisticsScreenState.isLoading
 
     val avgWpm = if (results.isNotEmpty()) results.map { it.wpm }.average().toInt() else 0
@@ -107,9 +108,30 @@ fun StatisticsScreen(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
             ) {
-                // Summary Stats Grid
+                // Activity Heatmap
                 item {
                     Spacer(Modifier.height(20.dp))
+                    StatSectionLabel(stringResource(Res.string.statistics_activity_title).uppercase())
+                    Spacer(Modifier.height(16.dp))
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(280.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .shimmerEffect(),
+                        )
+                    } else {
+                        ActivityHeatmap(
+                            dailyActivity = dailyActivity,
+                            isVisible = isHeatmapVisible,
+                        )
+                    }
+                    Spacer(Modifier.height(40.dp))
+                }
+
+                // Summary Stats Grid
+                item {
                     val animatedAvgWpm by animateFloatAsState(
                         targetValue = if (startAnimation) avgWpm.toFloat() else 0f,
                         animationSpec = tween(
@@ -150,6 +172,9 @@ fun StatisticsScreen(
                             easing = FastOutSlowInEasing
                         )
                     )
+
+                    StatSectionLabel(stringResource(Res.string.statistics_summary_title).uppercase())
+                    Spacer(Modifier.height(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatCard(
@@ -206,27 +231,6 @@ fun StatisticsScreen(
                         results = results,
                         startAnimation = startAnimation,
                     )
-                    Spacer(Modifier.height(40.dp))
-                }
-
-                // Activity Heatmap
-                item(key = "activity_heatmap") {
-                    StatSectionLabel(stringResource(Res.string.statistics_activity_title))
-                    Spacer(Modifier.height(16.dp))
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(280.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .shimmerEffect(),
-                        )
-                    } else {
-                        ActivityHeatmap(
-                            dailyDurations = dailyActivityDurations,
-                            isVisible = isHeatmapVisible,
-                        )
-                    }
                     Spacer(Modifier.height(40.dp))
                 }
             }
@@ -418,7 +422,9 @@ private fun StatSectionLabel(text: String) {
     )
 }
 
-@Preview
+@Preview(
+    heightDp = 1300
+)
 @Composable
 private fun StatisticsScreenPreview() {
     val dummyProfileScreenState = StatisticsScreenState(
@@ -456,9 +462,9 @@ private fun StatisticsScreenPreview() {
         ),
         bestWpm = 50,
         totalTests = 25,
-        dailyActivityDurations = mapOf(
-            "2026-07-01" to 120,
-            "2026-07-05" to 600,
+        dailyActivity = mapOf(
+            "2026-07-01" to 2,
+            "2026-07-05" to 10,
         ),
         isLoading = false
     )

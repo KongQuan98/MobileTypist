@@ -44,7 +44,7 @@ class StorageManager(private val settings: Settings) {
     private val _totalTestsFlow = MutableStateFlow(getTotalTests())
     val totalTestsFlow = _totalTestsFlow.asStateFlow()
 
-    private val _dailyActivityFlow = MutableStateFlow(getDailyActivityDurations())
+    private val _dailyActivityFlow = MutableStateFlow(getDailyActivity())
     val dailyActivityFlow = _dailyActivityFlow.asStateFlow()
 
     private val _achievementProgressFlow = MutableStateFlow(getAchievementProgress())
@@ -75,7 +75,7 @@ class StorageManager(private val settings: Settings) {
         _totalTestsFlow.value = getTotalTests()
         _userProfileFlow.value = getUserProfile()
         _settingsFlow.value = getSettings()
-        _dailyActivityFlow.value = getDailyActivityDurations()
+        _dailyActivityFlow.value = getDailyActivity()
         _achievementProgressFlow.value = getAchievementProgress()
     }
 
@@ -165,20 +165,20 @@ class StorageManager(private val settings: Settings) {
         _userProfileFlow.value = profile
     }
 
-    fun getDailyActivityDurations(): Map<String, Int> {
-        val stored = readDailyActivityDurations()
+    fun getDailyActivity(): Map<String, Int> {
+        val stored = readDailyActivity()
         if (stored.isNotEmpty()) {
             return stored
         }
 
         val migrated = ActivityHeatmapRepository.aggregateFromResults(getResults())
         if (migrated.isNotEmpty()) {
-            writeDailyActivityDurations(migrated)
+            writeDailyActivity(migrated)
         }
         return migrated
     }
 
-    private fun readDailyActivityDurations(): Map<String, Int> {
+    private fun readDailyActivity(): Map<String, Int> {
         val jsonString = settings.getStringOrNull(KEY_DAILY_ACTIVITY) ?: return emptyMap()
         return try {
             json.decodeFromString<DailyActivityDurations>(jsonString).durations
@@ -187,17 +187,15 @@ class StorageManager(private val settings: Settings) {
         }
     }
 
-    private fun writeDailyActivityDurations(durations: Map<String, Int>) {
-        settings[KEY_DAILY_ACTIVITY] = json.encodeToString(DailyActivityDurations(durations))
+    private fun writeDailyActivity(activity: Map<String, Int>) {
+        settings[KEY_DAILY_ACTIVITY] = json.encodeToString(DailyActivityDurations(activity))
     }
 
     private fun addDailyActivity(result: TypingTestResult) {
-        if (result.duration <= 0) return
-
-        val durations = getDailyActivityDurations().toMutableMap()
+        val activity = getDailyActivity().toMutableMap()
         val dateKey = ActivityHeatmapRepository.dateKeyFromTimestamp(result.timestamp)
-        durations[dateKey] = (durations[dateKey] ?: 0) + result.duration
-        writeDailyActivityDurations(durations)
+        activity[dateKey] = (activity[dateKey] ?: 0) + 1
+        writeDailyActivity(activity)
     }
 
     fun clearAllData() {

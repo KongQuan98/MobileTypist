@@ -8,7 +8,7 @@ import org.example.project.utils.timestampToDateKey
 
 data class HeatmapCell(
     val day: Int?,
-    val durationSeconds: Int = 0,
+    val testCount: Int = 0,
     val dateKey: String? = null,
 )
 
@@ -16,7 +16,7 @@ data class MonthHeatmapData(
     val year: Int,
     val month: Int,
     val weeks: List<List<HeatmapCell>>,
-    val maxDurationSeconds: Int,
+    val maxTestCount: Int,
 )
 
 data class YearMonth(val year: Int, val month: Int) : Comparable<YearMonth> {
@@ -34,20 +34,19 @@ object ActivityHeatmapRepository {
 
     fun aggregateFromResults(results: List<TypingTestResult>): Map<String, Int> {
         return results
-            .filter { it.duration > 0 }
             .groupBy { dateKeyFromTimestamp(it.timestamp) }
-            .mapValues { (_, dayResults) -> dayResults.sumOf { it.duration } }
+            .mapValues { (_, dayResults) -> dayResults.size }
     }
 
-    fun availableMonths(dailyDurations: Map<String, Int>): List<YearMonth> {
+    fun availableMonths(dailyActivity: Map<String, Int>): List<YearMonth> {
         val today = currentLocalDate()
         val end = YearMonth(today.year, today.monthNumber)
 
-        if (dailyDurations.isEmpty()) {
+        if (dailyActivity.isEmpty()) {
             return listOf(end)
         }
 
-        val earliestKey = dailyDurations.keys.min()
+        val earliestKey = dailyActivity.keys.min()
         val earliestDate = LocalDate.parse(earliestKey)
         val start = YearMonth(earliestDate.year, earliestDate.monthNumber)
 
@@ -63,7 +62,7 @@ object ActivityHeatmapRepository {
     fun buildMonthGrid(
         year: Int,
         month: Int,
-        dailyDurations: Map<String, Int>,
+        dailyActivity: Map<String, Int>,
     ): MonthHeatmapData {
         val firstDay = LocalDate(year, month, 1)
         val daysInMonth = daysInMonth(year, month)
@@ -80,19 +79,19 @@ object ActivityHeatmapRepository {
                     val day = position - leadingPadding + 1
                     val date = LocalDate(year, month, day)
                     val dateKey = date.toString()
-                    val duration = dailyDurations[dateKey] ?: 0
+                    val count = dailyActivity[dateKey] ?: 0
                     HeatmapCell(
                         day = day,
-                        durationSeconds = duration,
+                        testCount = count,
                         dateKey = dateKey,
                     )
                 }
             }
         }
 
-        val maxDuration = weeks
+        val maxCount = weeks
             .flatten()
-            .maxOfOrNull { it.durationSeconds }
+            .maxOfOrNull { it.testCount }
             ?.coerceAtLeast(1)
             ?: 1
 
@@ -100,7 +99,7 @@ object ActivityHeatmapRepository {
             year = year,
             month = month,
             weeks = weeks,
-            maxDurationSeconds = maxDuration,
+            maxTestCount = maxCount,
         )
     }
 

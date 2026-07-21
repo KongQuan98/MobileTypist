@@ -86,7 +86,7 @@ fun Navigation(
                         results = results,
                         bestWpm = bestWpm,
                         totalTests = totalTests,
-                        dailyActivityDurations = dailyActivity,
+                        dailyActivity = dailyActivity,
                     ),
                     modifier = modifier.then(scaffoldModifier),
                     refreshData = { storageManager.refreshStats() }
