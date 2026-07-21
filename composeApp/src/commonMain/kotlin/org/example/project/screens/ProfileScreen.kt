@@ -1,6 +1,7 @@
 package org.example.project.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Edit3
+import compose.icons.feathericons.Star
 import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
 import org.example.project.data.model.TypingMode
@@ -99,19 +101,29 @@ fun ProfileScreen(
         0
     }
 
+    var isRecentTestsExpanded by remember { mutableStateOf(false) }
+
+    // Click border highlight effect
     val editProfileInteractionSource = remember { MutableInteractionSource() }
     val viewMoreAchievementInteractionSource = remember { MutableInteractionSource() }
+    val viewMoreTestInteractionSource = remember { MutableInteractionSource() }
+
+    // Button click
     val isEditProfilePressed by editProfileInteractionSource.collectIsPressedAsState()
     val isViewMoreAchievementPressed by viewMoreAchievementInteractionSource.collectIsPressedAsState()
 
-    val editProfileBorderColor =
-        if (isEditProfilePressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+    val editProfileBorderColor by animateColorAsState(
+        targetValue = if (isEditProfilePressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
             alpha = 0.3f
-        )
-    val viewMoreAchievementBorderColor =
-        if (isViewMoreAchievementPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+        ),
+        animationSpec = tween(durationMillis = 150)
+    )
+    val viewMoreAchievementBorderColor by animateColorAsState(
+        targetValue = if (isViewMoreAchievementPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
             alpha = 0.3f
-        )
+        ),
+        animationSpec = tween(durationMillis = 150)
+    )
 
     var startAnimation by remember { mutableStateOf(false) }
     LaunchedEffect(startAnimation) {
@@ -407,7 +419,8 @@ fun ProfileScreen(
                         )
                     }
                 } else {
-                    itemsIndexed(results) { index, result ->
+                    val displayResults = if (isRecentTestsExpanded) results else results.take(3)
+                    itemsIndexed(displayResults) { _, result ->
                         AnimatedVisibility(
                             visible = true,
                             enter = fadeIn() + slideInVertically(
@@ -416,6 +429,50 @@ fun ProfileScreen(
                         ) {
                             ProfileResultItem(result)
                             Spacer(Modifier.height(8.dp))
+                        }
+                    }
+
+                    if (results.size > 3) {
+                        item(key = "view_more_less_tests_toggle") {
+                            val isPressed by viewMoreTestInteractionSource.collectIsPressedAsState()
+                            val animatedBorderColor by animateColorAsState(
+                                targetValue = if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                    alpha = 0.3f
+                                ),
+                                animationSpec = tween(durationMillis = 150)
+                            )
+
+                            Spacer(Modifier.height(16.dp))
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(
+                                        1.dp,
+                                        animatedBorderColor,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .hapticClickable(
+                                        interactionSource = viewMoreTestInteractionSource,
+                                        onClick = {
+                                            isRecentTestsExpanded = !isRecentTestsExpanded
+                                        }
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (isRecentTestsExpanded) "view less" else "view more tests",
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontFamily = FontFamily.Monospace,
+                                        textAlign = TextAlign.Center,
+                                    ),
+                                    modifier = Modifier
+                                        .padding(vertical = 8.dp)
+                                        .fillMaxWidth(),
+                                )
+                            }
                         }
                     }
                 }
@@ -686,7 +743,7 @@ private fun ProfileResultItem(
     }
 }
 
-@Preview
+@Preview(heightDp = 1000)
 @Composable
 private fun ProfileScreenPreviewDark() {
     val dummyProfileScreenState = ProfileScreenState(
@@ -721,10 +778,33 @@ private fun ProfileScreenPreviewDark() {
                 correctChars = 0,
                 errorCount = 0,
                 duration = 0,
+            ),
+            TypingTestResult(
+                id = "",
+                mode = TypingMode.WORDS,
+                wpm = 100,
+                accuracy = 90,
+                timestamp = 1000L,
+                correctChars = 0,
+                errorCount = 0,
+                duration = 0,
             )
         ),
         bestWpm = 50,
         totalTests = 25,
+        achievements = listOf(
+            Achievement(
+                id = "1",
+                title = "Speed Demon",
+                description = "Reach 100 WPM",
+                icon = FeatherIcons.Star,
+                hidden = false,
+                progress = 100,
+                target = 100,
+                unlocked = true,
+                unlockedAt = null
+            )
+        )
     )
 
     PreviewCompositionLocals {
@@ -777,6 +857,30 @@ private fun ProfileScreenPreview() {
         ),
         bestWpm = 50,
         totalTests = 25,
+        achievements = listOf(
+            Achievement(
+                id = "1",
+                title = "Speed Demon",
+                description = "Reach 100 WPM",
+                icon = FeatherIcons.Star,
+                hidden = false,
+                progress = 100,
+                target = 100,
+                unlocked = true,
+                unlockedAt = null
+            ),
+            Achievement(
+                id = "2",
+                title = "Sharpshooter",
+                description = "100% accuracy",
+                icon = FeatherIcons.Star,
+                hidden = false,
+                progress = 100,
+                target = 100,
+                unlocked = true,
+                unlockedAt = null
+            )
+        )
     )
 
     PreviewCompositionLocals {
