@@ -431,6 +431,8 @@ private fun AchievementCard(
 ) {
     Column(
         modifier = modifier
+            .fillMaxWidth()
+            .height(150.dp)
             .background(
                 MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
                 RoundedCornerShape(12.dp)

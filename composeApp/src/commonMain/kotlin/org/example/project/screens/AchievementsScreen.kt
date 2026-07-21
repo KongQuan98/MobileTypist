@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -151,7 +150,9 @@ fun AchievementsScreen(
             ) {
                 items(achievements) { achievement ->
                     Box(
-                        modifier = Modifier.height(120.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         AchievementGridItem(achievement)
@@ -166,7 +167,7 @@ fun AchievementsScreen(
 fun AchievementGridItem(achievement: Achievement) {
     Column(
         modifier = Modifier
-            .fillMaxHeight()
+            .fillMaxSize()
             .background(
                 MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
                 RoundedCornerShape(12.dp)
