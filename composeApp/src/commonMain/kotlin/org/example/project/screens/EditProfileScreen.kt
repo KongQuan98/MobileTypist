@@ -48,12 +48,12 @@ import compose.icons.feathericons.Check
 import compose.icons.feathericons.Smile
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.UserProfile
-import org.example.project.ui.LocalHaptics
-import org.example.project.ui.PreviewCompositionLocals
-import org.example.project.ui.hapticClickable
-import org.example.project.ui.wrap
 import org.example.project.utils.AudioPlayer
+import org.example.project.utils.LocalHaptics
+import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.SoundEffect
+import org.example.project.utils.hapticClickable
+import org.example.project.utils.wrap
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable

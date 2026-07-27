@@ -1,12 +1,9 @@
-package org.example.project.ui
+package org.example.project.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import com.russhwolf.settings.MapSettings
 import org.example.project.data.storage.StorageManager
-import org.example.project.utils.AudioPlayerApi
-import org.example.project.utils.Haptics
-import org.example.project.utils.SoundEffect
 
 /** No-op haptics for Compose previews. */
 object PreviewHaptics : Haptics {
@@ -18,7 +15,7 @@ object PreviewHaptics : Haptics {
 
 /**
  * No-op audio for Compose previews.
- * Must not subclass [org.example.project.utils.AudioPlayer] — Android's implementation
+ * Must not subclass [AudioPlayer] — Android's implementation
  * references SoundPool, which is unavailable in the preview classloader.
  */
 object PreviewAudioPlayer : AudioPlayerApi {

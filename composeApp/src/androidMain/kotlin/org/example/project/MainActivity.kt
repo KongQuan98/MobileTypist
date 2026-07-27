@@ -7,8 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import org.example.project.data.storage.initAppContext
-import org.example.project.ui.previewStorageManager
 import org.example.project.utils.AppContextProvider
+import org.example.project.utils.previewStorageManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -41,11 +41,11 @@ import mobiletypist.composeapp.generated.resources.settings_title
 import mobiletypist.composeapp.generated.resources.version
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.AppSettings
-import org.example.project.ui.LocalHaptics
-import org.example.project.ui.PreviewCompositionLocals
-import org.example.project.ui.hapticClickable
-import org.example.project.ui.wrap
 import org.example.project.utils.AudioPlayer
+import org.example.project.utils.LocalHaptics
+import org.example.project.utils.PreviewCompositionLocals
+import org.example.project.utils.hapticClickable
+import org.example.project.utils.wrap
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 

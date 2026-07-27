@@ -28,7 +28,10 @@ import org.example.project.navigation.model.BottomNavigationTab
 import org.example.project.navigation.model.Screen
 import org.example.project.screens.SettingsScreen
 import org.example.project.utils.AudioPlayer
+import org.example.project.utils.LocalHaptics
+import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.isIOS
+import org.example.project.utils.wrap
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 

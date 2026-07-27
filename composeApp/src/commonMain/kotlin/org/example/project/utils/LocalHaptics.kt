@@ -1,4 +1,4 @@
-package org.example.project.ui
+package org.example.project.utils
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -6,9 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import org.example.project.utils.AudioPlayerApi
-import org.example.project.utils.Haptics
-import org.example.project.utils.SoundEffect
 
 val LocalHaptics = staticCompositionLocalOf<Haptics> {
     error("No Haptics provided")

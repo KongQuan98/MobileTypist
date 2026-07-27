@@ -1,4 +1,4 @@
-package org.example.project.ui
+package org.example.project.utils
 
 import androidx.compose.runtime.Composable
 import kotlinx.datetime.DayOfWeek

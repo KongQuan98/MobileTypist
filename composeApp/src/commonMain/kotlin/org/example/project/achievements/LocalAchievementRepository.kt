@@ -1,4 +1,4 @@
-package org.example.project.ui
+package org.example.project.achievements
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import org.example.project.achievements.repository.AchievementRepository

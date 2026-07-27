@@ -10,15 +10,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import org.example.project.achievements.LocalAchievementRepository
 import org.example.project.achievements.repository.AchievementRepository
 import org.example.project.data.storage.StorageManager
 import org.example.project.data.storage.createSettings
 import org.example.project.navigation.Navigation
 import org.example.project.navigation.model.Screen
 import org.example.project.navigation.rememberNavigationManager
-import org.example.project.ui.LocalAchievementRepository
-import org.example.project.ui.LocalAudioPlayer
-import org.example.project.ui.LocalHaptics
+import org.example.project.utils.LocalAudioPlayer
+import org.example.project.utils.LocalHaptics
 import org.example.project.utils.TypingHapticFeedback
 import org.example.project.utils.createAudioPlayer
 

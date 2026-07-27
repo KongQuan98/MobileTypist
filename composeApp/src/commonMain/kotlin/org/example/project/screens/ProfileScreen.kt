@@ -61,10 +61,10 @@ import org.example.project.achievements.model.Achievement
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
-import org.example.project.ui.PreviewCompositionLocals
 import org.example.project.ui.TooltipHint
-import org.example.project.ui.hapticClickable
+import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.formatDate
+import org.example.project.utils.hapticClickable
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class ProfileScreenState(

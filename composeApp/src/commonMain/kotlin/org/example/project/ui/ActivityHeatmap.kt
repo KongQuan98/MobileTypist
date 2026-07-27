@@ -70,6 +70,9 @@ import org.example.project.data.repo.ActivityHeatmapRepository
 import org.example.project.data.repo.HeatmapCell
 import org.example.project.data.repo.MonthHeatmapData
 import org.example.project.data.repo.YearMonth
+import org.example.project.utils.heatmapDayLabel
+import org.example.project.utils.heatmapFormatTestCount
+import org.example.project.utils.heatmapMonthYearLabel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
