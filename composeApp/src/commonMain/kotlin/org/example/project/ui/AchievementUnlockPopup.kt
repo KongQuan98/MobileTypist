@@ -50,6 +50,8 @@ import compose.icons.feathericons.X
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.achievement_close_content_description
 import mobiletypist.composeapp.generated.resources.achievement_dismiss_button
+import mobiletypist.composeapp.generated.resources.achievement_first_strike_desc
+import mobiletypist.composeapp.generated.resources.achievement_first_strike_title
 import mobiletypist.composeapp.generated.resources.achievement_unlocked_label
 import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
@@ -212,7 +214,7 @@ fun AchievementUnlockContent(
 
                 // Achievement Title
                 Text(
-                    text = achievement.title,
+                    text = stringResource(achievement.title),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 28.sp,
@@ -226,7 +228,7 @@ fun AchievementUnlockContent(
 
                 // Achievement Description
                 Text(
-                    text = achievement.description,
+                    text = stringResource(achievement.description),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                         fontSize = 14.sp,
@@ -281,8 +283,8 @@ private fun AchievementUnlockPopupPreview() {
         AchievementUnlockContent(
             achievement = Achievement(
                 id = "first_game",
-                title = "First Strike",
-                description = "Completed your first typing test",
+                title = Res.string.achievement_first_strike_title,
+                description = Res.string.achievement_first_strike_desc,
                 icon = FeatherIcons.Star,
                 hidden = false,
                 progress = 1,
@@ -304,8 +306,8 @@ private fun AchievementUnlockPopupDarkPreview() {
         AchievementUnlockContent(
             achievement = Achievement(
                 id = "first_game",
-                title = "First Strike",
-                description = "Completed your first typing test",
+                title = Res.string.achievement_first_strike_title,
+                description = Res.string.achievement_first_strike_desc,
                 icon = FeatherIcons.Star,
                 hidden = false,
                 progress = 1,

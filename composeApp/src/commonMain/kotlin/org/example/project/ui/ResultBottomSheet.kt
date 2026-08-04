@@ -35,8 +35,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import mobiletypist.composeapp.generated.resources.*
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -79,7 +81,8 @@ fun ResultBottomSheet(
                         )
                     )
                     Text(
-                        text = "WORDS PER MINUTE", style = TextStyle(
+                        text = stringResource(Res.string.result_words_per_minute),
+                        style = TextStyle(
                             fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontFamily = FontFamily.Monospace,
@@ -137,17 +140,17 @@ fun ResultBottomSheet(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         StatItem(
-                            label = "ACCURACY",
+                            label = stringResource(Res.string.result_accuracy),
                             value = "${result.accuracy}%",
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         StatItem(
-                            label = "CORRECT",
+                            label = stringResource(Res.string.result_correct),
                             value = result.correctChars.toString(),
                             color = MaterialTheme.colorScheme.primary
                         )
                         StatItem(
-                            label = "ERRORS",
+                            label = stringResource(Res.string.result_errors),
                             value = result.errorCount.toString(),
                             color = MaterialTheme.colorScheme.error
                         )
@@ -156,7 +159,8 @@ fun ResultBottomSheet(
                     Spacer(Modifier.height(16.dp))
 
                     Text(
-                        text = "$keystrokes keystrokes", style = TextStyle(
+                        text = stringResource(Res.string.result_keystrokes, keystrokes),
+                        style = TextStyle(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontFamily = FontFamily.Monospace
@@ -179,7 +183,8 @@ fun ResultBottomSheet(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = "restart test", style = TextStyle(
+                            text = stringResource(Res.string.result_restart_test),
+                            style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace
@@ -204,7 +209,7 @@ fun ResultBottomSheet(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = "back",
+                            text = stringResource(Res.string.back),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,

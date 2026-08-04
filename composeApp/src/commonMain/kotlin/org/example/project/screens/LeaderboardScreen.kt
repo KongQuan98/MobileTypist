@@ -52,7 +52,15 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Award
 import kotlinx.coroutines.delay
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.leaderboard_tabs_15s
+import mobiletypist.composeapp.generated.resources.leaderboard_tabs_30s
+import mobiletypist.composeapp.generated.resources.leaderboard_tabs_60s
+import mobiletypist.composeapp.generated.resources.leaderboard_tabs_all
+import mobiletypist.composeapp.generated.resources.leaderboard_title
+import mobiletypist.composeapp.generated.resources.wpm
 import org.example.project.MobileTypistTheme
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class LeaderboardEntry(
@@ -66,7 +74,12 @@ data class LeaderboardEntry(
 fun LeaderboardScreen(
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("15s", "30s", "60s", "all")
+    val tabs = listOf(
+        stringResource(Res.string.leaderboard_tabs_15s),
+        stringResource(Res.string.leaderboard_tabs_30s),
+        stringResource(Res.string.leaderboard_tabs_60s),
+        stringResource(Res.string.leaderboard_tabs_all)
+    )
     var selectedTab by remember { mutableStateOf(1) } // 30s selected by default
     var animateStart by remember { mutableStateOf(false) }
 
@@ -105,7 +118,7 @@ fun LeaderboardScreen(
                 Spacer(Modifier.height(screenHeight * 0.04f))
 
                 Text(
-                    text = "leaderboard",
+                    text = stringResource(Res.string.leaderboard_title),
                     style = TextStyle(
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
@@ -335,7 +348,7 @@ private fun PodiumPosition(
             )
             Spacer(Modifier.width(2.dp))
             Text(
-                text = "wpm",
+                text = stringResource(Res.string.wpm),
                 style = TextStyle(
                     fontSize = 9.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

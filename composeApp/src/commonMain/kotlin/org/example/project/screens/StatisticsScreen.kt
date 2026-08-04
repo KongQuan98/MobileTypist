@@ -24,10 +24,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import mobiletypist.composeapp.generated.resources.Res
-import mobiletypist.composeapp.generated.resources.statistics_activity_title
-import mobiletypist.composeapp.generated.resources.statistics_summary_title
-import mobiletypist.composeapp.generated.resources.statistics_title
+import mobiletypist.composeapp.generated.resources.*
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
@@ -178,14 +175,14 @@ fun StatisticsScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatCard(
-                                label = "AVG WPM",
+                                label = stringResource(Res.string.statistics_avg_wpm),
                                 value = animatedAvgWpm.toInt().toString(),
                                 textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f),
                                 isLoading = isLoading
                             )
                             StatCard(
-                                label = "BEST WPM",
+                                label = stringResource(Res.string.statistics_best_wpm),
                                 value = animatedBestWpm.toInt().toString(),
                                 textColor = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.weight(1f),
@@ -194,14 +191,18 @@ fun StatisticsScreen(
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatCard(
-                                label = "TIME TYPED",
-                                value = "${animatedMinutesTyped.toInt()}m ${animatedSecondsTyped.toInt()}s",
+                                label = stringResource(Res.string.statistics_time_typed),
+                                value = stringResource(
+                                    Res.string.statistics_time_typed_value,
+                                    animatedMinutesTyped.toInt(),
+                                    animatedSecondsTyped.toInt()
+                                ),
                                 textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f),
                                 isLoading = isLoading
                             )
                             StatCard(
-                                label = "TESTS",
+                                label = stringResource(Res.string.statistics_tests),
                                 value = animatedTotalTests.toInt().toString(),
                                 textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f),
@@ -214,7 +215,7 @@ fun StatisticsScreen(
 
                 // WPM History Graph
                 item {
-                    StatSectionLabel("WPM HISTORY (LAST 10)")
+                    StatSectionLabel(stringResource(Res.string.statistics_wpm_history))
                     Spacer(Modifier.height(16.dp))
                     WpmHistoryGraph(
                         results.takeLast(10).map { it.wpm },
@@ -225,7 +226,7 @@ fun StatisticsScreen(
 
                 // Accuracy Distribution
                 item {
-                    StatSectionLabel("ACCURACY DISTRIBUTION")
+                    StatSectionLabel(stringResource(Res.string.statistics_accuracy_distribution))
                     Spacer(Modifier.height(16.dp))
                     AccuracyDistribution(
                         results = results,

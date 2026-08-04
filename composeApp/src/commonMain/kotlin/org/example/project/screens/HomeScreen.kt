@@ -63,6 +63,7 @@ import kotlinx.coroutines.launch
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.app_icon
 import mobiletypist.composeapp.generated.resources.app_name
+import mobiletypist.composeapp.generated.resources.home_start_description
 import org.example.project.MobileTypistTheme
 import org.example.project.achievements.LocalAchievementRepository
 import org.example.project.achievements.events.AchievementEvent
@@ -277,7 +278,7 @@ private fun StartPlayButton(
         ) {
             Icon(
                 imageVector = FeatherIcons.Play,
-                contentDescription = "Start",
+                contentDescription = stringResource(Res.string.home_start_description),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(80.dp),
             )

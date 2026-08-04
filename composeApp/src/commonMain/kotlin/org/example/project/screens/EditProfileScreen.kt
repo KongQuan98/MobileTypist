@@ -46,6 +46,17 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowLeft
 import compose.icons.feathericons.Check
 import compose.icons.feathericons.Smile
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.back
+import mobiletypist.composeapp.generated.resources.cancel
+import mobiletypist.composeapp.generated.resources.edit_profile_bio
+import mobiletypist.composeapp.generated.resources.edit_profile_change_avatar_content_description
+import mobiletypist.composeapp.generated.resources.edit_profile_change_avatar_description
+import mobiletypist.composeapp.generated.resources.edit_profile_display_name
+import mobiletypist.composeapp.generated.resources.edit_profile_email
+import mobiletypist.composeapp.generated.resources.edit_profile_title
+import mobiletypist.composeapp.generated.resources.edit_profile_username
+import mobiletypist.composeapp.generated.resources.save
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.UserProfile
 import org.example.project.utils.AudioPlayer
@@ -54,6 +65,7 @@ import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.SoundEffect
 import org.example.project.utils.hapticClickable
 import org.example.project.utils.wrap
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -114,21 +126,24 @@ fun EditProfileScreen(
 
                     // Form Fields
                     EditField(
-                        label = "USERNAME",
+                        label = stringResource(Res.string.edit_profile_username),
                         value = username,
                         onValueChange = { username = it },
                         prefix = "@ "
                     )
                     Spacer(Modifier.height(24.dp))
                     EditField(
-                        label = "DISPLAY NAME",
+                        label = stringResource(Res.string.edit_profile_display_name),
                         value = displayName,
                         onValueChange = { displayName = it })
                     Spacer(Modifier.height(24.dp))
-                    EditField(label = "EMAIL", value = email, onValueChange = { email = it })
+                    EditField(
+                        label = stringResource(Res.string.edit_profile_email),
+                        value = email,
+                        onValueChange = { email = it })
                     Spacer(Modifier.height(24.dp))
                     EditField(
-                        label = "BIO",
+                        label = stringResource(Res.string.edit_profile_bio),
                         value = bio,
                         onValueChange = { bio = it },
                         singleLine = false,
@@ -183,7 +198,7 @@ private fun TopHeaderBar(
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "back",
+                text = stringResource(Res.string.back),
                 style = TextStyle(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 16.sp,
@@ -193,7 +208,7 @@ private fun TopHeaderBar(
         }
 
         Text(
-            text = "edit profile",
+            text = stringResource(Res.string.edit_profile_title),
             modifier = Modifier.align(Alignment.Center),
             style = TextStyle(
                 color = MaterialTheme.colorScheme.onSurface,
@@ -248,7 +263,7 @@ private fun AvatarProfileIcon(
             ) {
                 Icon(
                     imageVector = FeatherIcons.Smile,
-                    contentDescription = "Change Avatar",
+                    contentDescription = stringResource(Res.string.edit_profile_change_avatar_content_description),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(18.dp)
                 )
@@ -256,7 +271,7 @@ private fun AvatarProfileIcon(
         }
         Spacer(Modifier.height(16.dp))
         Text(
-            text = "tap icon to change avatar",
+            text = stringResource(Res.string.edit_profile_change_avatar_description),
             style = TextStyle(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
@@ -301,7 +316,7 @@ private fun DoubleActionButton(
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
         ) {
             Text(
-                text = "cancel",
+                text = stringResource(Res.string.cancel),
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -330,7 +345,7 @@ private fun DoubleActionButton(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.background
             ),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(12.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -340,7 +355,7 @@ private fun DoubleActionButton(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "save",
+                    text = stringResource(Res.string.save),
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,

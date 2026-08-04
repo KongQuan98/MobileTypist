@@ -50,10 +50,13 @@ import mobiletypist.composeapp.generated.resources.confirm_password_header
 import mobiletypist.composeapp.generated.resources.create_account_button
 import mobiletypist.composeapp.generated.resources.create_account_title
 import mobiletypist.composeapp.generated.resources.email_header
+import mobiletypist.composeapp.generated.resources.email_placeholder
 import mobiletypist.composeapp.generated.resources.have_an_account
 import mobiletypist.composeapp.generated.resources.password_header
+import mobiletypist.composeapp.generated.resources.password_placeholder
 import mobiletypist.composeapp.generated.resources.sign_in_arrow_button
 import mobiletypist.composeapp.generated.resources.username_header
+import mobiletypist.composeapp.generated.resources.username_placeholder
 import org.example.project.MobileTypistTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -100,7 +103,7 @@ fun CreateAccountScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        "user sample",
+                        stringResource(Res.string.username_placeholder),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         fontFamily = FontFamily.Monospace
                     )
@@ -137,7 +140,7 @@ fun CreateAccountScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        "user@example.com",
+                        stringResource(Res.string.email_placeholder),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         fontFamily = FontFamily.Monospace
                     )
@@ -174,7 +177,7 @@ fun CreateAccountScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        "........",
+                        stringResource(Res.string.password_placeholder),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         fontFamily = FontFamily.Monospace
                     )
@@ -223,7 +226,7 @@ fun CreateAccountScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        "........",
+                        stringResource(Res.string.password_placeholder),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         fontFamily = FontFamily.Monospace
                     )

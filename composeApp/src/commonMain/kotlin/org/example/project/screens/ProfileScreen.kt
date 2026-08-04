@@ -56,6 +56,26 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Edit3
 import compose.icons.feathericons.Star
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.achievement_sharpshooter_desc
+import mobiletypist.composeapp.generated.resources.achievement_sharpshooter_title
+import mobiletypist.composeapp.generated.resources.achievement_speed_demon_desc
+import mobiletypist.composeapp.generated.resources.achievement_speed_demon_title
+import mobiletypist.composeapp.generated.resources.profile_achievements
+import mobiletypist.composeapp.generated.resources.profile_avg_wpm
+import mobiletypist.composeapp.generated.resources.profile_best
+import mobiletypist.composeapp.generated.resources.profile_edit_profile
+import mobiletypist.composeapp.generated.resources.profile_global_accuracy
+import mobiletypist.composeapp.generated.resources.profile_keep_practicing
+import mobiletypist.composeapp.generated.resources.profile_member_since
+import mobiletypist.composeapp.generated.resources.profile_no_tests
+import mobiletypist.composeapp.generated.resources.profile_recent_tests
+import mobiletypist.composeapp.generated.resources.profile_tests
+import mobiletypist.composeapp.generated.resources.profile_unlocked_label
+import mobiletypist.composeapp.generated.resources.profile_view_less
+import mobiletypist.composeapp.generated.resources.profile_view_more_achievements
+import mobiletypist.composeapp.generated.resources.profile_view_more_tests
+import mobiletypist.composeapp.generated.resources.wpm
 import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
 import org.example.project.data.model.TypingMode
@@ -65,6 +85,7 @@ import org.example.project.ui.TooltipHint
 import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.formatDate
 import org.example.project.utils.hapticClickable
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class ProfileScreenState(
@@ -182,7 +203,7 @@ fun ProfileScreen(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text = "member since jan 2024",
+                    text = stringResource(Res.string.profile_member_since),
                     style = TextStyle(
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -217,7 +238,7 @@ fun ProfileScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "edit profile",
+                        text = stringResource(Res.string.profile_edit_profile),
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -251,19 +272,19 @@ fun ProfileScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         StatBox(
-                            label = "avg wpm",
+                            label = stringResource(Res.string.profile_avg_wpm),
                             value = averageWpm.toString(),
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
                         )
                         StatBox(
-                            label = "best",
+                            label = stringResource(Res.string.profile_best),
                             value = bestWpm.toString(),
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.weight(1f)
                         )
                         StatBox(
-                            label = "tests",
+                            label = stringResource(Res.string.profile_tests),
                             value = totalTests.toString(),
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
@@ -296,7 +317,7 @@ fun ProfileScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "achievements",
+                                text = stringResource(Res.string.profile_achievements),
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
@@ -308,7 +329,11 @@ fun ProfileScreen(
                             val unlockedCount =
                                 achievements.count { it.unlocked }
                             Text(
-                                text = "$unlockedCount / ${achievements.size} unlocked",
+                                text = stringResource(
+                                    Res.string.profile_unlocked_label,
+                                    unlockedCount,
+                                    achievements.size
+                                ),
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.primary,
@@ -339,7 +364,7 @@ fun ProfileScreen(
 
                         if (achievements.none { it.unlocked }) {
                             Text(
-                                text = "Keep practicing to achieve more",
+                                text = stringResource(Res.string.profile_keep_practicing),
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                                 style = TextStyle(
@@ -372,7 +397,7 @@ fun ProfileScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "view more achievements",
+                                text = stringResource(Res.string.profile_view_more_achievements),
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
@@ -393,7 +418,7 @@ fun ProfileScreen(
                 item {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = "recent tests (${results.size})",
+                            text = stringResource(Res.string.profile_recent_tests, results.size),
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
@@ -409,7 +434,7 @@ fun ProfileScreen(
                 if (results.isEmpty()) {
                     item {
                         Text(
-                            text = "no tests completed yet",
+                            text = stringResource(Res.string.profile_no_tests),
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -461,7 +486,9 @@ fun ProfileScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = if (isRecentTestsExpanded) "view less" else "view more tests",
+                                    text = if (isRecentTestsExpanded) stringResource(Res.string.profile_view_less) else stringResource(
+                                        Res.string.profile_view_more_tests
+                                    ),
                                     style = TextStyle(
                                         fontSize = 14.sp,
                                         color = MaterialTheme.colorScheme.onSurface,
@@ -523,9 +550,9 @@ private fun AchievementCard(
 
         Spacer(Modifier.height(12.dp))
 
-        TooltipHint(hint = achievement.title) {
+        TooltipHint(hint = stringResource(achievement.title)) {
             Text(
-                text = achievement.title,
+                text = stringResource(achievement.title),
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
@@ -540,9 +567,9 @@ private fun AchievementCard(
 
         Spacer(Modifier.height(4.dp))
 
-        TooltipHint(hint = achievement.description) {
+        TooltipHint(hint = stringResource(achievement.description)) {
             Text(
-                text = achievement.description,
+                text = stringResource(achievement.description),
                 style = TextStyle(
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -589,7 +616,7 @@ private fun StatBox(
             text = label,
             style = TextStyle(
                 fontSize = 11.sp,
-                color = Color(0xFF646669),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontFamily = FontFamily.Monospace
             )
         )
@@ -619,7 +646,7 @@ private fun GlobalAccuracyBar(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "global accuracy",
+            text = stringResource(Res.string.profile_global_accuracy),
             style = TextStyle(
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -703,7 +730,7 @@ private fun ProfileResultItem(
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    text = "wpm",
+                    text = stringResource(Res.string.wpm),
                     style = TextStyle(
                         fontSize = 10.sp,
                         color = MaterialTheme.colorScheme.primary,
@@ -795,8 +822,8 @@ private fun ProfileScreenPreviewDark() {
         achievements = listOf(
             Achievement(
                 id = "1",
-                title = "Speed Demon",
-                description = "Reach 100 WPM",
+                title = Res.string.achievement_speed_demon_title,
+                description = Res.string.achievement_speed_demon_desc,
                 icon = FeatherIcons.Star,
                 hidden = false,
                 progress = 100,
@@ -860,8 +887,8 @@ private fun ProfileScreenPreview() {
         achievements = listOf(
             Achievement(
                 id = "1",
-                title = "Speed Demon",
-                description = "Reach 100 WPM",
+                title = Res.string.achievement_speed_demon_title,
+                description = Res.string.achievement_speed_demon_desc,
                 icon = FeatherIcons.Star,
                 hidden = false,
                 progress = 100,
@@ -871,8 +898,8 @@ private fun ProfileScreenPreview() {
             ),
             Achievement(
                 id = "2",
-                title = "Sharpshooter",
-                description = "100% accuracy",
+                title = Res.string.achievement_sharpshooter_title,
+                description = Res.string.achievement_sharpshooter_desc,
                 icon = FeatherIcons.Star,
                 hidden = false,
                 progress = 100,

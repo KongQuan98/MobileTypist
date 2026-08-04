@@ -37,6 +37,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.app_name
+import mobiletypist.composeapp.generated.resources.settings_account
+import mobiletypist.composeapp.generated.resources.settings_appearance
+import mobiletypist.composeapp.generated.resources.settings_dark_theme
+import mobiletypist.composeapp.generated.resources.settings_font_family
+import mobiletypist.composeapp.generated.resources.settings_font_size
+import mobiletypist.composeapp.generated.resources.settings_gameplay
+import mobiletypist.composeapp.generated.resources.settings_haptic_feedback
+import mobiletypist.composeapp.generated.resources.settings_language
+import mobiletypist.composeapp.generated.resources.settings_reset_statistics
+import mobiletypist.composeapp.generated.resources.settings_sign_out
+import mobiletypist.composeapp.generated.resources.settings_sound_effects
+import mobiletypist.composeapp.generated.resources.settings_theme
 import mobiletypist.composeapp.generated.resources.settings_title
 import mobiletypist.composeapp.generated.resources.version
 import org.example.project.MobileTypistTheme
@@ -84,14 +96,32 @@ fun SettingsScreen(
     val appName = stringResource(Res.string.app_name)
     val appVersion = stringResource(Res.string.version)
 
-    val items = remember(appSettings, appName, appVersion) {
+    val appearanceHeader = stringResource(Res.string.settings_appearance)
+    val themeLabel = stringResource(Res.string.settings_theme)
+    val fontSizeLabel = stringResource(Res.string.settings_font_size)
+    val fontFamilyLabel = stringResource(Res.string.settings_font_family)
+    val darkThemeLabel = stringResource(Res.string.settings_dark_theme)
+    val gameplayHeader = stringResource(Res.string.settings_gameplay)
+    val soundEffectsLabel = stringResource(Res.string.settings_sound_effects)
+    val hapticFeedbackLabel = stringResource(Res.string.settings_haptic_feedback)
+    val accountHeader = stringResource(Res.string.settings_account)
+    val languageLabel = stringResource(Res.string.settings_language)
+    val resetStatisticsLabel = stringResource(Res.string.settings_reset_statistics)
+    val signOutLabel = stringResource(Res.string.settings_sign_out)
+
+    val items = remember(
+        appSettings, appName, appVersion, appearanceHeader, themeLabel,
+        fontSizeLabel, fontFamilyLabel, darkThemeLabel, gameplayHeader,
+        soundEffectsLabel, hapticFeedbackLabel, accountHeader, languageLabel,
+        resetStatisticsLabel, signOutLabel
+    ) {
         listOf(
-            SettingsListItem.Header("// appearance"),
-            SettingsListItem.NavRow("theme", "dark minimal"),
-            SettingsListItem.NavRow("font size", "medium"),
-            SettingsListItem.NavRow("font family", "jetbrains mono"),
+            SettingsListItem.Header(appearanceHeader),
+            SettingsListItem.NavRow(themeLabel, "dark minimal"),
+            SettingsListItem.NavRow(fontSizeLabel, "medium"),
+            SettingsListItem.NavRow(fontFamilyLabel, "jetbrains mono"),
             SettingsListItem.Toggle(
-                label = "dark theme",
+                label = darkThemeLabel,
                 checked = appSettings.darkTheme,
                 onCheckedChange = {
                     action(
@@ -104,9 +134,9 @@ fun SettingsScreen(
                 },
             ),
             SettingsListItem.Spacer40,
-            SettingsListItem.Header("// gameplay"),
+            SettingsListItem.Header(gameplayHeader),
             SettingsListItem.Toggle(
-                label = "sound effects",
+                label = soundEffectsLabel,
                 checked = appSettings.soundEnabled,
                 onCheckedChange = {
                     action(
@@ -119,23 +149,23 @@ fun SettingsScreen(
                 },
             ),
             SettingsListItem.Toggle(
-                label = "haptic feedback",
+                label = hapticFeedbackLabel,
                 checked = appSettings.vibrationEnabled,
                 onCheckedChange = {
                     action(SettingsScreenAction.SaveSettings(appSettings.copy(vibrationEnabled = it)))
                 },
             ),
             SettingsListItem.Spacer40,
-            SettingsListItem.Header("// account"),
-            SettingsListItem.NavRow("language", "english"),
+            SettingsListItem.Header(accountHeader),
+            SettingsListItem.NavRow(languageLabel, "english"),
             SettingsListItem.Spacer40,
             SettingsListItem.ActionRow(
-                label = "reset statistics",
+                label = resetStatisticsLabel,
                 isDestructive = true,
                 onClick = { action(SettingsScreenAction.ClearAllData) },
             ),
             SettingsListItem.ActionRow(
-                label = "sign out",
+                label = signOutLabel,
                 isDestructive = true,
                 onClick = { },
             ),

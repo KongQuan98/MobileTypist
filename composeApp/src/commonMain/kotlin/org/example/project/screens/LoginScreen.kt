@@ -52,9 +52,13 @@ import mobiletypist.composeapp.generated.resources.app_icon
 import mobiletypist.composeapp.generated.resources.app_name
 import mobiletypist.composeapp.generated.resources.continue_as_guest
 import mobiletypist.composeapp.generated.resources.email_header
+import mobiletypist.composeapp.generated.resources.email_placeholder
 import mobiletypist.composeapp.generated.resources.forgot_password
+import mobiletypist.composeapp.generated.resources.login_title
 import mobiletypist.composeapp.generated.resources.no_account
+import mobiletypist.composeapp.generated.resources.or
 import mobiletypist.composeapp.generated.resources.password_header
+import mobiletypist.composeapp.generated.resources.password_placeholder
 import mobiletypist.composeapp.generated.resources.sign_in_button
 import mobiletypist.composeapp.generated.resources.sign_up_arrow_button
 import org.example.project.MobileTypistTheme
@@ -128,7 +132,7 @@ fun LoginScreen(
 
             // Heading
             Text(
-                text = "sign in",
+                text = stringResource(Res.string.login_title),
                 style = TextStyle(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
@@ -155,7 +159,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        "user@example.com",
+                        stringResource(Res.string.email_placeholder),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         fontFamily = FontFamily.Monospace
                     )
@@ -192,7 +196,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        "........",
+                        stringResource(Res.string.password_placeholder),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         fontFamily = FontFamily.Monospace
                     )
@@ -274,7 +278,7 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
                 )
                 Text(
-                    text = "or",
+                    text = stringResource(Res.string.or),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = TextStyle(
                         fontSize = 14.sp,

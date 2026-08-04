@@ -41,9 +41,17 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowLeft
 import compose.icons.feathericons.Star
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.achievement_first_strike_desc
+import mobiletypist.composeapp.generated.resources.achievement_first_strike_title
+import mobiletypist.composeapp.generated.resources.achievements_collection
+import mobiletypist.composeapp.generated.resources.achievements_title
+import mobiletypist.composeapp.generated.resources.back
+import mobiletypist.composeapp.generated.resources.profile_unlocked_label
 import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
 import org.example.project.ui.TooltipHint
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -82,7 +90,7 @@ fun AchievementsScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "back",
+                        text = stringResource(Res.string.back),
                         style = TextStyle(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 16.sp,
@@ -92,7 +100,7 @@ fun AchievementsScreen(
                 }
 
                 Text(
-                    text = "achievements",
+                    text = stringResource(Res.string.achievements_title),
                     modifier = Modifier.align(Alignment.Center),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onSurface,
@@ -119,7 +127,7 @@ fun AchievementsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "COLLECTION",
+                    text = stringResource(Res.string.achievements_collection),
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
@@ -129,7 +137,11 @@ fun AchievementsScreen(
                     )
                 )
                 Text(
-                    text = "$unlockedCount / $totalCount unlocked",
+                    text = stringResource(
+                        Res.string.profile_unlocked_label,
+                        unlockedCount,
+                        totalCount
+                    ),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.primary,
@@ -203,9 +215,9 @@ fun AchievementGridItem(achievement: Achievement) {
 
         Spacer(Modifier.height(12.dp))
 
-        TooltipHint(hint = achievement.title) {
+        TooltipHint(hint = stringResource(achievement.title)) {
             Text(
-                text = achievement.title,
+                text = stringResource(achievement.title),
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
@@ -222,9 +234,9 @@ fun AchievementGridItem(achievement: Achievement) {
 
         Spacer(Modifier.height(4.dp))
 
-        TooltipHint(hint = achievement.description) {
+        TooltipHint(hint = stringResource(achievement.description)) {
             Text(
-                text = achievement.description,
+                text = stringResource(achievement.description),
                 style = TextStyle(
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -247,8 +259,8 @@ private fun AchievementsScreenPreview() {
             achievements = listOf(
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -258,8 +270,8 @@ private fun AchievementsScreenPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -269,8 +281,8 @@ private fun AchievementsScreenPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -280,8 +292,8 @@ private fun AchievementsScreenPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -291,8 +303,8 @@ private fun AchievementsScreenPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -302,8 +314,8 @@ private fun AchievementsScreenPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -325,8 +337,8 @@ private fun AchievementsScreenDarkPreview() {
             achievements = listOf(
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -336,8 +348,8 @@ private fun AchievementsScreenDarkPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -347,8 +359,8 @@ private fun AchievementsScreenDarkPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -358,8 +370,8 @@ private fun AchievementsScreenDarkPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -369,8 +381,8 @@ private fun AchievementsScreenDarkPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,
@@ -380,8 +392,8 @@ private fun AchievementsScreenDarkPreview() {
                 ),
                 Achievement(
                     id = "first_game",
-                    title = "First Strike",
-                    description = "Completed your first typing test",
+                    title = Res.string.achievement_first_strike_title,
+                    description = Res.string.achievement_first_strike_desc,
                     icon = FeatherIcons.Star,
                     hidden = false,
                     progress = 1,

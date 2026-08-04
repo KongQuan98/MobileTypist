@@ -27,7 +27,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.about_description
+import mobiletypist.composeapp.generated.resources.about_feature_custom
+import mobiletypist.composeapp.generated.resources.about_feature_quotes
+import mobiletypist.composeapp.generated.resources.about_feature_stats
+import mobiletypist.composeapp.generated.resources.about_feature_time
+import mobiletypist.composeapp.generated.resources.about_feature_words
+import mobiletypist.composeapp.generated.resources.about_features
+import mobiletypist.composeapp.generated.resources.about_keyboard_typist
+import mobiletypist.composeapp.generated.resources.about_privacy_description
+import mobiletypist.composeapp.generated.resources.about_privacy_policy
+import mobiletypist.composeapp.generated.resources.about_terms_description
+import mobiletypist.composeapp.generated.resources.about_terms_of_service
+import mobiletypist.composeapp.generated.resources.about_title
+import mobiletypist.composeapp.generated.resources.about_version
 import mobiletypist.composeapp.generated.resources.app_name
+import mobiletypist.composeapp.generated.resources.back
 import org.example.project.MobileTypistTheme
 import org.example.project.navigation.NavigationManager
 import org.jetbrains.compose.resources.stringResource
@@ -55,7 +70,7 @@ fun AboutScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "About",
+                    text = stringResource(Res.string.about_title),
                     style = TextStyle(
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
@@ -69,7 +84,7 @@ fun AboutScreen(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Back")
+                    Text(stringResource(Res.string.back))
                 }
             }
 
@@ -101,7 +116,7 @@ fun AboutScreen(
                     Spacer(Modifier.height(8.dp))
 
                     Text(
-                        text = "Version 1.0.0",
+                        text = stringResource(Res.string.about_version, "1.0.0"),
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -126,7 +141,7 @@ fun AboutScreen(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = "About Keyboard Typist",
+                        text = stringResource(Res.string.about_keyboard_typist),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -137,9 +152,7 @@ fun AboutScreen(
                     Spacer(Modifier.height(12.dp))
 
                     Text(
-                        text = "Keyboard Typist is a comprehensive typing practice app designed to help you improve your typing speed and accuracy. " +
-                                "With multiple game modes including time-based challenges, word count goals, and inspiring quotes, " +
-                                "you can practice typing in various engaging ways.",
+                        text = stringResource(Res.string.about_description),
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
@@ -166,7 +179,7 @@ fun AboutScreen(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = "Features",
+                        text = stringResource(Res.string.about_features),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -176,11 +189,11 @@ fun AboutScreen(
 
                     Spacer(Modifier.height(12.dp))
 
-                    FeatureItem("⏱️ Time Mode - Test your speed in timed challenges")
-                    FeatureItem("📝 Words Mode - Type a specific number of words")
-                    FeatureItem("💬 Quotes Mode - Practice with inspiring quotes")
-                    FeatureItem("📊 Statistics - Track your progress over time")
-                    FeatureItem("🎨 Customizable - Dark theme and preferences")
+                    FeatureItem(stringResource(Res.string.about_feature_time))
+                    FeatureItem(stringResource(Res.string.about_feature_words))
+                    FeatureItem(stringResource(Res.string.about_feature_quotes))
+                    FeatureItem(stringResource(Res.string.about_feature_stats))
+                    FeatureItem(stringResource(Res.string.about_feature_custom))
                 }
             }
 
@@ -200,7 +213,7 @@ fun AboutScreen(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = "Privacy Policy",
+                        text = stringResource(Res.string.about_privacy_policy),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -211,8 +224,7 @@ fun AboutScreen(
                     Spacer(Modifier.height(12.dp))
 
                     Text(
-                        text = "Keyboard Typist respects your privacy. All typing test data is stored locally on your device. " +
-                                "We do not collect, transmit, or share any personal information.",
+                        text = stringResource(Res.string.about_privacy_description),
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
@@ -239,7 +251,7 @@ fun AboutScreen(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = "Terms of Service",
+                        text = stringResource(Res.string.about_terms_of_service),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -250,9 +262,7 @@ fun AboutScreen(
                     Spacer(Modifier.height(12.dp))
 
                     Text(
-                        text = "By using Keyboard Typist, you agree to use the app for its intended purpose of improving typing skills. " +
-                                "The app is provided as-is without warranties. We are not responsible for any data loss. " +
-                                "You may clear all data at any time through the settings menu.",
+                        text = stringResource(Res.string.about_terms_description),
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),

@@ -48,9 +48,17 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowLeft
 import compose.icons.feathericons.Check
 import compose.icons.feathericons.Lock
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.back
+import mobiletypist.composeapp.generated.resources.choose_avatar_currently_selected
+import mobiletypist.composeapp.generated.resources.choose_avatar_locked
+import mobiletypist.composeapp.generated.resources.choose_avatar_select_button
+import mobiletypist.composeapp.generated.resources.choose_avatar_tap_to_preview
+import mobiletypist.composeapp.generated.resources.choose_avatar_title
 import org.example.project.MobileTypistTheme
 import org.example.project.data.repo.Avatar
 import org.example.project.data.repo.AvatarRepository
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -92,7 +100,7 @@ fun SelectAvatarScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "back",
+                        text = stringResource(Res.string.back),
                         style = TextStyle(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 16.sp,
@@ -102,7 +110,7 @@ fun SelectAvatarScreen(
                 }
 
                 Text(
-                    text = "choose avatar",
+                    text = stringResource(Res.string.choose_avatar_title),
                     modifier = Modifier.align(Alignment.Center),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onSurface,
@@ -145,7 +153,7 @@ fun SelectAvatarScreen(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = selectedAvatar.name,
+                    text = stringResource(selectedAvatar.name),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 24.sp,
@@ -155,7 +163,9 @@ fun SelectAvatarScreen(
                 )
 
                 Text(
-                    text = if (selectedId == currentAvatarId) "Currently Selected" else "Tap to Preview",
+                    text = if (selectedId == currentAvatarId) stringResource(Res.string.choose_avatar_currently_selected) else stringResource(
+                        Res.string.choose_avatar_tap_to_preview
+                    ),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
@@ -213,7 +223,7 @@ fun SelectAvatarScreen(
                     )
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = "Select Avatar",
+                        text = stringResource(Res.string.choose_avatar_select_button),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -269,7 +279,7 @@ private fun AvatarGridItem(
                 if (avatar.isLocked) {
                     Icon(
                         imageVector = FeatherIcons.Lock,
-                        contentDescription = "Locked",
+                        contentDescription = stringResource(Res.string.choose_avatar_locked),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )
@@ -298,7 +308,7 @@ private fun AvatarGridItem(
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = avatar.name.uppercase(),
+            text = stringResource(avatar.name).uppercase(),
             style = TextStyle(
                 color = if (isSelected) MaterialTheme.colorScheme.onSurface
                 else MaterialTheme.colorScheme.onSurfaceVariant,

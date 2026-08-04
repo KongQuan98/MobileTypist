@@ -35,6 +35,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.StopCircle
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.acc
+import mobiletypist.composeapp.generated.resources.stop
+import mobiletypist.composeapp.generated.resources.time
+import mobiletypist.composeapp.generated.resources.wpm
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
@@ -43,6 +48,7 @@ import org.example.project.ui.GlobalHiddenInputOverlay
 import org.example.project.ui.ResultBottomSheet
 import org.example.project.viewModel.TypingScreenAction
 import org.example.project.viewModel.TypingViewModel
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class CharStatus { Pending, Correct, Incorrect }
@@ -148,10 +154,19 @@ fun TypingScreenContent(
                             modifier = Modifier.align(Alignment.Center),
                             horizontalArrangement = Arrangement.spacedBy(24.dp)
                         ) {
-                            StatDisplay(label = "wpm", value = viewModel.currentWpm.toString())
-                            StatDisplay(label = "acc", value = "${viewModel.currentAccuracy}%")
+                            StatDisplay(
+                                label = stringResource(Res.string.wpm),
+                                value = viewModel.currentWpm.toString()
+                            )
+                            StatDisplay(
+                                label = stringResource(Res.string.acc),
+                                value = "${viewModel.currentAccuracy}%"
+                            )
                             if (viewModel.timeLeft > 0) {
-                                StatDisplay(label = "time", value = "${viewModel.timeLeft}s")
+                                StatDisplay(
+                                    label = stringResource(Res.string.time),
+                                    value = "${viewModel.timeLeft}s"
+                                )
                             }
                         }
 
@@ -162,7 +177,7 @@ fun TypingScreenContent(
                         ) {
                             Icon(
                                 imageVector = FeatherIcons.StopCircle,
-                                contentDescription = "Stop",
+                                contentDescription = stringResource(Res.string.stop),
                                 tint = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.fillMaxSize()
                             )

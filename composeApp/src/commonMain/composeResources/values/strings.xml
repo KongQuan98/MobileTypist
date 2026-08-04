@@ -12,13 +12,39 @@
     <string name="leaderboard_title">leaderboard</string>
     <string name="home_title">home</string>
     <string name="profile_title">profile</string>
+    <string name="achievements_title">achievements</string>
+    <string name="edit_profile_title">edit profile</string>
+    <string name="choose_avatar_title">choose avatar</string>
+
+    // common
+    <string name="back">back</string>
+    <string name="cancel">cancel</string>
+    <string name="save">save</string>
+    <string name="wpm">wpm</string>
+    <string name="accuracy">accuracy</string>
+    <string name="or">or</string>
+    <string name="stop">stop</string>
+    <string name="time">time</string>
+    <string name="acc">acc</string>
+    <string name="email_placeholder">user@example.com</string>
+    <string name="password_placeholder">........</string>
+    <string name="username_placeholder">user sample</string>
+
+    // home screen
+    <string name="home_start_description">Start</string>
 
     // statistics screen
     <string name="statistics_summary_title">summary</string>
-
+    <string name="statistics_avg_wpm">AVG WPM</string>
+    <string name="statistics_best_wpm">BEST WPM</string>
+    <string name="statistics_time_typed">TIME TYPED</string>
+    <string name="statistics_tests">TESTS</string>
+    <string name="statistics_wpm_history">WPM HISTORY (LAST 10)</string>
+    <string name="statistics_accuracy_distribution">ACCURACY DISTRIBUTION</string>
+    <string name="statistics_time_typed_value">%1$dm %2$ds</string>
+    <string name="statistics_activity_title">activity</string>
 
     // statistics heatmap
-    <string name="statistics_activity_title">activity</string>
     <string name="heatmap_less">less</string>
     <string name="heatmap_more">more</string>
     <string name="heatmap_typed_on">%1$s typed on %2$s</string>
@@ -68,6 +94,49 @@
     <string name="heatmap_month_november">November</string>
     <string name="heatmap_month_december">December</string>
 
+    // profile screen
+    <string name="profile_member_since">member since jan 2024</string>
+    <string name="profile_edit_profile">edit profile</string>
+    <string name="profile_avg_wpm">avg wpm</string>
+    <string name="profile_best">best</string>
+    <string name="profile_tests">tests</string>
+    <string name="profile_global_accuracy">global accuracy</string>
+    <string name="profile_achievements">achievements</string>
+    <string name="profile_unlocked_label">%1$d / %2$d unlocked</string>
+    <string name="profile_keep_practicing">Keep practicing to achieve more</string>
+    <string name="profile_view_more_achievements">view more achievements</string>
+    <string name="profile_recent_tests">recent tests (%1$d)</string>
+    <string name="profile_no_tests">no tests completed yet</string>
+    <string name="profile_view_more_tests">view more tests</string>
+    <string name="profile_view_less">view less</string>
+
+    // edit profile
+    <string name="edit_profile_username">USERNAME</string>
+    <string name="edit_profile_display_name">DISPLAY NAME</string>
+    <string name="edit_profile_email">EMAIL</string>
+    <string name="edit_profile_bio">BIO</string>
+    <string name="edit_profile_change_avatar_description">tap icon to change avatar</string>
+    <string name="edit_profile_change_avatar_content_description">Change Avatar</string>
+
+    // choose avatar
+    <string name="choose_avatar_currently_selected">Currently Selected</string>
+    <string name="choose_avatar_tap_to_preview">Tap to Preview</string>
+    <string name="choose_avatar_select_button">Select Avatar</string>
+    <string name="choose_avatar_locked">Locked</string>
+
+    // settings screen
+    <string name="settings_appearance">// appearance</string>
+    <string name="settings_theme">theme</string>
+    <string name="settings_font_size">font size</string>
+    <string name="settings_font_family">font family</string>
+    <string name="settings_dark_theme">dark theme</string>
+    <string name="settings_gameplay">// gameplay</string>
+    <string name="settings_sound_effects">sound effects</string>
+    <string name="settings_haptic_feedback">haptic feedback</string>
+    <string name="settings_account">// account</string>
+    <string name="settings_language">language</string>
+    <string name="settings_reset_statistics">reset statistics</string>
+    <string name="settings_sign_out">sign out</string>
 
     // create account
     <string name="create_account_title">create account</string>
@@ -92,4 +161,78 @@
     <string name="achievement_dismiss_button">Nice — keep going</string>
     <string name="achievement_close_content_description">Close</string>
 
+    // result bottom sheet
+    <string name="result_words_per_minute">WORDS PER MINUTE</string>
+    <string name="result_accuracy">ACCURACY</string>
+    <string name="result_correct">CORRECT</string>
+    <string name="result_errors">ERRORS</string>
+    <string name="result_keystrokes">%1$d keystrokes</string>
+    <string name="result_restart_test">restart test</string>
+
+    // achievements screen
+    <string name="achievements_collection">COLLECTION</string>
+
+    // leaderboard screen
+    <string name="leaderboard_tabs_15s">15s</string>
+    <string name="leaderboard_tabs_30s">30s</string>
+    <string name="leaderboard_tabs_60s">60s</string>
+    <string name="leaderboard_tabs_all">all</string>
+
+    // about screen
+    <string name="about_version">Version %1$s</string>
+    <string name="about_keyboard_typist">About Keyboard Typist</string>
+    <string name="about_description">Keyboard Typist is a comprehensive typing practice app designed to help you improve your typing speed and accuracy. With multiple game modes including time-based challenges, word count goals, and inspiring quotes, you can practice typing in various engaging ways.</string>
+    <string name="about_features">Features</string>
+    <string name="about_feature_time">⏱️ Time Mode - Test your speed in timed challenges</string>
+    <string name="about_feature_words">📝 Words Mode - Type a specific number of words</string>
+    <string name="about_feature_quotes">💬 Quotes Mode - Practice with inspiring quotes</string>
+    <string name="about_feature_stats">📊 Statistics - Track your progress over time</string>
+    <string name="about_feature_custom">🎨 Customizable - Dark theme and preferences</string>
+    <string name="about_privacy_policy">Privacy Policy</string>
+    <string name="about_privacy_description">Keyboard Typist respects your privacy. All typing test data is stored locally on your device. We do not collect, transmit, or share any personal information.</string>
+    <string name="about_terms_of_service">Terms of Service</string>
+    <string name="about_terms_description">By using Keyboard Typist, you agree to use the app for its intended purpose of improving typing skills. The app is provided as-is without warranties. We are not responsible for any data loss. You may clear all data at any time through the settings menu.</string>
+
+    // avatars
+    <string name="avatar_monkey">Monkey</string>
+    <string name="avatar_typist">Typist</string>
+    <string name="avatar_blazer">Blazer</string>
+    <string name="avatar_flash">Flash</string>
+    <string name="avatar_bullseye">Bullseye</string>
+    <string name="avatar_night_owl">Night Owl</string>
+    <string name="avatar_champion">Champion</string>
+    <string name="avatar_diamond">Diamond</string>
+    <string name="avatar_fox">Fox</string>
+    <string name="avatar_dragon">Dragon</string>
+    <string name="avatar_gamer">Gamer</string>
+    <string name="avatar_rocket">Rocket</string>
+
+    // achievements
+    <string name="achievement_speed_demon_title">Speed Demon</string>
+    <string name="achievement_speed_demon_desc">Reach 100 WPM</string>
+    <string name="achievement_sharpshooter_title">Sharpshooter</string>
+    <string name="achievement_sharpshooter_desc">100% Accuracy</string>
+    <string name="achievement_on_streak_title">On Streak</string>
+    <string name="achievement_on_streak_desc">10 Day Streak</string>
+    <string name="achievement_grandmaster_title">Grandmaster</string>
+    <string name="achievement_grandmaster_desc">Reach 150 WPM</string>
+    <string name="achievement_marathon_title">Marathon</string>
+    <string name="achievement_marathon_desc">Type for 24h total</string>
+    <string name="achievement_wordsmith_title">Wordsmith</string>
+    <string name="achievement_wordsmith_desc">1M Keystrokes</string>
+    <string name="achievement_early_bird_title">Early Bird</string>
+    <string name="achievement_early_bird_desc">Practice before 6am</string>
+    <string name="achievement_night_owl_title">Night Owl</string>
+    <string name="achievement_night_owl_desc">Practice after 10pm</string>
+    <string name="achievement_consistent_title">Consistent</string>
+    <string name="achievement_consistent_desc">30 Day Streak</string>
+    <string name="achievement_socialite_title">Socialite</string>
+    <string name="achievement_socialite_desc">Share a result</string>
+    <string name="achievement_veteran_title">Veteran</string>
+    <string name="achievement_veteran_desc">Complete 1000 tests</string>
+    <string name="achievement_perfectionist_title">Perfectionist</string>
+    <string name="achievement_perfectionist_desc">No errors in 10 consecutive tests</string>
+    <string name="achievement_keep_practicing_footer">Keep practicing to achieve more</string>
+    <string name="achievement_first_strike_title">First Strike</string>
+    <string name="achievement_first_strike_desc">Completed your first typing test</string>
 </resources>
