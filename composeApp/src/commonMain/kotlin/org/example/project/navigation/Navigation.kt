@@ -5,9 +5,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import org.example.project.achievements.repository.AchievementRepository
 import org.example.project.data.model.AppSettings
 import org.example.project.data.storage.StorageManager
+import org.example.project.di.LocalAppContainer
 import org.example.project.navigation.model.Screen
 import org.example.project.screens.AboutScreen
 import org.example.project.screens.AchievementsScreen
@@ -30,7 +30,6 @@ import org.example.project.utils.AudioPlayer
 fun Navigation(
     navigationManager: NavigationManager,
     storageManager: StorageManager,
-    achievementRepository: AchievementRepository,
     appSettings: AppSettings,
     audioPlayer: AudioPlayer,
     modifier: Modifier = Modifier
@@ -43,6 +42,7 @@ fun Navigation(
         }
     )
 
+    val achievementRepository = LocalAppContainer.current.achievementRepository
     val currentScreen = navigationManager.currentScreen
 
     // Reactive data collection from StorageManager flows

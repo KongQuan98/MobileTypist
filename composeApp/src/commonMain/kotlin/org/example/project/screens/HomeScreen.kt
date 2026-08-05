@@ -34,6 +34,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -65,13 +66,15 @@ import mobiletypist.composeapp.generated.resources.app_icon
 import mobiletypist.composeapp.generated.resources.app_name
 import mobiletypist.composeapp.generated.resources.home_start_description
 import org.example.project.MobileTypistTheme
-import org.example.project.achievements.LocalAchievementRepository
 import org.example.project.achievements.events.AchievementEvent
 import org.example.project.achievements.model.Achievement
+import org.example.project.dailystreak.repository.StreakRepositoryImpl
 import org.example.project.data.model.TypingMode
 import org.example.project.data.storage.StorageManager
+import org.example.project.di.LocalAppContainer
 import org.example.project.navigation.NavigationManager
 import org.example.project.ui.AchievementUnlockPopup
+import org.example.project.ui.StreakDialog
 import org.example.project.ui.shimmerEffect
 import org.example.project.utils.AudioPlayer
 import org.example.project.utils.Haptics
@@ -92,12 +95,20 @@ fun HomeScreen(
     storageManager: StorageManager,
     modifier: Modifier = Modifier
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val viewModel = remember { HomeViewModel(storageManager, coroutineScope) }
-    val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
-    val achievementRepository = LocalAchievementRepository.current
+    val streakRepository = LocalAppContainer.current.streakRepository
+    val achievementRepository = LocalAppContainer.current.achievementRepository
 
+    val coroutineScope = rememberCoroutineScope()
+    val viewModel = remember {
+        HomeViewModel(
+            storageManager = storageManager,
+            streakRepository = streakRepository,
+            coroutineScope = coroutineScope,
+        )
+    }
+    val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
     var unlockedAchievement by remember { mutableStateOf<Achievement?>(null) }
+    val streakEvent by viewModel.streakEvent.collectAsState()
 
     LaunchedEffect(achievementRepository) {
         achievementRepository.events.collectLatest { event ->
@@ -121,6 +132,15 @@ fun HomeScreen(
             achievement = unlockedAchievement,
             onDismiss = { unlockedAchievement = null }
         )
+
+        streakEvent?.let { event ->
+            StreakDialog(
+                event = event,
+                onDismiss = {
+                    viewModel.dismissStreakEvent()
+                }
+            )
+        }
     }
 }
 
@@ -482,7 +502,12 @@ private fun ChildSelectionButton(
 private fun HomeScreenPreview() {
     val coroutineScope = rememberCoroutineScope()
     val storageManager = previewStorageManager()
-    val viewModel = HomeViewModel(storageManager, coroutineScope)
+    val streakRepository = StreakRepositoryImpl(storageManager)
+    val viewModel = HomeViewModel(
+        storageManager,
+        streakRepository,
+        coroutineScope
+    )
     val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
 
     PreviewCompositionLocals {
@@ -502,7 +527,12 @@ private fun HomeScreenPreview() {
 private fun HomeScreenDarkPreview() {
     val coroutineScope = rememberCoroutineScope()
     val storageManager = previewStorageManager()
-    val viewModel = HomeViewModel(storageManager, coroutineScope)
+    val streakRepository = StreakRepositoryImpl(storageManager)
+    val viewModel = HomeViewModel(
+        storageManager,
+        streakRepository,
+        coroutineScope
+    )
     val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
 
     PreviewCompositionLocals {

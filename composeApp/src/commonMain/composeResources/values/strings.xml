@@ -158,7 +158,7 @@
 
     // achievement unlock
     <string name="achievement_unlocked_label">ACHIEVEMENT UNLOCKED</string>
-    <string name="achievement_dismiss_button">Nice — keep going</string>
+    <string name="achievement_dismiss_button">Nice — keep going!</string>
     <string name="achievement_close_content_description">Close</string>
 
     // result bottom sheet

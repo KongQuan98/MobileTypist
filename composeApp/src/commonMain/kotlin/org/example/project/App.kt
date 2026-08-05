@@ -10,10 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import org.example.project.achievements.LocalAchievementRepository
-import org.example.project.achievements.repository.AchievementRepository
 import org.example.project.data.storage.StorageManager
 import org.example.project.data.storage.createSettings
+import org.example.project.di.AppContainer
+import org.example.project.di.LocalAppContainer
 import org.example.project.navigation.Navigation
 import org.example.project.navigation.model.Screen
 import org.example.project.navigation.rememberNavigationManager
@@ -32,13 +32,15 @@ fun App(
     val navigationManager = rememberNavigationManager(
         initialScreen = startScreen,
     )
-    val storageManager = remember(storageManagerOverride) {
-        storageManagerOverride ?: StorageManager(settings = createSettings())
-    }
-
-    val achievementRepository = remember {
-        AchievementRepository(storageManager = storageManager)
-    }
+//    val storageManager = remember(storageManagerOverride) {
+//        storageManagerOverride ?: StorageManager(
+//            settings = createSettings()
+//        )
+//    }
+    val appContainer = remember { AppContainer(settings = createSettings()) }
+    val storageManager = appContainer.storageManager
+    val achievementRepository = appContainer.achievementRepository
+    val streakRepository = appContainer.streakRepository
 
     // Refresh data when screen becomes visible (Crucial for iOS TabBar navigation)
     LifecycleResumeEffect(Unit) {
@@ -72,12 +74,11 @@ fun App(
         CompositionLocalProvider(
             LocalHaptics provides haptics,
             LocalAudioPlayer provides audioPlayer,
-            LocalAchievementRepository provides achievementRepository
+            LocalAppContainer provides appContainer,
         ) {
             Navigation(
                 navigationManager = navigationManager,
                 storageManager = storageManager,
-                achievementRepository = achievementRepository,
                 appSettings = settingState,
                 audioPlayer = audioPlayer,
                 modifier = Modifier

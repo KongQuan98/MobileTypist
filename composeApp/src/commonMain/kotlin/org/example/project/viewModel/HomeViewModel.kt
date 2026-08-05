@@ -5,10 +5,16 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import org.example.project.dailystreak.model.StreakEvent
+import org.example.project.dailystreak.repository.StreakRepository
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.repo.Difficulty
@@ -18,8 +24,9 @@ import org.example.project.data.storage.StorageManager
 
 class HomeViewModel(
     private val storageManager: StorageManager,
+    private val streakRepository: StreakRepository,
     private val coroutineScope: CoroutineScope,
-) {
+) : ViewModel() {
 
     val modes = listOf(TypingMode.TIME, TypingMode.WORDS, TypingMode.QUOTES)
     val timeOptions = listOf(15, 30, 60)
@@ -97,5 +104,29 @@ class HomeViewModel(
 
     fun onTestComplete(result: TypingTestResult) {
         storageManager.saveResult(result)
+        viewModelScope.launch {
+            streakRepository.recordPlay()
+            val event = streakRepository.getPendingEvent()
+
+            if (event != StreakEvent.None) {
+                _streakEvent.value = event
+            }
+        }
     }
+
+    // Streak behaviour region
+
+    fun dismissStreakEvent() {
+        viewModelScope.launch {
+
+            streakRepository.consumeEvent()
+
+            _streakEvent.value = null
+        }
+    }
+
+    private val _streakEvent = MutableStateFlow<StreakEvent?>(null)
+    val streakEvent = _streakEvent.asStateFlow()
+
+    // end of region
 }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.example.project.achievements.model.AchievementProgress
+import org.example.project.dailystreak.model.StreakData
 import org.example.project.data.model.AppSettings
 import org.example.project.data.model.DailyActivityDurations
 import org.example.project.data.model.TypingTestResult
@@ -26,6 +27,7 @@ class StorageManager(private val settings: Settings) {
         private const val KEY_DAILY_ACTIVITY = "daily_activity_durations"
         private const val KEY_ACHIEVEMENT_PROGRESS = "achievement_progress"
         private const val KEY_SOCIAL_SHARES = "social_shares"
+        private const val KEY_STREAK = "streak_data"
     }
 
     private val _settingsFlow = MutableStateFlow(getSettings())
@@ -50,16 +52,20 @@ class StorageManager(private val settings: Settings) {
     private val _achievementProgressFlow = MutableStateFlow(getAchievementProgress())
     val achievementProgressFlow = _achievementProgressFlow.asStateFlow()
 
+    private val _streakFlow = MutableStateFlow(getStreakData())
+    val streakFlow = _streakFlow.asStateFlow()
+
     fun saveResult(result: TypingTestResult) {
+        // Update statistics in storage first
+        updateBestWpm(result.wpm)
+        incrementTotalTests()
+        addDailyActivity(result)
+
+        // Save result to history after updating daily activity to avoid double counting during migration
         val results = getResults().toMutableList()
         results.add(0, result)
         val limitedResults = results.take(100)
         settings[KEY_RESULTS] = json.encodeToString(limitedResults)
-
-        // Update statistics in storage
-        updateBestWpm(result.wpm)
-        incrementTotalTests()
-        addDailyActivity(result)
 
         // Trigger reactive updates for the current instance
         refreshStats()
@@ -196,6 +202,22 @@ class StorageManager(private val settings: Settings) {
         val dateKey = ActivityHeatmapRepository.dateKeyFromTimestamp(result.timestamp)
         activity[dateKey] = (activity[dateKey] ?: 0) + 1
         writeDailyActivity(activity)
+    }
+
+    fun getStreakData(): StreakData {
+        val jsonString = settings.getStringOrNull(KEY_STREAK)
+            ?: return StreakData()
+
+        return try {
+            json.decodeFromString<StreakData>(jsonString)
+        } catch (e: Exception) {
+            StreakData()
+        }
+    }
+
+    fun saveStreakData(data: StreakData) {
+        settings[KEY_STREAK] = json.encodeToString(data)
+        _streakFlow.value = data
     }
 
     fun clearAllData() {
