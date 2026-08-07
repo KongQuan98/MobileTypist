@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -360,29 +360,14 @@ private fun HeatmapDayCell(
     Box(
         modifier = modifier
             .scale(scale.value)
-            .alpha(alpha.value)
-            .padding(top = 6.dp, end = 4.dp),
+            .alpha(alpha.value),
         contentAlignment = Alignment.Center,
     ) {
-        if (showFire) {
-            Text(
-                text = fireIcon,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 6.dp, y = (-10).dp)
-                    .scale(0.65f + intensity * 0.55f),
-                style = TextStyle(
-                    fontSize = (10 + intensity * 8).sp,
-                    color = fireTint,
-                ),
-            )
-        }
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(34.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(8.dp))
                 .background(
                     if (cell.day == null) {
                         Color.Transparent
@@ -393,9 +378,9 @@ private fun HeatmapDayCell(
                 .then(
                     if (isSelected && cell.day != null) {
                         Modifier.border(
-                            width = 1.5.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                            shape = RoundedCornerShape(10.dp),
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            shape = RoundedCornerShape(8.dp),
                         )
                     } else {
                         Modifier
@@ -414,14 +399,28 @@ private fun HeatmapDayCell(
                 Text(
                     text = cell.day.toString(),
                     style = TextStyle(
-                        fontSize = 11.sp,
-                        fontWeight = if (cell.testCount > 0) FontWeight.SemiBold else FontWeight.Normal,
+                        fontSize = 10.sp,
+                        fontWeight = if (cell.testCount > 0) FontWeight.Bold else FontWeight.Normal,
                         color = if (cell.testCount > 0) {
                             MaterialTheme.colorScheme.onSurface
                         } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         },
                         fontFamily = FontFamily.Monospace,
+                    ),
+                )
+            }
+
+            if (showFire) {
+                Text(
+                    text = fireIcon,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = 2.dp, y = (-4).dp)
+                        .scale(0.6f + intensity * 0.4f),
+                    style = TextStyle(
+                        fontSize = (10 + intensity * 6).sp,
+                        color = fireTint,
                     ),
                 )
             }
@@ -432,7 +431,7 @@ private fun HeatmapDayCell(
 @Composable
 private fun HeatmapLegend() {
     val fireIcon = stringResource(Res.string.heatmap_fire_icon)
-    val levels = listOf(0f, 0.2f, 0.45f, 0.7f, 1f)
+    val levels = listOf(0f, 0.25f, 0.5f, 0.75f, 1f)
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -450,12 +449,12 @@ private fun HeatmapLegend() {
             overflow = TextOverflow.Clip,
         )
         Spacer(Modifier.size(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
             levels.forEach { level ->
                 Box(
                     modifier = Modifier
-                        .size(18.dp)
-                        .clip(RoundedCornerShape(6.dp))
+                        .size(16.dp)
+                        .clip(RoundedCornerShape(4.dp))
                         .background(heatmapCellColor(level)),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -463,7 +462,7 @@ private fun HeatmapLegend() {
                         Text(
                             text = fireIcon,
                             style = TextStyle(
-                                fontSize = (8 + level * 6).sp,
+                                fontSize = (8 + level * 5).sp,
                                 color = heatmapFireTint(level),
                             ),
                         )
@@ -487,18 +486,24 @@ private fun HeatmapLegend() {
 
 private fun heatmapIntensity(testCount: Int, maxTestCount: Int): Float {
     if (testCount <= 0) return 0f
-    return (testCount.toFloat() / maxTestCount.coerceAtLeast(1)).coerceIn(0f, 1f)
+    // Discrete intensity levels like LeetCode (0.25, 0.5, 0.75, 1.0)
+    return when {
+        testCount == 1 -> 0.25f
+        testCount <= 3 -> 0.5f
+        testCount <= 5 -> 0.75f
+        else -> 1f
+    }
 }
 
 @Composable
 private fun heatmapCellColor(intensity: Float): Color {
     val surface = MaterialTheme.colorScheme.surfaceVariant
     return when {
-        intensity <= 0f -> surface.copy(alpha = 0.35f)
-        intensity <= 0.25f -> FireEmber.copy(alpha = 0.18f)
-        intensity <= 0.5f -> FireEmber.copy(alpha = 0.32f)
-        intensity <= 0.75f -> FireOrange.copy(alpha = 0.42f)
-        else -> FireBlaze.copy(alpha = 0.5f)
+        intensity <= 0f -> surface.copy(alpha = 0.25f)
+        intensity <= 0.25f -> FireEmber.copy(alpha = 0.15f)
+        intensity <= 0.5f -> FireEmber.copy(alpha = 0.35f)
+        intensity <= 0.75f -> FireOrange.copy(alpha = 0.55f)
+        else -> FireBlaze.copy(alpha = 0.75f)
     }
 }
 

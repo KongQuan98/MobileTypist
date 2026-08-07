@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.Check
 import compose.icons.feathericons.Star
 import compose.icons.feathericons.X
 import mobiletypist.composeapp.generated.resources.Res
@@ -214,7 +213,7 @@ fun AchievementUnlockContent(
 
                 // Achievement Title
                 Text(
-                    text = stringResource(achievement.title),
+                    text = stringResource(achievement.title).uppercase(),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 28.sp,
@@ -254,7 +253,7 @@ fun AchievementUnlockContent(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = FeatherIcons.Check,
+                            imageVector = FeatherIcons.Star,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
