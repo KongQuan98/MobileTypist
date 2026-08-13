@@ -16,14 +16,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -35,9 +42,20 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import mobiletypist.composeapp.generated.resources.*
+import compose.icons.FeatherIcons
+import compose.icons.feathericons.Share2
+import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.back
+import mobiletypist.composeapp.generated.resources.result_accuracy
+import mobiletypist.composeapp.generated.resources.result_correct
+import mobiletypist.composeapp.generated.resources.result_errors
+import mobiletypist.composeapp.generated.resources.result_keystrokes
+import mobiletypist.composeapp.generated.resources.result_share
+import mobiletypist.composeapp.generated.resources.result_words_per_minute
+import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
+import org.example.project.data.model.UserProfile
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -46,11 +64,23 @@ fun ResultBottomSheet(
     visible: Boolean,
     result: TypingTestResult,
     wpmHistory: List<Int>,
-    onReset: () -> Unit,
+    userProfile: UserProfile,
+    streak: Int,
     onBack: () -> Unit = {},
 ) {
     val yellow = Color(0xFFe2b714)
     val keystrokes = result.correctChars + result.errorCount
+    var showShareScreen by remember { mutableStateOf(false) }
+
+    if (showShareScreen) {
+        ShareResultScreen(
+            visible = true,
+            result = result,
+            userProfile = userProfile,
+            streak = streak,
+            onDismiss = { showShareScreen = false }
+        )
+    }
 
     AnimatedVisibility(
         visible = visible,
@@ -170,9 +200,10 @@ fun ResultBottomSheet(
                     Spacer(Modifier.height(32.dp))
 
                     Button(
-                        onClick = onReset,
+                        onClick = { showShareScreen = true },
                         modifier = Modifier
                             .fillMaxWidth(0.85f)
+                            .padding(top = 16.dp)
                             .border(
                                 2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)
                             ),
@@ -182,14 +213,22 @@ fun ResultBottomSheet(
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(
-                            text = stringResource(Res.string.result_restart_test),
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = FeatherIcons.Share2,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
                             )
-                        )
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = stringResource(Res.string.result_share),
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            )
+                        }
                     }
 
                     Button(
@@ -248,7 +287,7 @@ private fun StatItem(label: String, value: String, color: Color) {
 @Preview
 @Composable
 private fun PreviewRealGraphDarkTheme() {
-    _root_ide_package_.org.example.project.MobileTypistTheme(darkTheme = true) {
+    MobileTypistTheme(darkTheme = true) {
         ResultBottomSheet(
             visible = true,
             result = TypingTestResult(
@@ -261,7 +300,8 @@ private fun PreviewRealGraphDarkTheme() {
                 duration = 60,
             ),
             wpmHistory = listOf(30, 45, 40, 55, 60, 58, 65, 70, 68, 75),
-            onReset = { },
+            userProfile = UserProfile(),
+            streak = 12,
         )
     }
 }
@@ -269,7 +309,7 @@ private fun PreviewRealGraphDarkTheme() {
 @Preview
 @Composable
 private fun PreviewRealGraph() {
-    _root_ide_package_.org.example.project.MobileTypistTheme(darkTheme = false) {
+    MobileTypistTheme(darkTheme = false) {
         ResultBottomSheet(
             visible = true,
             result = TypingTestResult(
@@ -282,7 +322,8 @@ private fun PreviewRealGraph() {
                 duration = 60,
             ),
             wpmHistory = listOf(30, 45, 40, 55, 60, 58, 65, 70, 68, 75),
-            onReset = { },
+            userProfile = UserProfile(),
+            streak = 12,
         )
     }
 }

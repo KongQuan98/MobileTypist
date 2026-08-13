@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import com.russhwolf.settings.MapSettings
 import org.example.project.data.storage.StorageManager
+import org.example.project.di.AppContainer
+import org.example.project.di.LocalAppContainer
 
 /** No-op haptics for Compose previews. */
 object PreviewHaptics : Haptics {
@@ -27,6 +29,9 @@ object PreviewAudioPlayer : AudioPlayerApi {
 fun previewStorageManager(): StorageManager =
     StorageManager(settings = MapSettings())
 
+fun previewAppContainer(): AppContainer =
+    AppContainer(settings = MapSettings())
+
 @Composable
 fun PreviewCompositionLocals(
     content: @Composable () -> Unit,
@@ -34,6 +39,7 @@ fun PreviewCompositionLocals(
     CompositionLocalProvider(
         LocalHaptics provides PreviewHaptics,
         LocalAudioPlayer provides PreviewAudioPlayer,
+        LocalAppContainer provides previewAppContainer(),
         content = content,
     )
 }

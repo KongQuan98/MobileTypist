@@ -22,6 +22,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -43,6 +45,7 @@ import mobiletypist.composeapp.generated.resources.wpm
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
+import org.example.project.di.LocalAppContainer
 import org.example.project.ui.CleanTypingArea
 import org.example.project.ui.GlobalHiddenInputOverlay
 import org.example.project.ui.ResultBottomSheet
@@ -93,6 +96,9 @@ fun TypingScreenContent(
     modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
+    val appContainer = LocalAppContainer.current
+    val userProfile by appContainer.storageManager.userProfileFlow.collectAsState()
+    val streakData by appContainer.storageManager.streakFlow.collectAsState()
 
     LaunchedEffect(isStarted) {
         if (isStarted) {
@@ -113,10 +119,8 @@ fun TypingScreenContent(
                 visible = true,
                 result = result,
                 wpmHistory = viewModel.wpmHistory,
-                onReset = {
-                    viewModel.resetTest()
-                    viewModel.startTest()
-                },
+                userProfile = userProfile,
+                streak = streakData.currentStreak,
                 onBack = { onBack() },
             )
         }

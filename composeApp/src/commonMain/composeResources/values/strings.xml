@@ -168,6 +168,23 @@
     <string name="result_errors">ERRORS</string>
     <string name="result_keystrokes">%1$d keystrokes</string>
     <string name="result_restart_test">restart test</string>
+    <string name="result_share">share</string>
+
+    // share result screen
+    <string name="share_result_title">share result</string>
+    <string name="share_result_words_per_minute_short">wpm</string>
+    <string name="share_result_accuracy">ACCURACY</string>
+    <string name="share_result_score">SCORE</string>
+    <string name="share_result_streak">🔥 %1$d day streak</string>
+    <string name="share_result_keep_typing">KEEP TYPING</string>
+    <string name="share_result_app_url">typely.app</string>
+    <string name="share_result_button">share now</string>
+    <string name="share_result_save_image">Save Image</string>
+    <string name="share_result_copy_result">Copy Result</string>
+    <string name="share_result_footer_hint">Opens your share sheet — Instagram, WhatsApp, Messages</string>
+    <string name="share_result_mode_seconds">%1$d SECOND CHALLENGE</string>
+    <string name="share_result_mode_words">%1$d WORDS CHALLENGE</string>
+    <string name="share_result_mode_quotes">QUOTES CHALLENGE</string>
 
     // achievements screen
     <string name="achievements_collection">COLLECTION</string>
