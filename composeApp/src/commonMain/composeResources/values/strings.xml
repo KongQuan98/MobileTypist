@@ -185,6 +185,7 @@
     <string name="share_result_mode_seconds">%1$d SECOND CHALLENGE</string>
     <string name="share_result_mode_words">%1$d WORDS CHALLENGE</string>
     <string name="share_result_mode_quotes">QUOTES CHALLENGE</string>
+    <string name="share_result_message">I just reached %1$d WPM on Typely with %2$d%% accuracy! My current streak is %3$d days. 🔥\n\nTry it now at %4$s</string>
 
     // achievements screen
     <string name="achievements_collection">COLLECTION</string>
@@ -252,4 +253,32 @@
     <string name="achievement_keep_practicing_footer">Keep practicing to achieve more</string>
     <string name="achievement_first_strike_title">First Strike</string>
     <string name="achievement_first_strike_desc">Completed your first typing test</string>
+
+    // daily streak screen
+    <string name="streak_title">DAILY STREAK</string>
+    <string name="streak_days">days</string>
+    <string name="streak_badge_started">STREAK STARTED</string>
+    <string name="streak_badge_new">NEW STREAK</string>
+    <string name="streak_badge_continued">STREAK CONTINUED</string>
+    <string name="streak_badge_ended">STREAK ENDED</string>
+    <string name="streak_badge_welcome">WELCOME BACK</string>
+    <string name="streak_badge_milestone">MILESTONE REACHED</string>
+    <string name="streak_headline_first">Your streak begins!</string>
+    <string name="streak_headline_started">%1$d Day Streak!</string>
+    <string name="streak_headline_continued">%1$d Days!</string>
+    <string name="streak_headline_broken">Your %1$d day streak ended.</string>
+    <string name="streak_headline_welcome">We missed you!</string>
+    <string name="streak_subheadline_first">Keep typing every day to build your streak.</string>
+    <string name="streak_subheadline_started">Great start! Come back tomorrow.</string>
+    <string name="streak_subheadline_continued">Your consistency is improving.</string>
+    <string name="streak_subheadline_broken">Start again today and beat your previous record.</string>
+    <string name="streak_subheadline_welcome">You have been away for %1$d days. Let\'s get typing again!</string>
+    <string name="streak_subheadline_milestone">Amazing achievement! You\'re among the top typists.</string>
+    <string name="streak_button_new">START A NEW STREAK</string>
+    <string name="streak_button_keep">KEEP MY STREAK ALIVE</string>
+    <string name="streak_button_secured">STREAK SECURED</string>
+    <string name="streak_next_milestone">NEXT MILESTONE</string>
+    <string name="streak_milestones_title">STREAK MILESTONES</string>
+    <string name="streak_more_days">%1$d more days</string>
+    <string name="streak_milestone_progress">%1$d / %2$d days</string>
 </resources>

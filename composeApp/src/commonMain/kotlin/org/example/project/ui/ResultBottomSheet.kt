@@ -276,7 +276,7 @@ private fun StatItem(label: String, value: String, color: Color) {
         Text(
             text = label, style = TextStyle(
                 fontSize = 8.sp,
-                color = Color(0xFF646669),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontFamily = FontFamily.Monospace,
                 letterSpacing = 1.sp
             )

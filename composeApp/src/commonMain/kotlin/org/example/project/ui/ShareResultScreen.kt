@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import compose.icons.FeatherIcons
+import compose.icons.feathericons.Copy
+import compose.icons.feathericons.Download
 import compose.icons.feathericons.Share2
 import compose.icons.feathericons.X
 import kotlinx.coroutines.launch
@@ -55,11 +58,14 @@ import mobiletypist.composeapp.generated.resources.result_words_per_minute
 import mobiletypist.composeapp.generated.resources.share_result_accuracy
 import mobiletypist.composeapp.generated.resources.share_result_app_url
 import mobiletypist.composeapp.generated.resources.share_result_button
+import mobiletypist.composeapp.generated.resources.share_result_copy_result
 import mobiletypist.composeapp.generated.resources.share_result_footer_hint
 import mobiletypist.composeapp.generated.resources.share_result_keep_typing
+import mobiletypist.composeapp.generated.resources.share_result_message
 import mobiletypist.composeapp.generated.resources.share_result_mode_quotes
 import mobiletypist.composeapp.generated.resources.share_result_mode_seconds
 import mobiletypist.composeapp.generated.resources.share_result_mode_words
+import mobiletypist.composeapp.generated.resources.share_result_save_image
 import mobiletypist.composeapp.generated.resources.share_result_score
 import mobiletypist.composeapp.generated.resources.share_result_streak
 import mobiletypist.composeapp.generated.resources.share_result_title
@@ -117,8 +123,13 @@ private fun ShareResultContent(
         val coroutineScope = rememberCoroutineScope()
         val graphicsLayer = rememberGraphicsLayer()
 
-        val shareText =
-            "I just reached ${result.wpm} WPM on Typely with ${result.accuracy}% accuracy! My current streak is $streak days. 🔥\n\nTry it now at mobiletypist.app"
+        val shareMessage = stringResource(
+            Res.string.share_result_message,
+            result.wpm,
+            result.accuracy,
+            streak,
+            stringResource(Res.string.share_result_app_url)
+        )
 
         Column(
             modifier = Modifier
@@ -190,7 +201,7 @@ private fun ShareResultContent(
                     onClick = {
                         coroutineScope.launch {
                             val bitmap = graphicsLayer.toImageBitmap()
-                            shareImage(bitmap, shareText)
+                            shareImage(bitmap, shareMessage)
                             appContainer.storageManager.incrementSocialShares()
                         }
                     },
@@ -221,32 +232,31 @@ private fun ShareResultContent(
                     }
                 }
 
-//                // Secondary Buttons
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-//                ) {
-//                    SecondaryActionButton(
-//                        modifier = Modifier.weight(1f),
-//                        icon = FeatherIcons.Download,
-//                        text = stringResource(Res.string.share_result_save_image),
-//                        onClick = {
-//                            coroutineScope.launch {
-//                                // For now, we can just share it or implement actual gallery save
-//                                val bitmap = graphicsLayer.toImageBitmap()
-//                                shareImage(bitmap, "My Typely Result")
-//                            }
-//                        }
-//                    )
-//                    SecondaryActionButton(
-//                        modifier = Modifier.weight(1f),
-//                        icon = FeatherIcons.Copy,
-//                        text = stringResource(Res.string.share_result_copy_result),
-//                        onClick = {
-//                            clipboardManager.setText(AnnotatedString(shareText))
-//                        }
-//                    )
-//                }
+                // Secondary Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    SecondaryActionButton(
+                        modifier = Modifier.weight(1f),
+                        icon = FeatherIcons.Download,
+                        text = stringResource(Res.string.share_result_save_image),
+                        onClick = {
+                            coroutineScope.launch {
+                                val bitmap = graphicsLayer.toImageBitmap()
+                                shareImage(bitmap, "My Typely Result")
+                            }
+                        }
+                    )
+                    SecondaryActionButton(
+                        modifier = Modifier.weight(1f),
+                        icon = FeatherIcons.Copy,
+                        text = stringResource(Res.string.share_result_copy_result),
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(shareMessage))
+                        }
+                    )
+                }
 
                 Spacer(Modifier.height(16.dp))
 
@@ -360,7 +370,7 @@ private fun ShareCard(
                 }
 
                 Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.05f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
@@ -488,6 +498,18 @@ private fun ShareCard(
 
             Spacer(Modifier.height(24.dp))
 
+            // Typist Letters
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                "TYPIST".forEach { char ->
+                    LetterBox(char.toString())
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
             // Footer Links
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -513,6 +535,33 @@ private fun ShareCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun LetterBox(letter: String) {
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .background(
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f),
+                RoundedCornerShape(8.dp)
+            )
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                RoundedCornerShape(8.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = letter,
+            style = TextStyle(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
     }
 }
 
@@ -582,7 +631,7 @@ private fun SecondaryActionButton(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
-                tint = Color.White.copy(alpha = 0.6f)
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
             Spacer(Modifier.width(8.dp))
             Text(

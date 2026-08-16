@@ -74,7 +74,7 @@ import org.example.project.data.storage.StorageManager
 import org.example.project.di.LocalAppContainer
 import org.example.project.navigation.NavigationManager
 import org.example.project.ui.AchievementUnlockPopup
-import org.example.project.ui.StreakDialog
+import org.example.project.ui.StreakScreen
 import org.example.project.ui.shimmerEffect
 import org.example.project.utils.AudioPlayer
 import org.example.project.utils.Haptics
@@ -133,13 +133,19 @@ fun HomeScreen(
             onDismiss = { unlockedAchievement = null }
         )
 
-        streakEvent?.let { event ->
-            StreakDialog(
-                event = event,
-                onDismiss = {
-                    viewModel.dismissStreakEvent()
-                }
-            )
+        AnimatedVisibility(
+            visible = streakEvent != null,
+            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+        ) {
+            streakEvent?.let { event ->
+                StreakScreen(
+                    event = event,
+                    onDismiss = {
+                        viewModel.dismissStreakEvent()
+                    }
+                )
+            }
         }
     }
 }
