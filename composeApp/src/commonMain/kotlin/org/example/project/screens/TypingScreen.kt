@@ -192,8 +192,6 @@ fun TypingScreenContent(
                 // Monkeytype Area
                 CleanTypingArea(
                     targetText = viewModel.targetText,
-                    input = viewModel.input,
-                    enabled = !viewModel.isFinished,
                     charStatuses = viewModel.charStatuses.toList(),
                     isQuoteMode = viewModel.mode == TypingMode.QUOTES,
                     modifier = Modifier.fillMaxWidth(0.9f)

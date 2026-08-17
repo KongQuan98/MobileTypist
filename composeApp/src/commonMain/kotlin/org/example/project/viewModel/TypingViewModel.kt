@@ -74,7 +74,7 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
 
     fun onInputChanged(new: String) {
         if (isFinished) return
-        
+
         if (!isRunning && !isFinished) {
             startTest()
         }
@@ -85,19 +85,37 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
                 val newChar = new.last()
                 val targetChar = targetText[currentCharIndex]
 
-                if (newChar == targetChar) {
-                    charStatuses[currentCharIndex] = CharStatus.Correct
-                    correctCount++
+                if (newChar == ' ' && targetChar != ' ') {
+                    // Standard logic: Jump to next word on space press
+                    while (currentCharIndex < targetText.length && targetText[currentCharIndex] != ' ') {
+                        charStatuses[currentCharIndex] = CharStatus.Incorrect
+                        errorCount++
+                        currentCharIndex++
+                    }
+                    // Also process the space itself if we found it
+                    if (currentCharIndex < targetText.length && targetText[currentCharIndex] == ' ') {
+                        charStatuses[currentCharIndex] = CharStatus.Correct
+                        correctCount++
+                        currentCharIndex++
+                    }
+                    input = new // Keep input sync
                 } else {
-                    charStatuses[currentCharIndex] = CharStatus.Incorrect
-                    errorCount++
+                    // Normal character process
+                    if (newChar == targetChar) {
+                        charStatuses[currentCharIndex] = CharStatus.Correct
+                        correctCount++
+                    } else {
+                        charStatuses[currentCharIndex] = CharStatus.Incorrect
+                        errorCount++
+                    }
+                    currentCharIndex++
+                    input = new
                 }
-                currentCharIndex++
-                input = new
                 updateLiveStats()
             }
         } else if (new.length < input.length) {
-            // Backspace
+            // Backspace logic: Handle potential jumps
+            // Standard backspace usually just goes back one character.
             if (currentCharIndex > 0) {
                 currentCharIndex--
                 if (charStatuses[currentCharIndex] == CharStatus.Correct) {

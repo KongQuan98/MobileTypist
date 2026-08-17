@@ -46,8 +46,6 @@ import org.example.project.screens.CharStatus
 @Composable
 fun CleanTypingArea(
     targetText: String,
-    input: String,
-    enabled: Boolean,
     charStatuses: List<CharStatus>,
     isQuoteMode: Boolean = false,
     modifier: Modifier = Modifier
@@ -61,8 +59,6 @@ fun CleanTypingArea(
     ) { animatedTargetText ->
         CleanTypingAreaContent(
             targetText = animatedTargetText,
-            input = input,
-            enabled = enabled,
             charStatuses = charStatuses,
             isQuoteMode = isQuoteMode,
             modifier = modifier,
@@ -73,8 +69,6 @@ fun CleanTypingArea(
 @Composable
 private fun CleanTypingAreaContent(
     targetText: String,
-    input: String,
-    enabled: Boolean,
     charStatuses: List<CharStatus>,
     isQuoteMode: Boolean,
     modifier: Modifier = Modifier
@@ -82,29 +76,59 @@ private fun CleanTypingAreaContent(
     val textMeasurer = rememberTextMeasurer()
     val scrollState = rememberScrollState()
 
+    val primaryColor = MaterialTheme.colorScheme.primary
     val pendingColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
     val correctColor = MaterialTheme.colorScheme.onSurface
     val errorColor = Color(0xFFCA4754)
 
     val currentCharIndex = charStatuses.count { it != CharStatus.Pending }
 
+    // Find current word range for highlighting
+    val currentWordRange = remember(targetText, currentCharIndex) {
+        var start = currentCharIndex
+        while (start > 0 && targetText[start - 1] != ' ') {
+            start--
+        }
+        var end = currentCharIndex
+        while (end < targetText.length && targetText[end] != ' ') {
+            end++
+        }
+        start until end
+    }
+
     val annotatedString = buildAnnotatedString {
         targetText.forEachIndexed { index, char ->
-            val color = when {
+            val isCurrentChar = index == currentCharIndex
+            val isInCurrentWord = index in currentWordRange
+
+            val textColor = when {
                 index < charStatuses.size -> when (charStatuses[index]) {
                     CharStatus.Correct -> correctColor
                     CharStatus.Incorrect -> errorColor
-                    CharStatus.Pending -> if (index == currentCharIndex) {
-                        // Highlight current character color if needed, but no cursor line
-                        MaterialTheme.colorScheme.primary
+                    CharStatus.Pending -> if (isCurrentChar) {
+                        primaryColor
                     } else {
                         pendingColor
                     }
                 }
-
                 else -> pendingColor
             }
-            withStyle(style = SpanStyle(color = color)) {
+
+            val backgroundColor = when {
+                isCurrentChar && char == ' ' -> primaryColor.copy(alpha = 0.7f)
+                isInCurrentWord && charStatuses.getOrNull(index) == CharStatus.Pending -> MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = 0.05f
+                )
+
+                else -> Color.Transparent
+            }
+
+            withStyle(
+                style = SpanStyle(
+                    color = textColor,
+                    background = backgroundColor
+                )
+            ) {
                 append(char)
             }
         }
@@ -126,7 +150,7 @@ private fun CleanTypingAreaContent(
             constraints = Constraints(maxWidth = 1200)
         )
 
-        // Smooth Caret Motion calculation remains for auto-scroll logic only
+        // Smooth Caret Motion calculation
         val caretOffset = remember(currentCharIndex, layoutResult) {
             when {
                 currentCharIndex < targetText.length -> layoutResult.getCursorRect(currentCharIndex)
@@ -163,7 +187,6 @@ private fun CleanTypingAreaContent(
                 style = textStyle,
                 modifier = Modifier.fillMaxWidth()
             )
-            // Cursor Canvas Removed
         }
     }
 }
