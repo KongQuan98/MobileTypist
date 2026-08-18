@@ -1,9 +1,6 @@
 package org.example.project.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,7 +20,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +43,7 @@ import org.example.project.screens.CharStatus
 fun CleanTypingArea(
     targetText: String,
     charStatuses: List<CharStatus>,
+    currentCharIndex: Int,
     isQuoteMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -60,6 +57,7 @@ fun CleanTypingArea(
         CleanTypingAreaContent(
             targetText = animatedTargetText,
             charStatuses = charStatuses,
+            currentCharIndex = currentCharIndex,
             isQuoteMode = isQuoteMode,
             modifier = modifier,
         )
@@ -70,6 +68,7 @@ fun CleanTypingArea(
 private fun CleanTypingAreaContent(
     targetText: String,
     charStatuses: List<CharStatus>,
+    currentCharIndex: Int,
     isQuoteMode: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -79,9 +78,8 @@ private fun CleanTypingAreaContent(
     val primaryColor = MaterialTheme.colorScheme.primary
     val pendingColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
     val correctColor = MaterialTheme.colorScheme.onSurface
+    val currentWordBgColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
     val errorColor = Color(0xFFCA4754)
-
-    val currentCharIndex = charStatuses.count { it != CharStatus.Pending }
 
     // Find current word range for highlighting
     val currentWordRange = remember(targetText, currentCharIndex) {
@@ -97,58 +95,89 @@ private fun CleanTypingAreaContent(
     }
 
     val annotatedString = buildAnnotatedString {
-        targetText.forEachIndexed { index, char ->
-            val isCurrentChar = index == currentCharIndex
-            val isInCurrentWord = index in currentWordRange
+        if (targetText.isEmpty()) return@buildAnnotatedString
+
+        var i = 0
+        while (i < targetText.length) {
+            val start = i
+            val char = targetText[i]
+
+            val isCurrentChar = i == currentCharIndex
+            val isInCurrentWord = i in currentWordRange
 
             val textColor = when {
-                index < charStatuses.size -> when (charStatuses[index]) {
+                i < charStatuses.size -> when (charStatuses[i]) {
                     CharStatus.Correct -> correctColor
                     CharStatus.Incorrect -> errorColor
-                    CharStatus.Pending -> if (isCurrentChar) {
-                        primaryColor
-                    } else {
-                        pendingColor
-                    }
+                    CharStatus.Pending -> if (isCurrentChar) primaryColor else pendingColor
                 }
                 else -> pendingColor
             }
 
             val backgroundColor = when {
                 isCurrentChar && char == ' ' -> primaryColor.copy(alpha = 0.7f)
-                isInCurrentWord && charStatuses.getOrNull(index) == CharStatus.Pending -> MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = 0.05f
-                )
+                isInCurrentWord && (charStatuses.getOrNull(i)
+                    ?: CharStatus.Pending) == CharStatus.Pending -> currentWordBgColor
 
                 else -> Color.Transparent
             }
 
-            withStyle(
-                style = SpanStyle(
-                    color = textColor,
-                    background = backgroundColor
-                )
-            ) {
-                append(char)
+            i++
+            while (i < targetText.length) {
+                val nextChar = targetText[i]
+                val nextIsCurrentChar = i == currentCharIndex
+                val nextIsInCurrentWord = i in currentWordRange
+
+                val nextTextColor = when {
+                    i < charStatuses.size -> when (charStatuses[i]) {
+                        CharStatus.Correct -> correctColor
+                        CharStatus.Incorrect -> errorColor
+                        CharStatus.Pending -> if (nextIsCurrentChar) primaryColor else pendingColor
+                    }
+
+                    else -> pendingColor
+                }
+
+                val nextBackgroundColor = when {
+                    nextIsCurrentChar && nextChar == ' ' -> primaryColor.copy(alpha = 0.7f)
+                    nextIsInCurrentWord && (charStatuses.getOrNull(i)
+                        ?: CharStatus.Pending) == CharStatus.Pending -> currentWordBgColor
+
+                    else -> Color.Transparent
+                }
+
+                if (nextTextColor == textColor && nextBackgroundColor == backgroundColor) {
+                    i++
+                } else {
+                    break
+                }
+            }
+
+            withStyle(SpanStyle(color = textColor, background = backgroundColor)) {
+                append(targetText.substring(start, i))
             }
         }
     }
 
-    val textStyle = TextStyle(
-        fontSize = if (isQuoteMode) 22.sp else 24.sp,
-        fontFamily = FontFamily.Monospace,
-        fontWeight = FontWeight.Medium,
-        fontStyle = if (isQuoteMode) FontStyle.Italic else FontStyle.Normal,
-        lineHeight = if (isQuoteMode) 34.sp else 36.sp,
-        letterSpacing = 0.5.sp
-    )
+    val textStyle = remember(isQuoteMode) {
+        TextStyle(
+            fontSize = if (isQuoteMode) 22.sp else 24.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Medium,
+            fontStyle = if (isQuoteMode) FontStyle.Italic else FontStyle.Normal,
+            lineHeight = if (isQuoteMode) 34.sp else 36.sp,
+            letterSpacing = 0.5.sp
+        )
+    }
 
     Box(modifier = modifier) {
-        val layoutResult = textMeasurer.measure(
-            text = annotatedString,
-            style = textStyle,
-            constraints = Constraints(maxWidth = 1200)
-        )
+        val layoutResult = remember(annotatedString, textStyle) {
+            textMeasurer.measure(
+                text = annotatedString,
+                style = textStyle,
+                constraints = Constraints(maxWidth = 1200)
+            )
+        }
 
         // Smooth Caret Motion calculation
         val caretOffset = remember(currentCharIndex, layoutResult) {
@@ -168,17 +197,9 @@ private fun CleanTypingAreaContent(
             }
         }
 
-        val animatedCaretY by animateFloatAsState(
-            targetValue = caretOffset.top,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioNoBouncy,
-                stiffness = Spring.StiffnessLow
-            )
-        )
-
         // Auto-scroll logic: Keep typing position visible
-        LaunchedEffect(animatedCaretY) {
-            scrollState.animateScrollTo(animatedCaretY.toInt().coerceAtLeast(0))
+        LaunchedEffect(caretOffset.top) {
+            scrollState.animateScrollTo(caretOffset.top.toInt().coerceAtLeast(0))
         }
 
         Box(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {

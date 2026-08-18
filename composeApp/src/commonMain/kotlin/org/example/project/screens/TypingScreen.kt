@@ -80,6 +80,7 @@ fun TypingScreen(
 
     TypingScreenContent(
         viewModel = viewModel,
+        targetText = targetText,
         onTestComplete = { action(TypingScreenAction.OnTestComplete(it)) },
         onBack = { action(TypingScreenAction.OnNavigateBack) },
         isStarted = isStarted,
@@ -90,6 +91,7 @@ fun TypingScreen(
 @Composable
 fun TypingScreenContent(
     viewModel: TypingViewModel,
+    targetText: String,
     onTestComplete: (TypingTestResult) -> Unit,
     onBack: () -> Unit,
     isStarted: Boolean,
@@ -191,8 +193,9 @@ fun TypingScreenContent(
 
                 // Monkeytype Area
                 CleanTypingArea(
-                    targetText = viewModel.targetText,
-                    charStatuses = viewModel.charStatuses.toList(),
+                    targetText = targetText,
+                    charStatuses = viewModel.charStatuses,
+                    currentCharIndex = viewModel.currentCharIndex,
                     isQuoteMode = viewModel.mode == TypingMode.QUOTES,
                     modifier = Modifier.fillMaxWidth(0.9f)
                 )
