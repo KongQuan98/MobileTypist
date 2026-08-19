@@ -6,6 +6,11 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import kotlinx.serialization.Serializable
 import mobiletypist.composeapp.generated.resources.Res
+import mobiletypist.composeapp.generated.resources.heatmap_fire_icon
+import mobiletypist.composeapp.generated.resources.heatmap_lavender_icon
+import mobiletypist.composeapp.generated.resources.heatmap_ocean_icon
+import mobiletypist.composeapp.generated.resources.heatmap_rose_icon
+import mobiletypist.composeapp.generated.resources.heatmap_tree_icon
 import mobiletypist.composeapp.generated.resources.theme_classic
 import mobiletypist.composeapp.generated.resources.theme_forest
 import mobiletypist.composeapp.generated.resources.theme_lavender
@@ -28,6 +33,15 @@ enum class AppColorTheme {
             Forest -> Res.string.theme_forest
             Rose -> Res.string.theme_rose
             Lavender -> Res.string.theme_lavender
+        }
+
+    val iconRes: StringResource
+        get() = when (this) {
+            Classic -> Res.string.heatmap_fire_icon
+            Ocean -> Res.string.heatmap_ocean_icon
+            Forest -> Res.string.heatmap_tree_icon
+            Rose -> Res.string.heatmap_rose_icon
+            Lavender -> Res.string.heatmap_lavender_icon
         }
 
     val previewColor: Color
@@ -54,6 +68,44 @@ enum class AppColorTheme {
         Rose -> if (darkTheme) Color(0xFF3A2A2A) else Color(0xFFD4BCBC)
         Lavender -> if (darkTheme) Color(0xFF322A3A) else Color(0xFFC8BCD4)
     }
+
+    val heatmapColors: List<Color>
+        get() = when (this) {
+            Classic -> listOf(
+                Color(0xFFFF8C42), // Ember
+                Color(0xFFFF6B35), // Orange
+                Color(0xFFFF4500), // Blaze
+                Color(0xFFE63946)  // Inferno
+            )
+
+            Ocean -> listOf(
+                Color(0xFFB8D4DC),
+                Color(0xFF86B9C6),
+                Color(0xFF56B6C2),
+                Color(0xFF328A97)
+            )
+
+            Forest -> listOf(
+                Color(0xFFC5D4BC),
+                Color(0xFFA2BC8E),
+                Color(0xFF7EBC59),
+                Color(0xFF5A8E40)
+            )
+
+            Rose -> listOf(
+                Color(0xFFD4BCBC),
+                Color(0xFFE08E8E),
+                Color(0xFFE06C75),
+                Color(0xFFB8404A)
+            )
+
+            Lavender -> listOf(
+                Color(0xFFC8BCD4),
+                Color(0xFFB3A2CC),
+                Color(0xFFA78BFA),
+                Color(0xFF7C3AED)
+            )
+        }
 }
 
 private val ClassicLight = lightColorScheme(

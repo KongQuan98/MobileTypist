@@ -340,7 +340,7 @@ fun StreakScreen(
                     Text(
                         text = buttonText,
                         style = TextStyle(
-                            fontSize = 18.sp,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
                         )

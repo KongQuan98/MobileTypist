@@ -60,7 +60,6 @@ import mobiletypist.composeapp.generated.resources.heatmap_day_thu
 import mobiletypist.composeapp.generated.resources.heatmap_day_tue
 import mobiletypist.composeapp.generated.resources.heatmap_day_wed
 import mobiletypist.composeapp.generated.resources.heatmap_detail_placeholder
-import mobiletypist.composeapp.generated.resources.heatmap_fire_icon
 import mobiletypist.composeapp.generated.resources.heatmap_less
 import mobiletypist.composeapp.generated.resources.heatmap_more
 import mobiletypist.composeapp.generated.resources.heatmap_no_activity
@@ -75,11 +74,6 @@ import org.example.project.utils.heatmapFormatTestCount
 import org.example.project.utils.heatmapMonthYearLabel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-private val FireEmber = Color(0xFFFF8C42)
-private val FireOrange = Color(0xFFFF6B35)
-private val FireBlaze = Color(0xFFFF4500)
-private val FireInferno = Color(0xFFE63946)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -318,11 +312,14 @@ private fun HeatmapDayCell(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    val fireIcon = stringResource(Res.string.heatmap_fire_icon)
+    val heatmapColors = MobileTypistTheme.customColors.heatmapColors
+    val heatmapIcon = MobileTypistTheme.customColors.heatmapIcon
+
+    val icon = stringResource(heatmapIcon)
     val intensity = heatmapIntensity(cell.testCount, maxTestCount)
-    val cellColor = heatmapCellColor(intensity)
-    val fireTint = heatmapFireTint(intensity)
-    val showFire = cell.day != null && cell.testCount > 0
+    val cellColor = heatmapCellColor(intensity, heatmapColors)
+    val iconTint = heatmapFireTint(intensity, heatmapColors)
+    val showIcon = cell.day != null && cell.testCount > 0
 
     val scale = remember(animationEpoch) { Animatable(0.72f) }
     val alpha = remember(animationEpoch) { Animatable(0f) }
@@ -411,16 +408,16 @@ private fun HeatmapDayCell(
                 )
             }
 
-            if (showFire) {
+            if (showIcon) {
                 Text(
-                    text = fireIcon,
+                    text = icon,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .offset(x = 2.dp, y = (-4).dp)
                         .scale(0.6f + intensity * 0.4f),
                     style = TextStyle(
                         fontSize = (10 + intensity * 6).sp,
-                        color = fireTint,
+                        color = iconTint,
                     ),
                 )
             }
@@ -430,7 +427,10 @@ private fun HeatmapDayCell(
 
 @Composable
 private fun HeatmapLegend() {
-    val fireIcon = stringResource(Res.string.heatmap_fire_icon)
+    val heatmapColors = MobileTypistTheme.customColors.heatmapColors
+    val heatmapIcon = MobileTypistTheme.customColors.heatmapIcon
+
+    val icon = stringResource(heatmapIcon)
     val levels = listOf(0f, 0.25f, 0.5f, 0.75f, 1f)
 
     Row(
@@ -455,15 +455,15 @@ private fun HeatmapLegend() {
                     modifier = Modifier
                         .size(16.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(heatmapCellColor(level)),
+                        .background(heatmapCellColor(level, heatmapColors)),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (level > 0f) {
                         Text(
-                            text = fireIcon,
+                            text = icon,
                             style = TextStyle(
                                 fontSize = (8 + level * 5).sp,
-                                color = heatmapFireTint(level),
+                                color = heatmapFireTint(level, heatmapColors),
                             ),
                         )
                     }
@@ -496,23 +496,27 @@ private fun heatmapIntensity(testCount: Int, maxTestCount: Int): Float {
 }
 
 @Composable
-private fun heatmapCellColor(intensity: Float): Color {
+private fun heatmapCellColor(intensity: Float, heatmapColors: List<Color>): Color {
     val surface = MaterialTheme.colorScheme.surfaceVariant
+    if (heatmapColors.size < 4) return surface // Fallback
+    
     return when {
         intensity <= 0f -> surface.copy(alpha = 0.25f)
-        intensity <= 0.25f -> FireEmber.copy(alpha = 0.15f)
-        intensity <= 0.5f -> FireEmber.copy(alpha = 0.35f)
-        intensity <= 0.75f -> FireOrange.copy(alpha = 0.55f)
-        else -> FireBlaze.copy(alpha = 0.75f)
+        intensity <= 0.25f -> heatmapColors[0].copy(alpha = 0.15f)
+        intensity <= 0.5f -> heatmapColors[0].copy(alpha = 0.35f)
+        intensity <= 0.75f -> heatmapColors[1].copy(alpha = 0.55f)
+        else -> heatmapColors[2].copy(alpha = 0.75f)
     }
 }
 
-private fun heatmapFireTint(intensity: Float): Color {
+private fun heatmapFireTint(intensity: Float, heatmapColors: List<Color>): Color {
+    if (heatmapColors.size < 4) return Color.Unspecified // Fallback
+    
     return when {
-        intensity <= 0.25f -> FireEmber
-        intensity <= 0.5f -> FireOrange
-        intensity <= 0.75f -> FireBlaze
-        else -> FireInferno
+        intensity <= 0.25f -> heatmapColors[0]
+        intensity <= 0.5f -> heatmapColors[1]
+        intensity <= 0.75f -> heatmapColors[2]
+        else -> heatmapColors[3]
     }
 }
 
