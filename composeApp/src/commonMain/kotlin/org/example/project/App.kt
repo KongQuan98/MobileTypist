@@ -17,6 +17,8 @@ import org.example.project.di.LocalAppContainer
 import org.example.project.navigation.Navigation
 import org.example.project.navigation.model.Screen
 import org.example.project.navigation.rememberNavigationManager
+import org.example.project.theme.LocalTypingTextPreferences
+import org.example.project.theme.toTypingTextPreferences
 import org.example.project.utils.LocalAudioPlayer
 import org.example.project.utils.LocalHaptics
 import org.example.project.utils.TypingHapticFeedback
@@ -70,11 +72,15 @@ fun App(
         audioPlayer.preload()
     }
 
-    MobileTypistTheme(darkTheme = settingState.darkTheme) {
+    MobileTypistTheme(
+        darkTheme = settingState.darkTheme,
+        colorTheme = settingState.colorTheme,
+    ) {
         CompositionLocalProvider(
             LocalHaptics provides haptics,
             LocalAudioPlayer provides audioPlayer,
             LocalAppContainer provides appContainer,
+            LocalTypingTextPreferences provides settingState.toTypingTextPreferences(),
         ) {
             Navigation(
                 navigationManager = navigationManager,

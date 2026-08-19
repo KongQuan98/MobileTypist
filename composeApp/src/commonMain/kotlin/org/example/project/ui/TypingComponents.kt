@@ -29,15 +29,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.example.project.screens.CharStatus
+import org.example.project.theme.LocalTypingTextPreferences
+import org.example.project.theme.toTextStyle
 
 @Composable
 fun CleanTypingArea(
@@ -79,7 +78,7 @@ private fun CleanTypingAreaContent(
     val pendingColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
     val correctColor = MaterialTheme.colorScheme.onSurface
     val currentWordBgColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
-    val errorColor = Color(0xFFCA4754)
+    val errorColor = MaterialTheme.colorScheme.error
 
     // Find current word range for highlighting
     val currentWordRange = remember(targetText, currentCharIndex) {
@@ -159,15 +158,9 @@ private fun CleanTypingAreaContent(
         }
     }
 
-    val textStyle = remember(isQuoteMode) {
-        TextStyle(
-            fontSize = if (isQuoteMode) 22.sp else 24.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Medium,
-            fontStyle = if (isQuoteMode) FontStyle.Italic else FontStyle.Normal,
-            lineHeight = if (isQuoteMode) 34.sp else 36.sp,
-            letterSpacing = 0.5.sp
-        )
+    val typingPreferences = LocalTypingTextPreferences.current
+    val textStyle = remember(isQuoteMode, typingPreferences) {
+        typingPreferences.toTextStyle(isQuoteMode)
     }
 
     Box(modifier = modifier) {

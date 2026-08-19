@@ -6,6 +6,8 @@ import com.russhwolf.settings.MapSettings
 import org.example.project.data.storage.StorageManager
 import org.example.project.di.AppContainer
 import org.example.project.di.LocalAppContainer
+import org.example.project.theme.LocalTypingTextPreferences
+import org.example.project.theme.toTypingTextPreferences
 
 /** No-op haptics for Compose previews. */
 object PreviewHaptics : Haptics {
@@ -40,6 +42,8 @@ fun PreviewCompositionLocals(
         LocalHaptics provides PreviewHaptics,
         LocalAudioPlayer provides PreviewAudioPlayer,
         LocalAppContainer provides previewAppContainer(),
+        LocalTypingTextPreferences provides previewAppContainer().storageManager.getSettings()
+            .toTypingTextPreferences(),
         content = content,
     )
 }

@@ -130,6 +130,17 @@
     <string name="settings_font_size">font size</string>
     <string name="settings_font_family">font family</string>
     <string name="settings_dark_theme">dark theme</string>
+    <string name="theme_classic">classic</string>
+    <string name="theme_ocean">ocean</string>
+    <string name="theme_forest">forest</string>
+    <string name="theme_rose">rose</string>
+    <string name="theme_lavender">lavender</string>
+    <string name="font_size_small">small</string>
+    <string name="font_size_medium">medium</string>
+    <string name="font_size_large">large</string>
+    <string name="font_family_monospace">jetbrains mono</string>
+    <string name="font_family_sans_serif">sans serif</string>
+    <string name="font_family_serif">serif</string>
     <string name="settings_gameplay">// gameplay</string>
     <string name="settings_sound_effects">sound effects</string>
     <string name="settings_haptic_feedback">haptic feedback</string>

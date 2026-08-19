@@ -24,7 +24,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +56,11 @@ import mobiletypist.composeapp.generated.resources.settings_title
 import mobiletypist.composeapp.generated.resources.version
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.AppSettings
+import org.example.project.theme.AppColorTheme
+import org.example.project.theme.TypingFontFamily
+import org.example.project.theme.TypingFontSize
+import org.example.project.ui.SettingsOptionSheet
+import org.example.project.ui.ThemeColorSwatch
 import org.example.project.utils.AudioPlayer
 import org.example.project.utils.LocalHaptics
 import org.example.project.utils.PreviewCompositionLocals
@@ -67,9 +75,16 @@ sealed interface SettingsScreenAction {
     data class SaveSettings(val settings: AppSettings) : SettingsScreenAction
 }
 
+private enum class SettingsPicker {
+    Theme,
+    FontSize,
+    FontFamily,
+}
+
 private sealed interface SettingsListItem {
     data class Header(val title: String) : SettingsListItem
-    data class NavRow(val label: String, val value: String) : SettingsListItem
+    data class NavRow(val label: String, val value: String, val onClick: () -> Unit) :
+        SettingsListItem
     data class Toggle(
         val label: String,
         val checked: Boolean,
@@ -91,15 +106,18 @@ fun SettingsScreen(
     action: (SettingsScreenAction) -> Unit = {},
     appSettings: AppSettings = AppSettings(),
     audioPlayer: AudioPlayer? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val appName = stringResource(Res.string.app_name)
-    val appVersion = stringResource(Res.string.version)
+    var activePicker by remember { mutableStateOf<SettingsPicker?>(null) }
+
+    val themeLabel = stringResource(appSettings.colorTheme.labelRes)
+    val fontSizeLabel = stringResource(appSettings.typingFontSize.labelRes)
+    val fontFamilyLabel = stringResource(appSettings.typingFontFamily.labelRes)
 
     val appearanceHeader = stringResource(Res.string.settings_appearance)
-    val themeLabel = stringResource(Res.string.settings_theme)
-    val fontSizeLabel = stringResource(Res.string.settings_font_size)
-    val fontFamilyLabel = stringResource(Res.string.settings_font_family)
+    val themeSettingLabel = stringResource(Res.string.settings_theme)
+    val fontSizeSettingLabel = stringResource(Res.string.settings_font_size)
+    val fontFamilySettingLabel = stringResource(Res.string.settings_font_family)
     val darkThemeLabel = stringResource(Res.string.settings_dark_theme)
     val gameplayHeader = stringResource(Res.string.settings_gameplay)
     val soundEffectsLabel = stringResource(Res.string.settings_sound_effects)
@@ -108,29 +126,49 @@ fun SettingsScreen(
     val languageLabel = stringResource(Res.string.settings_language)
     val resetStatisticsLabel = stringResource(Res.string.settings_reset_statistics)
     val signOutLabel = stringResource(Res.string.settings_sign_out)
+    val appName = stringResource(Res.string.app_name)
+    val appVersion = stringResource(Res.string.version)
 
     val items = remember(
-        appSettings, appName, appVersion, appearanceHeader, themeLabel,
-        fontSizeLabel, fontFamilyLabel, darkThemeLabel, gameplayHeader,
-        soundEffectsLabel, hapticFeedbackLabel, accountHeader, languageLabel,
-        resetStatisticsLabel, signOutLabel
+        appSettings,
+        themeLabel,
+        fontSizeLabel,
+        fontFamilyLabel,
+        appearanceHeader,
+        themeSettingLabel,
+        fontSizeSettingLabel,
+        fontFamilySettingLabel,
+        darkThemeLabel,
+        gameplayHeader,
+        soundEffectsLabel,
+        hapticFeedbackLabel,
+        accountHeader,
+        languageLabel,
+        resetStatisticsLabel,
+        signOutLabel,
     ) {
         listOf(
             SettingsListItem.Header(appearanceHeader),
-            SettingsListItem.NavRow(themeLabel, "dark minimal"),
-            SettingsListItem.NavRow(fontSizeLabel, "medium"),
-            SettingsListItem.NavRow(fontFamilyLabel, "jetbrains mono"),
+            SettingsListItem.NavRow(
+                label = themeSettingLabel,
+                value = themeLabel,
+                onClick = { activePicker = SettingsPicker.Theme },
+            ),
+            SettingsListItem.NavRow(
+                label = fontSizeSettingLabel,
+                value = fontSizeLabel,
+                onClick = { activePicker = SettingsPicker.FontSize },
+            ),
+            SettingsListItem.NavRow(
+                label = fontFamilySettingLabel,
+                value = fontFamilyLabel,
+                onClick = { activePicker = SettingsPicker.FontFamily },
+            ),
             SettingsListItem.Toggle(
                 label = darkThemeLabel,
                 checked = appSettings.darkTheme,
                 onCheckedChange = {
-                    action(
-                        SettingsScreenAction.SaveSettings(
-                            appSettings.copy(
-                                darkTheme = it
-                            )
-                        )
-                    )
+                    action(SettingsScreenAction.SaveSettings(appSettings.copy(darkTheme = it)))
                 },
             ),
             SettingsListItem.Spacer40,
@@ -139,13 +177,7 @@ fun SettingsScreen(
                 label = soundEffectsLabel,
                 checked = appSettings.soundEnabled,
                 onCheckedChange = {
-                    action(
-                        SettingsScreenAction.SaveSettings(
-                            appSettings.copy(
-                                soundEnabled = it
-                            )
-                        )
-                    )
+                    action(SettingsScreenAction.SaveSettings(appSettings.copy(soundEnabled = it)))
                 },
             ),
             SettingsListItem.Toggle(
@@ -157,7 +189,11 @@ fun SettingsScreen(
             ),
             SettingsListItem.Spacer40,
             SettingsListItem.Header(accountHeader),
-            SettingsListItem.NavRow(languageLabel, "english"),
+            SettingsListItem.NavRow(
+                label = languageLabel,
+                value = "english",
+                onClick = { },
+            ),
             SettingsListItem.Spacer40,
             SettingsListItem.ActionRow(
                 label = resetStatisticsLabel,
@@ -181,7 +217,7 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp),
         ) {
             Spacer(Modifier.height(40.dp))
 
@@ -191,15 +227,15 @@ fun SettingsScreen(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontFamily = FontFamily.Monospace
-                )
+                    fontFamily = FontFamily.Monospace,
+                ),
             )
 
             Spacer(Modifier.height(20.dp))
 
             HorizontalDivider(
                 thickness = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
             )
 
             LazyColumn(
@@ -218,31 +254,25 @@ fun SettingsScreen(
                             SettingsListItem.Footer -> "footer"
                         }
                     },
-                ) { index, item ->
+                ) { _, item ->
                     AnimatedVisibility(
                         visible = true,
-                        enter = fadeIn() + slideInVertically(
-                            initialOffsetY = { it / 2 }
-                        ),
+                        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
                     ) {
                         when (item) {
-                            is SettingsListItem.Header -> {
-                                SettingSectionHeader(item.title)
-                            }
+                            is SettingsListItem.Header -> SettingSectionHeader(item.title)
+                            is SettingsListItem.NavRow -> SettingNavRow(
+                                label = item.label,
+                                value = item.value,
+                                onClick = item.onClick,
+                            )
 
-                            is SettingsListItem.NavRow -> {
-                                SettingNavRow(label = item.label, value = item.value)
-                            }
-
-                            is SettingsListItem.Toggle -> {
-                                SettingToggleRow(
-                                    label = item.label,
-                                    checked = item.checked,
-                                    audioPlayer = audioPlayer,
-                                    onCheckedChange = item.onCheckedChange,
-                                )
-                            }
-
+                            is SettingsListItem.Toggle -> SettingToggleRow(
+                                label = item.label,
+                                checked = item.checked,
+                                audioPlayer = audioPlayer,
+                                onCheckedChange = item.onCheckedChange,
+                            )
                             is SettingsListItem.ActionRow -> {
                                 Text(
                                     text = item.label,
@@ -253,14 +283,12 @@ fun SettingsScreen(
                                     style = TextStyle(
                                         color = MaterialTheme.colorScheme.error,
                                         fontSize = 16.sp,
-                                        fontFamily = FontFamily.Monospace
+                                        fontFamily = FontFamily.Monospace,
                                     ),
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
                                 )
                             }
-
                             SettingsListItem.Spacer40 -> Spacer(Modifier.height(40.dp))
-
                             SettingsListItem.Footer -> {
                                 Box(
                                     modifier = Modifier
@@ -275,8 +303,8 @@ fun SettingsScreen(
                                                 alpha = 0.5f
                                             ),
                                             fontSize = 12.sp,
-                                            fontFamily = FontFamily.Monospace
-                                        )
+                                            fontFamily = FontFamily.Monospace,
+                                        ),
                                     )
                                 }
                             }
@@ -286,6 +314,43 @@ fun SettingsScreen(
             }
         }
     }
+
+    SettingsOptionSheet(
+        visible = activePicker == SettingsPicker.Theme,
+        title = themeSettingLabel,
+        options = AppColorTheme.entries,
+        selected = appSettings.colorTheme,
+        onDismiss = { activePicker = null },
+        optionLabel = { stringResource(it.labelRes) },
+        optionLeading = { ThemeColorSwatch(it.previewColor) },
+        onSelect = { theme ->
+            action(SettingsScreenAction.SaveSettings(appSettings.copy(colorTheme = theme)))
+        },
+    )
+
+    SettingsOptionSheet(
+        visible = activePicker == SettingsPicker.FontSize,
+        title = fontSizeSettingLabel,
+        options = TypingFontSize.entries,
+        selected = appSettings.typingFontSize,
+        onDismiss = { activePicker = null },
+        optionLabel = { stringResource(it.labelRes) },
+        onSelect = { size ->
+            action(SettingsScreenAction.SaveSettings(appSettings.copy(typingFontSize = size)))
+        },
+    )
+
+    SettingsOptionSheet(
+        visible = activePicker == SettingsPicker.FontFamily,
+        title = fontFamilySettingLabel,
+        options = TypingFontFamily.entries,
+        selected = appSettings.typingFontFamily,
+        onDismiss = { activePicker = null },
+        optionLabel = { stringResource(it.labelRes) },
+        onSelect = { family ->
+            action(SettingsScreenAction.SaveSettings(appSettings.copy(typingFontFamily = family)))
+        },
+    )
 }
 
 @Composable
@@ -296,42 +361,46 @@ private fun SettingSectionHeader(title: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 18.sp,
             fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.ExtraBold,
         ),
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(vertical = 8.dp),
     )
 }
 
 @Composable
-private fun SettingNavRow(label: String, value: String) {
+private fun SettingNavRow(
+    label: String,
+    value: String,
+    onClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = label,
             style = TextStyle(
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
-                fontFamily = FontFamily.Monospace
-            )
+                fontFamily = FontFamily.Monospace,
+            ),
         )
         Row(
             modifier = Modifier
-                .hapticClickable { }
+                .hapticClickable(onClick = onClick)
                 .clip(RoundedCornerShape(12.dp))
                 .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = value,
                 style = TextStyle(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
-                    fontFamily = FontFamily.Monospace
+                    fontFamily = FontFamily.Monospace,
                 ),
                 textAlign = TextAlign.End,
             )
@@ -341,15 +410,15 @@ private fun SettingNavRow(label: String, value: String) {
                 style = TextStyle(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
-                    fontFamily = FontFamily.Monospace
-                )
+                    fontFamily = FontFamily.Monospace,
+                ),
             )
         }
     }
 
     HorizontalDivider(
         thickness = 1.dp,
-        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
     )
 }
 
@@ -358,7 +427,7 @@ private fun SettingToggleRow(
     label: String,
     checked: Boolean,
     audioPlayer: AudioPlayer?,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     val haptics = LocalHaptics.current
     Row(
@@ -366,15 +435,15 @@ private fun SettingToggleRow(
             .fillMaxWidth()
             .padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = label,
             style = TextStyle(
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
-                fontFamily = FontFamily.Monospace
-            )
+                fontFamily = FontFamily.Monospace,
+            ),
         )
         Switch(
             checked = checked,
@@ -388,14 +457,14 @@ private fun SettingToggleRow(
                 checkedTrackColor = MaterialTheme.colorScheme.primary,
                 uncheckedThumbColor = MaterialTheme.colorScheme.onBackground,
                 uncheckedTrackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                uncheckedBorderColor = Color.Transparent
-            )
+                uncheckedBorderColor = Color.Transparent,
+            ),
         )
     }
 
     HorizontalDivider(
         thickness = 1.dp,
-        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
     )
 }
 
