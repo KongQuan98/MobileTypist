@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -301,12 +300,10 @@ private fun ShareCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(32.dp))
             .background(MaterialTheme.colorScheme.surface)
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
-                RoundedCornerShape(32.dp)
             )
     ) {
         // Glow effect at top
@@ -498,18 +495,6 @@ private fun ShareCard(
 
             Spacer(Modifier.height(24.dp))
 
-            // Typist Letters
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                "TYPIST".forEach { char ->
-                    LetterBox(char.toString())
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
             // Footer Links
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -535,33 +520,6 @@ private fun ShareCard(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun LetterBox(letter: String) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .background(
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f),
-                RoundedCornerShape(8.dp)
-            )
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-                RoundedCornerShape(8.dp)
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = letter,
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-        )
     }
 }
 

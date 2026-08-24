@@ -205,8 +205,12 @@ fun TypingScreenContent(
         GlobalHiddenInputOverlay(
             value = viewModel.input,
             onValueChange = { viewModel.onInputChanged(it) },
-            enabled = !viewModel.isFinished,
+            enabled = !viewModel.isFinished && !viewModel.isProcessing,
             focusRequester = focusRequester,
+        )
+
+        org.example.project.ui.StandardLoadingOverlay(
+            visible = viewModel.isProcessing
         )
     }
 }

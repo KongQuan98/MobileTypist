@@ -27,7 +27,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +49,7 @@ import androidx.compose.ui.window.DialogProperties
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Star
 import compose.icons.feathericons.X
+import kotlinx.coroutines.delay
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.achievement_close_content_description
 import mobiletypist.composeapp.generated.resources.achievement_dismiss_button
@@ -56,6 +60,7 @@ import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun AchievementUnlockPopup(
@@ -93,6 +98,7 @@ fun AchievementUnlockContent(
 ) {
     val scale = remember { Animatable(0.8f) }
     val alpha = remember { Animatable(0f) }
+    var interactionEnabled by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         alpha.animateTo(1f, tween(300))
@@ -102,6 +108,8 @@ fun AchievementUnlockContent(
                 stiffness = Spring.StiffnessLow
             )
         )
+        delay(1000.milliseconds)
+        interactionEnabled = true
     }
 
     Surface(

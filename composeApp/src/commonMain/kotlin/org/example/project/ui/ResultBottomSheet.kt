@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,9 +69,20 @@ fun ResultBottomSheet(
     streak: Int,
     onBack: () -> Unit = {},
 ) {
-    val yellow = Color(0xFFe2b714)
+    val yellow = MaterialTheme.colorScheme.primary
     val keystrokes = result.correctChars + result.errorCount
     var showShareScreen by remember { mutableStateOf(false) }
+
+    // Prevention of accidental fast dismissal
+    var interactionEnabled by remember { mutableStateOf(false) }
+    LaunchedEffect(visible) {
+        if (visible) {
+            kotlinx.coroutines.delay(1000)
+            interactionEnabled = true
+        } else {
+            interactionEnabled = false
+        }
+    }
 
     if (showShareScreen) {
         ShareResultScreen(
@@ -200,16 +212,22 @@ fun ResultBottomSheet(
                     Spacer(Modifier.height(32.dp))
 
                     Button(
-                        onClick = { showShareScreen = true },
+                        onClick = { if (interactionEnabled) showShareScreen = true },
+                        enabled = interactionEnabled,
                         modifier = Modifier
                             .fillMaxWidth(0.85f)
                             .padding(top = 16.dp)
                             .border(
-                                2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)
+                                2.dp,
+                                if (interactionEnabled) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                RoundedCornerShape(12.dp)
                             ),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.primary
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            disabledContainerColor = Color.Transparent,
+                            disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -232,18 +250,22 @@ fun ResultBottomSheet(
                     }
 
                     Button(
-                        onClick = onBack,
+                        onClick = { if (interactionEnabled) onBack() },
+                        enabled = interactionEnabled,
                         modifier = Modifier
                             .fillMaxWidth(0.85f)
                             .padding(top = 16.dp)
                             .border(
                                 2.dp,
-                                MaterialTheme.colorScheme.primary,
+                                if (interactionEnabled) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                                 RoundedCornerShape(12.dp)
                             ),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.primary
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            disabledContainerColor = Color.Transparent,
+                            disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {

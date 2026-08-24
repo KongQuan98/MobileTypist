@@ -12,6 +12,7 @@ import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.screens.CharStatus
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 
 sealed class TypingScreenAction {
@@ -27,6 +28,8 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
     var isRunning by mutableStateOf(false)
         private set
     var isFinished by mutableStateOf(false)
+        private set
+    var isProcessing by mutableStateOf(false)
         private set
     var input by mutableStateOf("")
         private set
@@ -195,26 +198,36 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
 
     private fun finishTest() {
         isRunning = false
-        isFinished = true
         timerJob?.cancel()
         updateLiveStats()
-        // Ensure final point is captured
-        if (wpmHistory.isEmpty() || wpmHistory.last() != currentWpm) {
-            wpmHistory.add(currentWpm)
-        }
 
-        val finishedAt = Clock.System.now().toEpochMilliseconds()
-        val durationSeconds = elapsedSeconds(finishedAt)
-        completedResult = TypingTestResult(
-            mode = mode,
-            wpm = calculateWpm(correctCount, durationSeconds),
-            accuracy = calculateAccuracy(correctCount, errorCount),
-            correctChars = correctCount,
-            errorCount = errorCount,
-            timestamp = finishedAt,
-            duration = durationSeconds,
-            wordsTyped = correctCount / 5,
-        )
+        coroutineScope.launch {
+            isProcessing = true
+
+            // Artificial delay to prevent misclicks and allow calculations to "settle"
+            delay(800.milliseconds)
+
+            // Ensure final point is captured
+            if (wpmHistory.isEmpty() || wpmHistory.last() != currentWpm) {
+                wpmHistory.add(currentWpm)
+            }
+
+            val finishedAt = Clock.System.now().toEpochMilliseconds()
+            val durationSeconds = elapsedSeconds(finishedAt)
+            completedResult = TypingTestResult(
+                mode = mode,
+                wpm = calculateWpm(correctCount, durationSeconds),
+                accuracy = calculateAccuracy(correctCount, errorCount),
+                correctChars = correctCount,
+                errorCount = errorCount,
+                timestamp = finishedAt,
+                duration = durationSeconds,
+                wordsTyped = correctCount / 5,
+            )
+
+            isFinished = true
+            isProcessing = false
+        }
     }
 
     private fun elapsedSeconds(finishedAt: Long): Int {
