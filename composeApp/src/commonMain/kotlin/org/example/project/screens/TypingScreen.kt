@@ -49,6 +49,7 @@ import org.example.project.di.LocalAppContainer
 import org.example.project.ui.CleanTypingArea
 import org.example.project.ui.GlobalHiddenInputOverlay
 import org.example.project.ui.ResultBottomSheet
+import org.example.project.utils.LocalAudioPlayer
 import org.example.project.viewModel.TypingScreenAction
 import org.example.project.viewModel.TypingViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -64,10 +65,19 @@ fun TypingScreen(
     wordOptions: List<Int>? = null,
     action: (TypingScreenAction) -> Unit,
     modifier: Modifier = Modifier,
-    isStarted: Boolean = false
+    isStarted: Boolean = false,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val viewModel = remember { TypingViewModel(coroutineScope) }
+    val audioPlayer = LocalAudioPlayer.current
+    val storageManager = LocalAppContainer.current.storageManager
+
+    val viewModel = remember {
+        TypingViewModel(
+            coroutineScope = coroutineScope,
+            audioPlayer = audioPlayer,
+            storageManager = storageManager
+        )
+    }
 
     LaunchedEffect(mode, targetText, timeOptions, wordOptions) {
         viewModel.initialize(

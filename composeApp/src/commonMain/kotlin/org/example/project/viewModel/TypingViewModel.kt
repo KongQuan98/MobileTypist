@@ -10,7 +10,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
+import org.example.project.data.storage.StorageManager
 import org.example.project.screens.CharStatus
+import org.example.project.utils.AudioPlayerApi
+import org.example.project.utils.SoundEffect
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
@@ -21,7 +24,11 @@ sealed class TypingScreenAction {
 }
 
 @OptIn(ExperimentalTime::class)
-class TypingViewModel(private val coroutineScope: CoroutineScope) {
+class TypingViewModel(
+    private val coroutineScope: CoroutineScope,
+    private val audioPlayer: AudioPlayerApi? = null,
+    private val storageManager: StorageManager? = null,
+) {
 
     var timeLeft by mutableStateOf(0)
         private set
@@ -90,6 +97,7 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
 
                 if (newChar == ' ' && targetChar != ' ') {
                     // Standard logic: Jump to next word on space press
+                    audioPlayer?.play(SoundEffect.KEY_PRESS_3) // Space often has a deeper sound
                     while (currentCharIndex < targetText.length && targetText[currentCharIndex] != ' ') {
                         charStatuses[currentCharIndex] = CharStatus.Incorrect
                         errorCount++
@@ -104,6 +112,13 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
                     input = new // Keep input sync
                 } else {
                     // Normal character process
+                    val randomKeySound = when ((0..2).random()) {
+                        0 -> SoundEffect.KEY_PRESS_1
+                        1 -> SoundEffect.KEY_PRESS_2
+                        else -> SoundEffect.KEY_PRESS_3
+                    }
+                    audioPlayer?.play(randomKeySound)
+
                     if (newChar == targetChar) {
                         charStatuses[currentCharIndex] = CharStatus.Correct
                         correctCount++
@@ -189,6 +204,10 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
             while (timeLeft > 0 && isRunning) {
                 delay(1000)
                 timeLeft--
+
+                if (timeLeft in 1..5) {
+                    audioPlayer?.play(SoundEffect.TIMER_TICK)
+                }
             }
             if (timeLeft == 0) {
                 finishTest()
@@ -214,9 +233,21 @@ class TypingViewModel(private val coroutineScope: CoroutineScope) {
 
             val finishedAt = Clock.System.now().toEpochMilliseconds()
             val durationSeconds = elapsedSeconds(finishedAt)
+            val finalWpm = calculateWpm(correctCount, durationSeconds)
+
+            // Check for new record
+            val previousBest = storageManager?.getBestWpm() ?: 0
+            val isNewRecord = finalWpm > previousBest
+
+            if (isNewRecord) {
+                audioPlayer?.play(SoundEffect.NEW_RECORD)
+            } else {
+                audioPlayer?.play(SoundEffect.GAME_FINISH)
+            }
+
             completedResult = TypingTestResult(
                 mode = mode,
-                wpm = calculateWpm(correctCount, durationSeconds),
+                wpm = finalWpm,
                 accuracy = calculateAccuracy(correctCount, errorCount),
                 correctChars = correctCount,
                 errorCount = errorCount,

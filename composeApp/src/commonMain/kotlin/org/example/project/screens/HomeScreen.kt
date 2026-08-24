@@ -78,8 +78,10 @@ import org.example.project.ui.StreakScreen
 import org.example.project.ui.shimmerEffect
 import org.example.project.utils.AudioPlayer
 import org.example.project.utils.Haptics
+import org.example.project.utils.LocalAudioPlayer
 import org.example.project.utils.LocalHaptics
 import org.example.project.utils.PreviewCompositionLocals
+import org.example.project.utils.SoundEffect
 import org.example.project.utils.previewStorageManager
 import org.example.project.utils.wrap
 import org.example.project.viewModel.HomeViewModel
@@ -110,10 +112,31 @@ fun HomeScreen(
     var unlockedAchievement by remember { mutableStateOf<Achievement?>(null) }
     val streakEvent by viewModel.streakEvent.collectAsState()
 
+    val audioPlayer = LocalAudioPlayer.current
+
     LaunchedEffect(achievementRepository) {
         achievementRepository.events.collectLatest { event ->
             if (event is AchievementEvent.Unlocked) {
                 unlockedAchievement = event.achievement
+                audioPlayer.play(SoundEffect.NEW_RECORD) // Or a specific achievement sound if added
+            }
+        }
+    }
+
+    LaunchedEffect(streakEvent) {
+        streakEvent?.let { event ->
+            when (event) {
+                is org.example.project.dailystreak.model.StreakEvent.StreakBroken -> {
+                    audioPlayer.play(SoundEffect.GAME_FAIL)
+                }
+
+                is org.example.project.dailystreak.model.StreakEvent.WelcomeBack -> {
+                    audioPlayer.play(SoundEffect.BUTTON_CLICK)
+                }
+
+                else -> {
+                    audioPlayer.play(SoundEffect.NEW_RECORD)
+                }
             }
         }
     }

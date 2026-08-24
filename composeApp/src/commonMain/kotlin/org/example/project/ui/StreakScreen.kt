@@ -26,8 +26,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -93,6 +97,12 @@ fun StreakScreen(
     val storageManager = appContainer.storageManager
     val dailyActivity by storageManager.dailyActivityFlow.collectAsState()
     val streakData by storageManager.streakFlow.collectAsState()
+
+    var interactionEnabled by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(1000)
+        interactionEnabled = true
+    }
 
     val currentStreak = when (event) {
         is StreakEvent.StreakContinued -> event.streak
@@ -316,14 +326,18 @@ fun StreakScreen(
             contentAlignment = Alignment.BottomCenter
         ) {
             Button(
-                onClick = onDismiss,
+                onClick = { if (interactionEnabled) onDismiss() },
+                enabled = interactionEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = themeColor,
                     contentColor = if (themeColor == MaterialTheme.colorScheme.primary)
-                        Color(0xFF323437) else Color.White
+                        Color(0xFF323437) else Color.White,
+                    disabledContainerColor = themeColor.copy(alpha = 0.3f),
+                    disabledContentColor = (if (themeColor == MaterialTheme.colorScheme.primary)
+                        Color(0xFF323437) else Color.White).copy(alpha = 0.5f)
                 ),
                 shape = RoundedCornerShape(16.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
