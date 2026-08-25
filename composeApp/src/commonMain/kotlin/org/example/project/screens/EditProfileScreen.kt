@@ -58,6 +58,7 @@ import mobiletypist.composeapp.generated.resources.edit_profile_username
 import mobiletypist.composeapp.generated.resources.save
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.UserProfile
+import org.example.project.data.repo.AvatarRepository
 import org.example.project.utils.AudioPlayer
 import org.example.project.utils.LocalHaptics
 import org.example.project.utils.PreviewCompositionLocals
@@ -116,7 +117,7 @@ fun EditProfileScreen(
                     Spacer(Modifier.height(20.dp))
                     // Avatar Section
                     AvatarProfileIcon(
-                        username = username,
+                        userProfile = userProfile,
                         onNavigateToSelectAvatar = onNavigateToSelectAvatar
                     )
 
@@ -214,7 +215,7 @@ private fun TopHeaderBar(
 
 @Composable
 private fun AvatarProfileIcon(
-    username: String,
+    userProfile: UserProfile,
     onNavigateToSelectAvatar: () -> Unit
 ) {
     Column(
@@ -226,18 +227,18 @@ private fun AvatarProfileIcon(
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = if (username.length >= 2) username.take(2)
-                        .uppercase() else "??",
-                    style = TextStyle(
-                        fontSize = 40.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.background,
-                        fontFamily = FontFamily.Monospace
-                    )
+                val avatar = remember(userProfile.avatarId) {
+                    AvatarRepository.getAvatarById(userProfile.avatarId)
+                }
+                Icon(
+                    imageVector = avatar.icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(60.dp)
                 )
             }
             Box(

@@ -88,6 +88,7 @@ import org.example.project.achievements.model.Achievement
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
+import org.example.project.data.repo.AvatarRepository
 import org.example.project.ui.TooltipHint
 import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.formatDate
@@ -178,19 +179,18 @@ fun ProfileScreen(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = if (userProfile.username.length >= 2)
-                            userProfile.username.take(2).uppercase()
-                        else "??",
-                        style = TextStyle(
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.background,
-                            fontFamily = FontFamily.Monospace
-                        )
+                    val avatar = remember(userProfile.avatarId) {
+                        AvatarRepository.getAvatarById(userProfile.avatarId)
+                    }
+                    Icon(
+                        imageVector = avatar.icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(50.dp)
                     )
                 }
 
