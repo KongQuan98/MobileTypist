@@ -117,7 +117,7 @@ fun TypingScreenContent(
 
     LaunchedEffect(isStarted) {
         if (isStarted) {
-            viewModel.startTest()
+            viewModel.showTopBar()
             focusRequester.requestFocus()
         } else {
             viewModel.resetTest()
@@ -159,7 +159,7 @@ fun TypingScreenContent(
             ) {
                 // Live HUD & Top Actions
                 AnimatedVisibility(
-                    visible = viewModel.isRunning,
+                    visible = viewModel.showTopBar,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {

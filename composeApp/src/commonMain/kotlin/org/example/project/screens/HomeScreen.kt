@@ -34,7 +34,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Play
 import kotlinx.coroutines.CoroutineScope
@@ -99,6 +99,7 @@ fun HomeScreen(
 ) {
     val streakRepository = LocalAppContainer.current.streakRepository
     val achievementRepository = LocalAppContainer.current.achievementRepository
+    val audioPlayer = LocalAudioPlayer.current
 
     val coroutineScope = rememberCoroutineScope()
     val viewModel = remember {
@@ -110,9 +111,7 @@ fun HomeScreen(
     }
     val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
     var unlockedAchievement by remember { mutableStateOf<Achievement?>(null) }
-    val streakEvent by viewModel.streakEvent.collectAsState()
-
-    val audioPlayer = LocalAudioPlayer.current
+    val streakEvent by viewModel.streakEvent.collectAsStateWithLifecycle()
 
     LaunchedEffect(achievementRepository) {
         achievementRepository.events.collectLatest { event ->
@@ -184,6 +183,7 @@ fun HomeScreenContent(
     audioPlayer: AudioPlayer? = null,
 ) {
     val haptics = LocalHaptics.current
+    val showContent by viewModel.showContent.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.onHomeScreenVisible()
@@ -197,15 +197,11 @@ fun HomeScreenContent(
             }
     }
 
-    LaunchedEffect(viewModel.showContent) {
-        if (viewModel.showContent) {
+    LaunchedEffect(showContent) {
+        if (showContent) {
             viewModel.refreshTextForMode(viewModel.modes[pagerState.currentPage])
         }
-    }
-
-    // Sync bottom bar visibility with HomeScreen content state
-    LaunchedEffect(viewModel.showContent) {
-        navigationManager.showBottomBar = viewModel.showContent
+        navigationManager.showBottomBar = showContent
     }
 
     Surface(
@@ -217,7 +213,7 @@ fun HomeScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            TitleSection(showTitleBar = viewModel.showContent)
+            TitleSection(showTitleBar = showContent)
 
             TypingModeBar(
                 viewModel = viewModel,
@@ -225,6 +221,7 @@ fun HomeScreenContent(
                 pagerState = pagerState,
                 haptics = haptics,
                 audioPlayer = audioPlayer,
+                showContent = showContent,
             )
 
             Box(
@@ -232,7 +229,7 @@ fun HomeScreenContent(
             ) {
                 HorizontalPager(
                     state = pagerState,
-                    userScrollEnabled = viewModel.showContent,
+                    userScrollEnabled = showContent,
                 ) { page ->
                     val mode = viewModel.modes[page]
                     val textForPage = viewModel.typingTexts.getOrNull(page) ?: ""
@@ -255,12 +252,12 @@ fun HomeScreenContent(
                                     }
                                 }
                             },
-                            isStarted = !viewModel.showContent
+                            isStarted = !showContent
                         )
                     }
                 }
 
-                if (viewModel.showContent) {
+                if (showContent) {
                     StartPlayButton(
                         modifier = Modifier.align(Alignment.Center),
                         onClick = {
@@ -392,9 +389,10 @@ private fun TypingModeBar(
     pagerState: PagerState,
     haptics: Haptics,
     audioPlayer: AudioPlayer?,
+    showContent: Boolean,
 ) {
     AnimatedVisibility(
-        visible = viewModel.showContent,
+        visible = showContent,
         enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
     ) {

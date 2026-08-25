@@ -36,6 +36,8 @@ class TypingViewModel(
         private set
     var isRunning by mutableStateOf(false)
         private set
+    var showTopBar by mutableStateOf(false)
+        private set
     var isFinished by mutableStateOf(false)
         private set
     var isProcessing by mutableStateOf(false)
@@ -163,13 +165,19 @@ class TypingViewModel(
         currentAccuracy = calculateAccuracy(correctCount, errorCount)
     }
 
-    fun startTest() {
+    private fun startTest() {
         if (isRunning) return
         isRunning = true
         startTime = Clock.System.now().toEpochMilliseconds()
         startDataTracking() // Start recording WPM points
         if (mode == TypingMode.TIME) {
             startTimer()
+        }
+    }
+
+    fun showTopBar() {
+        if (!showTopBar) {
+            showTopBar = true
         }
     }
 

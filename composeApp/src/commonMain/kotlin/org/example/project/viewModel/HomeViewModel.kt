@@ -37,8 +37,8 @@ class HomeViewModel(
 
     val typingTexts = mutableStateListOf<String>()
 
-    var showContent by mutableStateOf(true)
-        private set
+    private var _showContent = MutableStateFlow(true)
+    val showContent = _showContent.asStateFlow()
 
     init {
         modes.forEach { _ -> typingTexts.add("") }
@@ -94,11 +94,11 @@ class HomeViewModel(
     }
 
     fun onStartTapped() {
-        showContent = false
+        _showContent.value = false
     }
 
     fun onBack() {
-        showContent = true
+        _showContent.value = true
         refreshAllTexts()
     }
 
