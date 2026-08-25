@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -44,8 +43,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.Copy
-import compose.icons.feathericons.Download
 import compose.icons.feathericons.Share2
 import compose.icons.feathericons.X
 import kotlinx.coroutines.launch
@@ -57,14 +54,11 @@ import mobiletypist.composeapp.generated.resources.result_words_per_minute
 import mobiletypist.composeapp.generated.resources.share_result_accuracy
 import mobiletypist.composeapp.generated.resources.share_result_app_url
 import mobiletypist.composeapp.generated.resources.share_result_button
-import mobiletypist.composeapp.generated.resources.share_result_copy_result
-import mobiletypist.composeapp.generated.resources.share_result_footer_hint
 import mobiletypist.composeapp.generated.resources.share_result_keep_typing
 import mobiletypist.composeapp.generated.resources.share_result_message
 import mobiletypist.composeapp.generated.resources.share_result_mode_quotes
 import mobiletypist.composeapp.generated.resources.share_result_mode_seconds
 import mobiletypist.composeapp.generated.resources.share_result_mode_words
-import mobiletypist.composeapp.generated.resources.share_result_save_image
 import mobiletypist.composeapp.generated.resources.share_result_score
 import mobiletypist.composeapp.generated.resources.share_result_streak
 import mobiletypist.composeapp.generated.resources.share_result_title
@@ -74,6 +68,7 @@ import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
 import org.example.project.di.LocalAppContainer
+import org.example.project.utils.MainButton
 import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.shareImage
 import org.jetbrains.compose.resources.stringResource
@@ -186,8 +181,6 @@ private fun ShareResultContent(
                 )
             }
 
-            Spacer(Modifier.weight(1f))
-
             Spacer(Modifier.height(16.dp))
 
             // Action Buttons
@@ -196,7 +189,7 @@ private fun ShareResultContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Main Share Button
-                Button(
+                MainButton(
                     onClick = {
                         coroutineScope.launch {
                             val bitmap = graphicsLayer.toImageBitmap()
@@ -204,86 +197,12 @@ private fun ShareResultContent(
                             appContainer.storageManager.incrementSocialShares()
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = FeatherIcons.Share2,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(Modifier.width(12.dp))
-                        Text(
-                            text = stringResource(Res.string.share_result_button),
-                            style = TextStyle(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
-                            )
-                        )
-                    }
-                }
-
-                // Secondary Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    SecondaryActionButton(
-                        modifier = Modifier.weight(1f),
-                        icon = FeatherIcons.Download,
-                        text = stringResource(Res.string.share_result_save_image),
-                        onClick = {
-                            coroutineScope.launch {
-                                val bitmap = graphicsLayer.toImageBitmap()
-                                shareImage(bitmap, "My Typely Result")
-                            }
-                        }
-                    )
-                    SecondaryActionButton(
-                        modifier = Modifier.weight(1f),
-                        icon = FeatherIcons.Copy,
-                        text = stringResource(Res.string.share_result_copy_result),
-                        onClick = {
-                            clipboardManager.setText(AnnotatedString(shareMessage))
-                        }
-                    )
-                }
+                    icon = FeatherIcons.Share2,
+                    text = stringResource(Res.string.share_result_button)
+                )
 
                 Spacer(Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = FeatherIcons.Share2,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(Res.string.share_result_footer_hint),
-                        style = TextStyle(
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace
-                        ),
-                        textAlign = TextAlign.Center
-                    )
-                }
             }
-
-            Spacer(Modifier.height(24.dp))
         }
     }
 }

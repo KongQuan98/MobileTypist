@@ -19,8 +19,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -45,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Check
 import compose.icons.feathericons.Lock
+import compose.icons.feathericons.Play
 import compose.icons.feathericons.Zap
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
@@ -83,6 +82,7 @@ import mobiletypist.composeapp.generated.resources.streak_title
 import org.example.project.MobileTypistTheme
 import org.example.project.dailystreak.model.StreakEvent
 import org.example.project.di.LocalAppContainer
+import org.example.project.utils.MainButton
 import org.example.project.utils.PreviewCompositionLocals
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -321,46 +321,15 @@ fun StreakScreen(
         // Bottom Button
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
+                .fillMaxSize(),
             contentAlignment = Alignment.BottomCenter
         ) {
-            Button(
+            MainButton(
                 onClick = { if (interactionEnabled) onDismiss() },
                 enabled = interactionEnabled,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = themeColor,
-                    contentColor = if (themeColor == MaterialTheme.colorScheme.primary)
-                        Color(0xFF323437) else Color.White,
-                    disabledContainerColor = themeColor.copy(alpha = 0.3f),
-                    disabledContentColor = (if (themeColor == MaterialTheme.colorScheme.primary)
-                        Color(0xFF323437) else Color.White).copy(alpha = 0.5f)
-                ),
-                shape = RoundedCornerShape(16.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (event !is StreakEvent.StreakBroken) {
-                        Icon(
-                            imageVector = FeatherIcons.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(Modifier.width(12.dp))
-                    }
-                    Text(
-                        text = buttonText,
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    )
-                }
-            }
+                icon = FeatherIcons.Play,
+                text = buttonText,
+            )
         }
     }
 }

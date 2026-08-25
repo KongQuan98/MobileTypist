@@ -29,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -187,9 +186,7 @@ fun AchievementGridItem(achievement: Achievement) {
             .then(
                 if (achievement.unlocked) Modifier.border(
                     width = 1.dp,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(MaterialTheme.colorScheme.primary, Color.Transparent)
-                    ),
+                    color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(12.dp)
                 ) else Modifier
             )

@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +56,7 @@ import mobiletypist.composeapp.generated.resources.achievement_first_strike_titl
 import mobiletypist.composeapp.generated.resources.achievement_unlocked_label
 import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
+import org.example.project.utils.MainButton
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.Duration.Companion.milliseconds
@@ -248,37 +247,13 @@ fun AchievementUnlockContent(
                 Spacer(Modifier.height(32.dp))
 
                 // Action Button
-                Button(
+
+                MainButton(
                     onClick = { if (interactionEnabled) onDismiss() },
                     enabled = interactionEnabled,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = FeatherIcons.Star,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(Res.string.achievement_dismiss_button),
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
-                            )
-                        )
-                    }
-                }
+                    text = stringResource(Res.string.achievement_dismiss_button),
+                    icon = FeatherIcons.Star,
+                )
             }
         }
     }

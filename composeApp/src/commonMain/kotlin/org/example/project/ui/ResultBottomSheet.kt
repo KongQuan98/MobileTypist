@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,13 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -57,6 +50,7 @@ import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
+import org.example.project.utils.MainButton
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -211,73 +205,18 @@ fun ResultBottomSheet(
 
                     Spacer(Modifier.height(32.dp))
 
-                    Button(
+                    MainButton(
                         onClick = { if (interactionEnabled) showShareScreen = true },
                         enabled = interactionEnabled,
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                            .padding(top = 16.dp)
-                            .border(
-                                2.dp,
-                                if (interactionEnabled) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                RoundedCornerShape(12.dp)
-                            ),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            disabledContainerColor = Color.Transparent,
-                            disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = FeatherIcons.Share2,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            Text(
-                                text = stringResource(Res.string.result_share),
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Monospace
-                                )
-                            )
-                        }
-                    }
+                        icon = FeatherIcons.Share2,
+                        text = stringResource(Res.string.result_share)
+                    )
 
-                    Button(
+                    MainButton(
                         onClick = { if (interactionEnabled) onBack() },
                         enabled = interactionEnabled,
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                            .padding(top = 16.dp)
-                            .border(
-                                2.dp,
-                                if (interactionEnabled) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                RoundedCornerShape(12.dp)
-                            ),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            disabledContainerColor = Color.Transparent,
-                            disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.back),
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
-                            )
-                        )
-                    }
+                        text = stringResource(Res.string.back)
+                    )
                 }
             }
         }
