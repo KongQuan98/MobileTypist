@@ -227,6 +227,7 @@ class StorageManager(private val settings: Settings) {
         settings.remove(KEY_DAILY_ACTIVITY)
         settings.remove(KEY_ACHIEVEMENT_PROGRESS)
         settings.remove(KEY_SOCIAL_SHARES)
+        settings.remove(KEY_STREAK)
         refreshStats()
     }
 
