@@ -1,108 +1,113 @@
-# Keyboard Typist
+# Typely (MobileTypist) ⌨️🔥
 
-A comprehensive typing practice app built with Kotlin Multiplatform for Android and iOS.
+**Typely** is a high-fidelity, modern typing practice application built with **Kotlin Multiplatform
+** and **Compose Multiplatform**. Designed for speed, precision, and habit formation, it brings a
+professional typing experience to both **Android** and **iOS** from a single codebase.
 
-## Features
+## 🚀 Key Features
 
-### 🎯 Multiple Typing Modes
-- **Time Mode**: Test your typing speed with timed challenges (15s, 30s, 60s)
-- **Words Mode**: Type a specific number of words (10, 25, 50, 100)
-- **Quotes Mode**: Practice typing with inspiring quotes and passages
+### 🎯 Pro Typing Engine
 
-### 📊 Statistics & Tracking
-- Track your best WPM (Words Per Minute)
-- View detailed statistics for each test
-- See your accuracy, correct characters, and errors
-- View test history with timestamps
-- Calculate average WPM and accuracy
+- **Multiple Modes**: Challenge yourself with Time (15s, 30s, 60s), Word Count, or curated Quotes.
+- **Precision Tracking**: Real-time character-level feedback, jump-to-word logic, and smooth
+  auto-scrolling.
+- **Mechanical Feel**: Immersive haptics and randomized mechanical key-click sound effects.
 
-### 🎨 User Experience
-- Beautiful, modern dark theme UI
-- Smooth animations and transitions
-- Real-time typing feedback with color-coded characters
-- Character-by-character accuracy tracking
-- Word-by-word progress tracking
+### 🔥 Habit & Gamification
 
-### ⚙️ Settings & Customization
-- Dark theme toggle
-- Sound effects preferences
-- Vibration settings
-- Statistics display options
-- Clear all data option
+- **Daily Streaks**: Stay motivated with a Duolingo-style streak system and milestone celebrations.
+- **Achievement System**: Unlock rewards for speed, accuracy, consistency, and early-bird/night-owl
+  sessions.
+- **Activity Heatmap**: Visualize your long-term progress with a dynamic, theme-reactive activity
+  grid.
 
-### 📱 Platform Support
-- Android (API 24+)
-- iOS (via Kotlin Multiplatform)
-- Shared business logic and UI code
+### 📊 Deep Analytics
 
+- **Live HUD**: Monitor WPM, Accuracy, and Time Left in real-time.
+- **Results Summary**: Beautiful post-game breakdowns with performance graphs and keystroke
+  analysis.
+- **Social Sharing**: Generate high-fidelity result cards as images to share your progress on social
+  media.
 
-## Project Structure
+### 🎨 Personalization
 
-* `/composeApp` contains the shared Compose Multiplatform code:
-  - `commonMain`: Shared code for all platforms
-  - `androidMain`: Android-specific implementations
-  - `iosMain`: iOS-specific implementations
-
-* `/iosApp` contains the iOS app entry point and Xcode project
-
-## Building the Project
-
-### Prerequisites
-- Android Studio or IntelliJ IDEA
-- JDK 11 or higher
-- Xcode (for iOS builds)
-- Android SDK (for Android builds)
-
-### Android
-```bash
-./gradlew :composeApp:assembleDebug
-```
-
-### iOS
-1. Open `iosApp/iosApp.xcodeproj` in Xcode
-2. Build and run
-
-## Setup for Publishing
-
-See [PUBLISHING.md](PUBLISHING.md) for detailed instructions on:
-- App signing
-- Store submission
-- Version management
-
-## Technologies Used
-
-- **Kotlin Multiplatform**: Shared codebase for Android and iOS
-- **Jetpack Compose Multiplatform**: Modern declarative UI
-- **Material 3**: Material Design components
-- **MultiplatformSettings**: Local data storage
-- **Kotlinx Serialization**: Data serialization
-- **Ktor**: HTTP client (for future features)
-
-## App Architecture
-
-- **Navigation**: Custom navigation manager with screen-based routing
-- **Data Storage**: Local storage using SharedPreferences (Android) and UserDefaults (iOS)
-- **State Management**: Compose state management with remember and mutableState
-
-## Privacy
-
-Keyboard Typist respects your privacy:
-- All data is stored locally on your device
-- No data is transmitted or shared
-- No personal information is collected
-
-## License
-
-[Add your license information here]
-
-## Contributing
-
-[Add contribution guidelines if applicable]
-
-## Support
-
-For issues, questions, or feature requests, please contact the development team.
+- **Dynamic Themes**: Choose from multiple color schemes (Classic, Ocean, Forest, Rose, Lavender).
+- **Customizable Typist**: Select your avatar and manage your profile.
+- **Typography**: Adjust font size and family (Monospace, Sans-Serif, Serif) for your ideal typing
+  environment.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)
+## 📱 Demos
+
+### 🎮 Gameplay & Core Loop
+
+*Showcase of starting a test, typing, and the smooth transition to results.*
+
+|            Android             |            iOS             |
+|:------------------------------:|:--------------------------:|
+| *[Android Gameplay Recording]* | *[iOS Gameplay Recording]* |
+
+### 🔥 Streak & Achievements
+
+*Visualizing the habit loop and achievement unlock popups.*
+
+|           Android            |           iOS            |
+|:----------------------------:|:------------------------:|
+| *[Android Streak Recording]* | *[iOS Streak Recording]* |
+
+### 🎨 Themes & Customization
+
+*Switching between different color themes and adjusting typing settings.*
+
+|           Android            |           iOS            |
+|:----------------------------:|:------------------------:|
+| *[Android Themes Recording]* | *[iOS Themes Recording]* |
+
+---
+
+## 🛠️ Technology Stack
+
+- **Compose Multiplatform**: Shared UI for Android & iOS.
+- **Kotlin Multiplatform (KMP)**: 100% shared business logic and state management.
+- **Multiplatform Settings**: Persistent local storage for stats and user preferences.
+- **Kotlinx Serialization**: Lightning-fast data parsing.
+- **GraphicsLayer API**: High-performance image generation for social sharing.
+- **Kamel**: Asynchronous image loading.
+
+## 🏗️ Project Structure
+
+* `composeApp/src/commonMain`: Shared UI and ViewModels.
+* `composeApp/src/androidMain`: Android-specific implementations (Haptics, SoundPool, Sharing).
+* `composeApp/src/iosMain`: iOS-specific implementations (AVAudioPlayer, UIActivityController).
+* `iosApp`: Native Swift wrapper for the iOS entry point.
+
+## 🔨 Building the Project
+
+### Prerequisites
+
+- Android Studio / IntelliJ IDEA
+- Xcode (for iOS)
+- JDK 17+
+
+### Commands
+```bash
+# Build Android Debug
+./gradlew :composeApp:assembleDebug
+
+# Run on iOS Simulator (from root)
+./gradlew iosRun
+```
+
+## 🔒 Privacy
+
+Typely respects your data. Everything stays on your device:
+
+- **No** data collection.
+- **No** cloud transmission.
+- **Local-only** storage via encrypted preferences where applicable.
+
+---
+
+*Learn more
+about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)*
