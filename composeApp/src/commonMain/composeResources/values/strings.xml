@@ -300,4 +300,9 @@
     <string name="streak_milestones_title">STREAK MILESTONES</string>
     <string name="streak_more_days">%1$d more days</string>
     <string name="streak_milestone_progress">%1$d / %2$d days</string>
+
+    // settings reset dialog
+    <string name="settings_reset_dialog_title">Reset Statistics?</string>
+    <string name="settings_reset_dialog_message">This will permanently delete all your typing results, best WPM, and progress. This action cannot be undone.</string>
+    <string name="settings_reset_dialog_confirm">Reset Everything</string>
 </resources>

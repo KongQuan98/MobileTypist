@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.app_name
+import mobiletypist.composeapp.generated.resources.cancel
 import mobiletypist.composeapp.generated.resources.settings_account
 import mobiletypist.composeapp.generated.resources.settings_appearance
 import mobiletypist.composeapp.generated.resources.settings_dark_theme
@@ -48,6 +51,9 @@ import mobiletypist.composeapp.generated.resources.settings_font_size
 import mobiletypist.composeapp.generated.resources.settings_gameplay
 import mobiletypist.composeapp.generated.resources.settings_haptic_feedback
 import mobiletypist.composeapp.generated.resources.settings_language
+import mobiletypist.composeapp.generated.resources.settings_reset_dialog_confirm
+import mobiletypist.composeapp.generated.resources.settings_reset_dialog_message
+import mobiletypist.composeapp.generated.resources.settings_reset_dialog_title
 import mobiletypist.composeapp.generated.resources.settings_reset_statistics
 import mobiletypist.composeapp.generated.resources.settings_sign_out
 import mobiletypist.composeapp.generated.resources.settings_sound_effects
@@ -109,6 +115,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     var activePicker by remember { mutableStateOf<SettingsPicker?>(null) }
+    var showResetDialog by remember { mutableStateOf(false) }
 
     val themeLabel = stringResource(appSettings.colorTheme.labelRes)
     val fontSizeLabel = stringResource(appSettings.typingFontSize.labelRes)
@@ -198,7 +205,7 @@ fun SettingsScreen(
             SettingsListItem.ActionRow(
                 label = resetStatisticsLabel,
                 isDestructive = true,
-                onClick = { action(SettingsScreenAction.ClearAllData) },
+                onClick = { showResetDialog = true },
             ),
             SettingsListItem.ActionRow(
                 label = signOutLabel,
@@ -351,6 +358,56 @@ fun SettingsScreen(
             action(SettingsScreenAction.SaveSettings(appSettings.copy(typingFontFamily = family)))
         },
     )
+
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            title = {
+                Text(
+                    text = stringResource(Res.string.settings_reset_dialog_title),
+                    style = TextStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(Res.string.settings_reset_dialog_message),
+                    style = TextStyle(fontFamily = FontFamily.Monospace)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        action(SettingsScreenAction.ClearAllData)
+                        showResetDialog = false
+                    }
+                ) {
+                    Text(
+                        text = stringResource(Res.string.settings_reset_dialog_confirm),
+                        color = MaterialTheme.colorScheme.error,
+                        style = TextStyle(
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetDialog = false }) {
+                    Text(
+                        text = stringResource(Res.string.cancel),
+                        style = TextStyle(fontFamily = FontFamily.Monospace)
+                    )
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            textContentColor = MaterialTheme.colorScheme.onSurface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
 }
 
 @Composable
