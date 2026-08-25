@@ -13,6 +13,7 @@ import org.example.project.data.model.TypingTestResult
 import org.example.project.data.storage.StorageManager
 import org.example.project.screens.CharStatus
 import org.example.project.utils.AudioPlayerApi
+import org.example.project.utils.Haptics
 import org.example.project.utils.SoundEffect
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
@@ -27,6 +28,7 @@ sealed class TypingScreenAction {
 class TypingViewModel(
     private val coroutineScope: CoroutineScope,
     private val audioPlayer: AudioPlayerApi? = null,
+    private val hapticFeedback: Haptics? = null,
     private val storageManager: StorageManager? = null,
 ) {
 
@@ -95,6 +97,7 @@ class TypingViewModel(
                 val newChar = new.last()
                 val targetChar = targetText[currentCharIndex]
 
+                hapticFeedback?.typingKey()
                 if (newChar == ' ' && targetChar != ' ') {
                     // Standard logic: Jump to next word on space press
                     audioPlayer?.play(SoundEffect.KEY_PRESS_3) // Space often has a deeper sound
@@ -239,6 +242,7 @@ class TypingViewModel(
             val previousBest = storageManager?.getBestWpm() ?: 0
             val isNewRecord = finalWpm > previousBest
 
+            hapticFeedback?.notificationSuccess()
             if (isNewRecord) {
                 audioPlayer?.play(SoundEffect.NEW_RECORD)
             } else {

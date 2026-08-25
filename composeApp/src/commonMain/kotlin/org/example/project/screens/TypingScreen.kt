@@ -50,6 +50,7 @@ import org.example.project.ui.CleanTypingArea
 import org.example.project.ui.GlobalHiddenInputOverlay
 import org.example.project.ui.ResultBottomSheet
 import org.example.project.utils.LocalAudioPlayer
+import org.example.project.utils.LocalHaptics
 import org.example.project.viewModel.TypingScreenAction
 import org.example.project.viewModel.TypingViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -69,12 +70,14 @@ fun TypingScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val audioPlayer = LocalAudioPlayer.current
+    val hapticFeedback = LocalHaptics.current
     val storageManager = LocalAppContainer.current.storageManager
 
     val viewModel = remember {
         TypingViewModel(
             coroutineScope = coroutineScope,
             audioPlayer = audioPlayer,
+            hapticFeedback = hapticFeedback,
             storageManager = storageManager
         )
     }
