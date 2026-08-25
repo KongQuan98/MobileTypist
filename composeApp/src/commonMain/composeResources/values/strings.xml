@@ -101,6 +101,10 @@
     // profile screen
     <string name="profile_member_since">member since jan 2024</string>
     <string name="profile_edit_profile">edit profile</string>
+    <string name="profile_login_card_title">Sign in to save progress</string>
+    <string name="profile_login_card_subtitle">Create an account to sync your stats and achievements across devices.</string>
+    <string name="profile_login_button">Sign In / Register</string>
+    <string name="profile_guest_label">GUEST ACCOUNT</string>
     <string name="profile_avg_wpm">avg wpm</string>
     <string name="profile_best">best</string>
     <string name="profile_tests">tests</string>

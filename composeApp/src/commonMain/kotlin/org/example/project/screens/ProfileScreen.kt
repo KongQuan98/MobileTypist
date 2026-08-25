@@ -28,6 +28,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -55,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Edit3
+import compose.icons.feathericons.LogIn
 import compose.icons.feathericons.Star
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.achievement_sharpshooter_desc
@@ -66,7 +69,11 @@ import mobiletypist.composeapp.generated.resources.profile_avg_wpm
 import mobiletypist.composeapp.generated.resources.profile_best
 import mobiletypist.composeapp.generated.resources.profile_edit_profile
 import mobiletypist.composeapp.generated.resources.profile_global_accuracy
+import mobiletypist.composeapp.generated.resources.profile_guest_label
 import mobiletypist.composeapp.generated.resources.profile_keep_practicing
+import mobiletypist.composeapp.generated.resources.profile_login_button
+import mobiletypist.composeapp.generated.resources.profile_login_card_subtitle
+import mobiletypist.composeapp.generated.resources.profile_login_card_title
 import mobiletypist.composeapp.generated.resources.profile_member_since
 import mobiletypist.composeapp.generated.resources.profile_no_tests
 import mobiletypist.composeapp.generated.resources.profile_recent_tests
@@ -102,6 +109,7 @@ fun ProfileScreen(
     profileScreenState: ProfileScreenState,
     onEditProfileClicked: () -> Unit,
     onViewMoreAchievements: () -> Unit,
+    onLoginClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
     refreshData: () -> Unit = {},
 ) {
@@ -109,6 +117,7 @@ fun ProfileScreen(
     val bestWpm = profileScreenState.bestWpm
     val totalTests = profileScreenState.totalTests
     val achievements = profileScreenState.achievements
+    val userProfile = profileScreenState.userProfile
 
     val averageWpm = if (results.isNotEmpty()) {
         results.map { it.wpm }.average().toInt()
@@ -127,7 +136,6 @@ fun ProfileScreen(
     // Click border highlight effect
     val editProfileInteractionSource = remember { MutableInteractionSource() }
     val viewMoreAchievementInteractionSource = remember { MutableInteractionSource() }
-    val viewMoreTestInteractionSource = remember { MutableInteractionSource() }
 
     // Button click
     val isEditProfilePressed by editProfileInteractionSource.collectIsPressedAsState()
@@ -147,13 +155,11 @@ fun ProfileScreen(
     )
 
     var startAnimation by remember { mutableStateOf(false) }
-    LaunchedEffect(startAnimation) {
-        startAnimation = true
-    }
-
     LaunchedEffect(Unit) {
+        startAnimation = true
         refreshData.invoke()
     }
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -176,8 +182,8 @@ fun ProfileScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (profileScreenState.userProfile.username.length >= 2)
-                            profileScreenState.userProfile.username.take(2).uppercase()
+                        text = if (userProfile.username.length >= 2)
+                            userProfile.username.take(2).uppercase()
                         else "??",
                         style = TextStyle(
                             fontSize = 32.sp,
@@ -190,15 +196,35 @@ fun ProfileScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                Text(
-                    text = profileScreenState.userProfile.displayName,
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontFamily = FontFamily.Monospace
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = userProfile.username,
+                        style = TextStyle(
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontFamily = FontFamily.Monospace
+                        )
                     )
-                )
+                    if (userProfile.isGuest) {
+                        Spacer(Modifier.width(8.dp))
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.profile_guest_label),
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                style = TextStyle(
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            )
+                        }
+                    }
+                }
 
                 Spacer(Modifier.height(8.dp))
 
@@ -265,6 +291,14 @@ fun ProfileScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 contentPadding = PaddingValues(bottom = 32.dp)
             ) {
+                // Login Card for Guests
+                if (userProfile.isGuest) {
+                    item {
+                        LoginPromptCard(onLoginClicked)
+                        Spacer(Modifier.height(32.dp))
+                    }
+                }
+
                 // Summary Stats Cards
                 item {
                     Row(
@@ -459,6 +493,8 @@ fun ProfileScreen(
 
                     if (results.size > 3) {
                         item(key = "view_more_less_tests_toggle") {
+                            val viewMoreTestInteractionSource =
+                                remember { MutableInteractionSource() }
                             val isPressed by viewMoreTestInteractionSource.collectIsPressedAsState()
                             val animatedBorderColor by animateColorAsState(
                                 targetValue = if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
@@ -502,6 +538,71 @@ fun ProfileScreen(
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoginPromptCard(onLoginClicked: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(Res.string.profile_login_card_title),
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontFamily = FontFamily.Monospace
+                ),
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(Res.string.profile_login_card_subtitle),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontFamily = FontFamily.Monospace
+                ),
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(20.dp))
+            Button(
+                onClick = onLoginClicked,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = FeatherIcons.LogIn,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(Res.string.profile_login_button),
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    )
                 }
             }
         }

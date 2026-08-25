@@ -1,7 +1,11 @@
 package org.example.project.ui
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -32,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -95,7 +100,7 @@ fun AchievementUnlockContent(
     achievement: Achievement,
     onDismiss: () -> Unit
 ) {
-    val scale = remember { Animatable(0.8f) }
+    val scale = remember { Animatable(0.5f) }
     val alpha = remember { Animatable(0f) }
     var interactionEnabled by remember { mutableStateOf(false) }
 
@@ -127,10 +132,16 @@ fun AchievementUnlockContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Yellow Accent Bar at top
+            // Animated Yellow Accent Bar
+            val barWidth = remember { Animatable(0f) }
+            LaunchedEffect(Unit) {
+                delay(400)
+                barWidth.animateTo(1f, tween(800, easing = FastOutSlowInEasing))
+            }
+
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(barWidth.value)
                     .height(4.dp)
                     .background(MaterialTheme.colorScheme.primary)
             )
@@ -144,7 +155,7 @@ fun AchievementUnlockContent(
                 // Close button at top right
                 Box(modifier = Modifier.fillMaxWidth()) {
                     IconButton(
-                        onClick = onDismiss,
+                        onClick = { if (interactionEnabled) onDismiss() },
                         modifier = Modifier.align(Alignment.TopEnd).size(32.dp)
                     ) {
                         Icon(
@@ -156,13 +167,26 @@ fun AchievementUnlockContent(
                     }
                 }
 
-                // Icon Circle with dashed border
+                // Icon Circle with rotating dashed border
+                val rotation = remember { Animatable(0f) }
+                LaunchedEffect(Unit) {
+                    rotation.animateTo(
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(10000, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart
+                        )
+                    )
+                }
+
                 Box(
-                    modifier = Modifier.size(140.dp),
+                    modifier = Modifier.size(160.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     val primaryColor = MaterialTheme.colorScheme.primary
-                    Canvas(modifier = Modifier.fillMaxSize()) {
+                    Canvas(
+                        modifier = Modifier.fillMaxSize()
+                            .graphicsLayer { rotationZ = rotation.value }) {
                         drawCircle(
                             color = primaryColor.copy(alpha = 0.1f),
                             radius = size.minDimension / 2
@@ -171,15 +195,23 @@ fun AchievementUnlockContent(
                             color = primaryColor.copy(alpha = 0.4f),
                             radius = size.minDimension / 2 - 10.dp.toPx(),
                             style = Stroke(
-                                width = 2.dp.toPx(),
-                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                                width = 3.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(15f, 15f), 0f)
                             )
                         )
                     }
 
+                    val iconScale = remember { Animatable(0f) }
+                    LaunchedEffect(Unit) {
+                        delay(200)
+                        iconScale.animateTo(1.2f, spring(Spring.DampingRatioHighBouncy))
+                        iconScale.animateTo(1f, spring(Spring.DampingRatioMediumBouncy))
+                    }
+
                     Box(
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(100.dp)
+                            .scale(iconScale.value)
                             .clip(CircleShape)
                             .background(primaryColor.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
@@ -188,7 +220,7 @@ fun AchievementUnlockContent(
                             imageVector = achievement.icon,
                             contentDescription = null,
                             tint = primaryColor,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(56.dp)
                         )
                     }
                 }
@@ -224,7 +256,7 @@ fun AchievementUnlockContent(
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         fontFamily = FontFamily.Monospace
                     ),
                     textAlign = TextAlign.Center
@@ -244,10 +276,9 @@ fun AchievementUnlockContent(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(40.dp))
 
                 // Action Button
-
                 MainButton(
                     onClick = { if (interactionEnabled) onDismiss() },
                     enabled = interactionEnabled,

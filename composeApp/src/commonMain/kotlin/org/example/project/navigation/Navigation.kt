@@ -153,6 +153,9 @@ fun Navigation(
                     onViewMoreAchievements = {
                         navigationManager.navigateTo(Screen.Achievements)
                     },
+                    onLoginClicked = {
+                        navigationManager.navigateTo(Screen.Login)
+                    },
                     refreshData = { storageManager.refreshStats() }
                 )
             }

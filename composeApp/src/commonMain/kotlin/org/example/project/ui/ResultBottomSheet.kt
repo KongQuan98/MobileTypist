@@ -1,10 +1,17 @@
 package org.example.project.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +21,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
@@ -27,10 +35,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -90,8 +102,17 @@ fun ResultBottomSheet(
 
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn() + scaleIn(initialScale = 0.9f),
-        exit = fadeOut() + scaleOut(targetScale = 0.9f)
+        enter = slideInVertically(
+            initialOffsetY = { it },
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        ) + fadeIn(),
+        exit = slideOutVertically(
+            targetOffsetY = { it },
+            animationSpec = tween(300)
+        ) + fadeOut()
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -108,10 +129,24 @@ fun ResultBottomSheet(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
+                    val scale = remember { Animatable(0.5f) }
+                    LaunchedEffect(visible) {
+                        if (visible) {
+                            scale.animateTo(
+                                1f, spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                            )
+                        }
+                    }
+
                     Text(
-                        text = result.wpm.toString(), style = TextStyle(
-                            fontSize = 60.sp,
-                            fontWeight = FontWeight.Bold,
+                        text = result.wpm.toString(),
+                        modifier = Modifier.scale(scale.value),
+                        style = TextStyle(
+                            fontSize = 80.sp,
+                            fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary,
                             fontFamily = FontFamily.Monospace
                         )
@@ -119,21 +154,32 @@ fun ResultBottomSheet(
                     Text(
                         text = stringResource(Res.string.result_words_per_minute),
                         style = TextStyle(
-                            fontSize = 10.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontFamily = FontFamily.Monospace,
                             letterSpacing = 2.sp
                         )
                     )
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(32.dp))
 
+                    // Animated Chart Box
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
+                            .height(150.dp)
                             .padding(horizontal = 16.dp)
                     ) {
+                        val chartProgress = remember { Animatable(0f) }
+                        LaunchedEffect(visible) {
+                            if (visible) {
+                                chartProgress.animateTo(
+                                    1f,
+                                    tween(1500, easing = FastOutSlowInEasing)
+                                )
+                            }
+                        }
+
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             if (wpmHistory.isNotEmpty()) {
                                 val maxWpm = wpmHistory.maxOrNull()?.coerceAtLeast(1) ?: 1
@@ -149,7 +195,13 @@ fun ResultBottomSheet(
                                 }
 
                                 drawPath(
-                                    path = path, color = yellow, style = Stroke(width = 3.dp.toPx())
+                                    path = path,
+                                    color = yellow,
+                                    style = Stroke(
+                                        width = 4.dp.toPx(),
+                                        cap = StrokeCap.Round,
+                                        join = StrokeJoin.Round
+                                    )
                                 )
 
                                 val fillPath = Path().apply {
@@ -159,40 +211,48 @@ fun ResultBottomSheet(
                                     close()
                                 }
                                 drawPath(
-                                    path = fillPath, brush = Brush.verticalGradient(
+                                    path = fillPath,
+                                    brush = Brush.verticalGradient(
                                         colors = listOf(
-                                            yellow.copy(alpha = 0.2f), Color.Transparent
-                                        ), startY = 0f, endY = size.height
-                                    )
+                                            yellow.copy(alpha = 0.3f),
+                                            Color.Transparent
+                                        ),
+                                        startY = 0f,
+                                        endY = size.height
+                                    ),
+                                    alpha = chartProgress.value
                                 )
                             }
                         }
                     }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(32.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        StatItem(
+                        AnimatedStatItem(
                             label = stringResource(Res.string.result_accuracy),
                             value = "${result.accuracy}%",
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            delay = 200
                         )
-                        StatItem(
+                        AnimatedStatItem(
                             label = stringResource(Res.string.result_correct),
                             value = result.correctChars.toString(),
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            delay = 400
                         )
-                        StatItem(
+                        AnimatedStatItem(
                             label = stringResource(Res.string.result_errors),
                             value = result.errorCount.toString(),
-                            color = MaterialTheme.colorScheme.error
+                            color = MaterialTheme.colorScheme.error,
+                            delay = 600
                         )
                     }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(24.dp))
 
                     Text(
                         text = stringResource(Res.string.result_keystrokes, keystrokes),
@@ -203,7 +263,7 @@ fun ResultBottomSheet(
                         )
                     )
 
-                    Spacer(Modifier.height(32.dp))
+                    Spacer(Modifier.height(48.dp))
 
                     MainButton(
                         onClick = { if (interactionEnabled) showShareScreen = true },
@@ -211,6 +271,8 @@ fun ResultBottomSheet(
                         icon = FeatherIcons.Share2,
                         text = stringResource(Res.string.result_share)
                     )
+
+                    Spacer(Modifier.height(12.dp))
 
                     MainButton(
                         onClick = { if (interactionEnabled) onBack() },
@@ -224,19 +286,41 @@ fun ResultBottomSheet(
 }
 
 @Composable
-private fun StatItem(label: String, value: String, color: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+private fun AnimatedStatItem(label: String, value: String, color: Color, delay: Int) {
+    var startAnim by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(delay.toLong())
+        startAnim = true
+    }
+
+    val alpha by animateFloatAsState(
+        targetValue = if (startAnim) 1f else 0f,
+        animationSpec = tween(500)
+    )
+    val slide by animateDpAsState(
+        targetValue = if (startAnim) 0.dp else 20.dp,
+        animationSpec = spring(Spring.DampingRatioMediumBouncy)
+    )
+
+    Column(
+        modifier = Modifier
+            .graphicsLayer { this.alpha = alpha }
+            .offset(y = slide),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
-            text = value, style = TextStyle(
-                fontSize = 20.sp,
+            text = value,
+            style = TextStyle(
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = color,
                 fontFamily = FontFamily.Monospace
             )
         )
         Text(
-            text = label, style = TextStyle(
-                fontSize = 8.sp,
+            text = label,
+            style = TextStyle(
+                fontSize = 10.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontFamily = FontFamily.Monospace,
                 letterSpacing = 1.sp

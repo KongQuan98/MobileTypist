@@ -52,7 +52,6 @@ import mobiletypist.composeapp.generated.resources.cancel
 import mobiletypist.composeapp.generated.resources.edit_profile_bio
 import mobiletypist.composeapp.generated.resources.edit_profile_change_avatar_content_description
 import mobiletypist.composeapp.generated.resources.edit_profile_change_avatar_description
-import mobiletypist.composeapp.generated.resources.edit_profile_display_name
 import mobiletypist.composeapp.generated.resources.edit_profile_email
 import mobiletypist.composeapp.generated.resources.edit_profile_title
 import mobiletypist.composeapp.generated.resources.edit_profile_username
@@ -78,8 +77,7 @@ fun EditProfileScreen(
     modifier: Modifier = Modifier
 ) {
     var username by remember { mutableStateOf(userProfile.username) }
-    var displayName by remember { mutableStateOf(userProfile.displayName) }
-    var email by remember { mutableStateOf(userProfile.email) }
+    var email by remember { mutableStateOf(userProfile.email ?: "") }
     var bio by remember { mutableStateOf(userProfile.bio) }
 
     Surface(
@@ -133,11 +131,6 @@ fun EditProfileScreen(
                     )
                     Spacer(Modifier.height(24.dp))
                     EditField(
-                        label = stringResource(Res.string.edit_profile_display_name),
-                        value = displayName,
-                        onValueChange = { displayName = it })
-                    Spacer(Modifier.height(24.dp))
-                    EditField(
                         label = stringResource(Res.string.edit_profile_email),
                         value = email,
                         onValueChange = { email = it })
@@ -163,7 +156,6 @@ fun EditProfileScreen(
                 onBackClicked = onBackClicked,
                 userProfile = userProfile,
                 username = username,
-                displayName = displayName,
                 email = email,
                 bio = bio
             )
@@ -288,7 +280,6 @@ private fun DoubleActionButton(
     onBackClicked: () -> Unit,
     userProfile: UserProfile,
     username: String,
-    displayName: String,
     email: String,
     bio: String
 ) {
@@ -331,7 +322,6 @@ private fun DoubleActionButton(
                     onSaveClicked(
                         userProfile.copy(
                             username = username,
-                            displayName = displayName,
                             email = email,
                             bio = bio
                         )

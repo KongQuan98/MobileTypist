@@ -1,5 +1,11 @@
 package org.example.project.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -207,8 +214,20 @@ fun StreakScreen(
             Spacer(Modifier.height(32.dp))
 
             // Badge
+            val badgeScale = remember { Animatable(0f) }
+            LaunchedEffect(Unit) {
+                badgeScale.animateTo(
+                    1f, spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
+            }
+
             Surface(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .scale(badgeScale.value),
                 color = themeColor.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(16.dp),
                 border = androidx.compose.foundation.BorderStroke(
@@ -243,16 +262,29 @@ fun StreakScreen(
             Spacer(Modifier.height(16.dp))
 
             // Large Number
+            val countScale = remember { Animatable(0.5f) }
+            LaunchedEffect(Unit) {
+                kotlinx.coroutines.delay(300)
+                countScale.animateTo(
+                    1f, spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
+            }
+
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .scale(countScale.value),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
                 Text(
                     text = currentStreak.toString(),
                     style = TextStyle(
-                        fontSize = 100.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 120.sp,
+                        fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontFamily = FontFamily.Monospace
                     )
@@ -260,9 +292,9 @@ fun StreakScreen(
                 Spacer(Modifier.width(12.dp))
                 Text(
                     text = stringResource(Res.string.streak_days),
-                    modifier = Modifier.padding(bottom = 24.dp),
+                    modifier = Modifier.padding(bottom = 32.dp),
                     style = TextStyle(
-                        fontSize = 20.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = themeColor,
                         fontFamily = FontFamily.Monospace
@@ -273,32 +305,48 @@ fun StreakScreen(
             Spacer(Modifier.height(16.dp))
 
             // Headline
-            Text(
-                text = headline,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontFamily = FontFamily.Monospace
+            var headlineVisible by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                kotlinx.coroutines.delay(500)
+                headlineVisible = true
+            }
+
+            AnimatedVisibility(
+                visible = headlineVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 20 })
+            ) {
+                Text(
+                    text = headline,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily.Monospace
+                    )
                 )
-            )
+            }
 
             Spacer(Modifier.height(8.dp))
 
             // Sub Headline
-            Text(
-                text = subHeadline,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontFamily = FontFamily.Monospace,
-                    lineHeight = 20.sp
+            AnimatedVisibility(
+                visible = headlineVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 40 })
+            ) {
+                Text(
+                    text = subHeadline,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontFamily = FontFamily.Monospace,
+                        lineHeight = 20.sp
+                    )
                 )
-            )
+            }
 
             Spacer(Modifier.height(40.dp))
 
@@ -315,21 +363,19 @@ fun StreakScreen(
             // All Milestones
             StreakMilestonesSection(currentStreak = currentStreak)
 
-            Spacer(Modifier.height(120.dp)) // Space for button
-        }
+            Spacer(Modifier.height(24.dp)) // Space for button
 
-        // Bottom Button
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            MainButton(
-                onClick = { if (interactionEnabled) onDismiss() },
-                enabled = interactionEnabled,
-                icon = FeatherIcons.Play,
-                text = buttonText,
-            )
+            // Bottom Button
+            Box(
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                MainButton(
+                    onClick = { if (interactionEnabled) onDismiss() },
+                    enabled = interactionEnabled,
+                    icon = FeatherIcons.Play,
+                    text = buttonText,
+                )
+            }
         }
     }
 }
