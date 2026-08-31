@@ -55,13 +55,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Edit3
 import compose.icons.feathericons.LogIn
 import compose.icons.feathericons.Star
 import mobiletypist.composeapp.generated.resources.Res
-import mobiletypist.composeapp.generated.resources.achievement_sharpshooter_desc
-import mobiletypist.composeapp.generated.resources.achievement_sharpshooter_title
 import mobiletypist.composeapp.generated.resources.achievement_speed_demon_desc
 import mobiletypist.composeapp.generated.resources.achievement_speed_demon_title
 import mobiletypist.composeapp.generated.resources.profile_achievements
@@ -93,32 +92,47 @@ import org.example.project.ui.TooltipHint
 import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.formatDate
 import org.example.project.utils.hapticClickable
+import org.example.project.viewModel.ProfileUiState
+import org.example.project.viewModel.ProfileViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-data class ProfileScreenState(
-    val userProfile: UserProfile,
-    val recentTestResult: List<TypingTestResult> = emptyList(),
-    val averageWpm: Int = 0,
-    val bestWpm: Int = 0,
-    val totalTests: Int = 0,
-    val achievements: List<Achievement> = emptyList()
-)
-
 @Composable
 fun ProfileScreen(
-    profileScreenState: ProfileScreenState,
+    viewModel: ProfileViewModel,
     onEditProfileClicked: () -> Unit,
     onViewMoreAchievements: () -> Unit,
     onLoginClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
-    refreshData: () -> Unit = {},
 ) {
-    val results = profileScreenState.recentTestResult
-    val bestWpm = profileScreenState.bestWpm
-    val totalTests = profileScreenState.totalTests
-    val achievements = profileScreenState.achievements
-    val userProfile = profileScreenState.userProfile
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshData()
+    }
+
+    ProfileScreenContent(
+        uiState = uiState,
+        onEditProfileClicked = onEditProfileClicked,
+        onViewMoreAchievements = onViewMoreAchievements,
+        onLoginClicked = onLoginClicked,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun ProfileScreenContent(
+    uiState: ProfileUiState,
+    onEditProfileClicked: () -> Unit,
+    onViewMoreAchievements: () -> Unit,
+    onLoginClicked: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    val results = uiState.recentTestResult
+    val bestWpm = uiState.bestWpm
+    val totalTests = uiState.totalTests
+    val achievements = uiState.achievements
+    val userProfile = uiState.userProfile
 
     val averageWpm = if (results.isNotEmpty()) {
         results.map { it.wpm }.average().toInt()
@@ -158,7 +172,6 @@ fun ProfileScreen(
     var startAnimation by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         startAnimation = true
-        refreshData.invoke()
     }
 
     Surface(
@@ -874,8 +887,8 @@ private fun ProfileResultItem(
 @Preview(heightDp = 1000)
 @Composable
 private fun ProfileScreenPreviewDark() {
-    val dummyProfileScreenState = ProfileScreenState(
-        userProfile = UserProfile(),
+    val dummyUiState = ProfileUiState(
+        userProfile = UserProfile(username = "johndoe"),
         recentTestResult = listOf(
             TypingTestResult(
                 id = "",
@@ -883,43 +896,13 @@ private fun ProfileScreenPreviewDark() {
                 wpm = 100,
                 accuracy = 90,
                 timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
-            ),
-            TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 90,
-                timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
-            ),
-            TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 90,
-                timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
-            ),
-            TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 90,
-                timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
+                correctChars = 500,
+                errorCount = 50,
+                duration = 60,
             )
         ),
-        bestWpm = 50,
-        totalTests = 25,
+        bestWpm = 105,
+        totalTests = 42,
         achievements = listOf(
             Achievement(
                 id = "1",
@@ -937,20 +920,20 @@ private fun ProfileScreenPreviewDark() {
 
     PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = true) {
-            ProfileScreen(
+            ProfileScreenContent(
+                uiState = dummyUiState,
                 onEditProfileClicked = {},
-                onViewMoreAchievements = {},
-                profileScreenState = dummyProfileScreenState,
+                onViewMoreAchievements = {}
             )
         }
     }
 }
 
-@Preview
+@Preview(heightDp = 1000)
 @Composable
-private fun ProfileScreenPreview() {
-    val dummyProfileScreenState = ProfileScreenState(
-        userProfile = UserProfile(),
+private fun ProfileScreenPreviewLight() {
+    val dummyUiState = ProfileUiState(
+        userProfile = UserProfile(username = "johndoe"),
         recentTestResult = listOf(
             TypingTestResult(
                 id = "",
@@ -958,49 +941,18 @@ private fun ProfileScreenPreview() {
                 wpm = 100,
                 accuracy = 90,
                 timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
-            ),
-            TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 90,
-                timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
-            ),
-            TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 90,
-                timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
+                correctChars = 500,
+                errorCount = 50,
+                duration = 60,
             )
         ),
-        bestWpm = 50,
-        totalTests = 25,
+        bestWpm = 105,
+        totalTests = 42,
         achievements = listOf(
             Achievement(
                 id = "1",
                 title = Res.string.achievement_speed_demon_title,
                 description = Res.string.achievement_speed_demon_desc,
-                icon = FeatherIcons.Star,
-                hidden = false,
-                progress = 100,
-                target = 100,
-                unlocked = true,
-                unlockedAt = null
-            ),
-            Achievement(
-                id = "2",
-                title = Res.string.achievement_sharpshooter_title,
-                description = Res.string.achievement_sharpshooter_desc,
                 icon = FeatherIcons.Star,
                 hidden = false,
                 progress = 100,
@@ -1013,10 +965,10 @@ private fun ProfileScreenPreview() {
 
     PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = false) {
-            ProfileScreen(
+            ProfileScreenContent(
+                uiState = dummyUiState,
                 onEditProfileClicked = {},
-                onViewMoreAchievements = {},
-                profileScreenState = dummyProfileScreenState,
+                onViewMoreAchievements = {}
             )
         }
     }

@@ -30,9 +30,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +40,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowLeft
 import compose.icons.feathericons.Check
@@ -65,22 +64,55 @@ import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.SoundEffect
 import org.example.project.utils.hapticClickable
 import org.example.project.utils.wrap
+import org.example.project.viewModel.EditProfileViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun EditProfileScreen(
+    viewModel: EditProfileViewModel,
     audioPlayer: AudioPlayer? = null,
-    userProfile: UserProfile,
-    onSaveClicked: (UserProfile) -> Unit = {},
+    onSaveClicked: () -> Unit = {},
     onBackClicked: () -> Unit = {},
     onNavigateToSelectAvatar: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    var username by remember { mutableStateOf(userProfile.username) }
-    var email by remember { mutableStateOf(userProfile.email ?: "") }
-    var bio by remember { mutableStateOf(userProfile.bio) }
+    val username by viewModel.username.collectAsStateWithLifecycle()
+    val email by viewModel.email.collectAsStateWithLifecycle()
+    val bio by viewModel.bio.collectAsStateWithLifecycle()
+    val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
 
+    EditProfileScreenContent(
+        username = username,
+        email = email,
+        bio = bio,
+        userProfile = userProfile,
+        audioPlayer = audioPlayer,
+        onUsernameChange = { viewModel.setUsername(it) },
+        onEmailChange = { viewModel.setEmail(it) },
+        onBioChange = { viewModel.setBio(it) },
+        onSaveClicked = { viewModel.saveProfile(onSaveClicked) },
+        onBackClicked = onBackClicked,
+        onNavigateToSelectAvatar = onNavigateToSelectAvatar,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun EditProfileScreenContent(
+    username: String,
+    email: String,
+    bio: String,
+    userProfile: UserProfile,
+    audioPlayer: AudioPlayer? = null,
+    onUsernameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onBioChange: (String) -> Unit,
+    onSaveClicked: () -> Unit,
+    onBackClicked: () -> Unit,
+    onNavigateToSelectAvatar: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -127,19 +159,20 @@ fun EditProfileScreen(
                     EditField(
                         label = stringResource(Res.string.edit_profile_username),
                         value = username,
-                        onValueChange = { username = it },
+                        onValueChange = onUsernameChange,
                         prefix = "@ "
                     )
                     Spacer(Modifier.height(24.dp))
                     EditField(
                         label = stringResource(Res.string.edit_profile_email),
                         value = email,
-                        onValueChange = { email = it })
+                        onValueChange = onEmailChange
+                    )
                     Spacer(Modifier.height(24.dp))
                     EditField(
                         label = stringResource(Res.string.edit_profile_bio),
                         value = bio,
-                        onValueChange = { bio = it },
+                        onValueChange = onBioChange,
                         singleLine = false,
                         minHeight = 100.dp
                     )
@@ -155,10 +188,6 @@ fun EditProfileScreen(
                 audioPlayer = audioPlayer,
                 onSaveClicked = onSaveClicked,
                 onBackClicked = onBackClicked,
-                userProfile = userProfile,
-                username = username,
-                email = email,
-                bio = bio
             )
 
             Spacer(Modifier.height(40.dp))
@@ -277,12 +306,8 @@ private fun AvatarProfileIcon(
 @Composable
 private fun DoubleActionButton(
     audioPlayer: AudioPlayer?,
-    onSaveClicked: (UserProfile) -> Unit,
+    onSaveClicked: () -> Unit,
     onBackClicked: () -> Unit,
-    userProfile: UserProfile,
-    username: String,
-    email: String,
-    bio: String
 ) {
     val haptics = LocalHaptics.current
     Row(
@@ -320,13 +345,7 @@ private fun DoubleActionButton(
         Button(
             onClick = {
                 haptics.wrap(audioPlayer) {
-                    onSaveClicked(
-                        userProfile.copy(
-                            username = username,
-                            email = email,
-                            bio = bio
-                        )
-                    )
+                    onSaveClicked()
                 }
             },
             modifier = Modifier
@@ -421,10 +440,17 @@ private fun EditField(
 private fun EditProfileScreenPreview() {
     PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = true) {
-            EditProfileScreen(
-                onBackClicked = {},
+            EditProfileScreenContent(
+                username = "johndoe",
+                email = "john@example.com",
+                bio = "Typing expert",
+                userProfile = UserProfile(),
+                onUsernameChange = {},
+                onEmailChange = {},
+                onBioChange = {},
                 onSaveClicked = {},
-                userProfile = UserProfile()
+                onBackClicked = {},
+                onNavigateToSelectAvatar = {}
             )
         }
     }
@@ -435,10 +461,17 @@ private fun EditProfileScreenPreview() {
 private fun EditProfileScreenLightPreview() {
     PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = false) {
-            EditProfileScreen(
-                onBackClicked = {},
+            EditProfileScreenContent(
+                username = "johndoe",
+                email = "john@example.com",
+                bio = "Typing expert",
+                userProfile = UserProfile(),
+                onUsernameChange = {},
+                onEmailChange = {},
+                onBioChange = {},
                 onSaveClicked = {},
-                userProfile = UserProfile()
+                onBackClicked = {},
+                onNavigateToSelectAvatar = {}
             )
         }
     }

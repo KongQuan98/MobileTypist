@@ -1,10 +1,18 @@
 package org.example.project.navigation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.example.project.data.model.AppSettings
 import org.example.project.data.storage.StorageManager
 import org.example.project.di.LocalAppContainer
@@ -17,14 +25,17 @@ import org.example.project.screens.HomeScreen
 import org.example.project.screens.LeaderboardScreen
 import org.example.project.screens.LoginScreen
 import org.example.project.screens.ProfileScreen
-import org.example.project.screens.ProfileScreenState
 import org.example.project.screens.SelectAvatarScreen
 import org.example.project.screens.SettingsScreen
-import org.example.project.screens.SettingsScreenAction
 import org.example.project.screens.StatisticsScreen
-import org.example.project.screens.StatisticsScreenState
 import org.example.project.ui.MainScaffold
 import org.example.project.utils.AudioPlayer
+import org.example.project.viewModel.AchievementsViewModel
+import org.example.project.viewModel.EditProfileViewModel
+import org.example.project.viewModel.HomeViewModel
+import org.example.project.viewModel.ProfileViewModel
+import org.example.project.viewModel.SettingsViewModel
+import org.example.project.viewModel.StatisticsViewModel
 
 @Composable
 fun Navigation(
@@ -34,6 +45,16 @@ fun Navigation(
     audioPlayer: AudioPlayer,
     modifier: Modifier = Modifier
 ) {
+    val appContainer = LocalAppContainer.current
+    val achievementRepository = appContainer.achievementRepository
+
+    val statisticsViewModel = remember { StatisticsViewModel(storageManager) }
+    val profileViewModel = remember { ProfileViewModel(storageManager, achievementRepository) }
+    val settingsViewModel = remember { SettingsViewModel(storageManager) }
+    val homeViewModel = remember { HomeViewModel(storageManager, appContainer.streakRepository) }
+    val achievementsViewModel = remember { AchievementsViewModel(achievementRepository) }
+    val editProfileViewModel = remember { EditProfileViewModel(storageManager) }
+
     // Handle platform back button (Android) - no-op on iOS
     BackHandler(
         enabled = navigationManager.canGoBack(),
@@ -42,16 +63,7 @@ fun Navigation(
         }
     )
 
-    val achievementRepository = LocalAppContainer.current.achievementRepository
     val currentScreen = navigationManager.currentScreen
-
-    // Reactive data collection from StorageManager flows
-    val userProfile by storageManager.userProfileFlow.collectAsState()
-    val results by storageManager.resultsFlow.collectAsState()
-    val bestWpm by storageManager.bestWpmFlow.collectAsState()
-    val totalTests by storageManager.totalTestsFlow.collectAsState()
-    val dailyActivity by storageManager.dailyActivityFlow.collectAsState()
-    val achievements by achievementRepository.achievements.collectAsState(emptyList())
 
     // Show/Hide bottom bar logic
     LaunchedEffect(currentScreen) {
@@ -62,6 +74,7 @@ fun Navigation(
     }
 
     // Evaluate achievements when results change
+    val results by storageManager.resultsFlow.collectAsStateWithLifecycle()
     LaunchedEffect(results) {
         achievementRepository.evaluate()
     }
@@ -70,141 +83,143 @@ fun Navigation(
         navigationManager = navigationManager,
         audioPlayer = audioPlayer,
     ) { scaffoldModifier ->
-        when (currentScreen) {
-            is Screen.Home -> {
-                HomeScreen(
-                    navigationManager = navigationManager,
-                    storageManager = storageManager,
-                    audioPlayer = audioPlayer,
-                    modifier = modifier.then(scaffoldModifier)
-                )
-            }
+        AnimatedContent(
+            targetState = currentScreen,
+            transitionSpec = {
+                if (targetState.isFullScreenOverlay() || initialState.isFullScreenOverlay()) {
+                    (slideInVertically(
+                        initialOffsetY = { it },
+                        animationSpec = tween(400)
+                    ) + fadeIn()).togetherWith(
+                        slideOutVertically(
+                            targetOffsetY = { it },
+                            animationSpec = tween(400)
+                        ) + fadeOut()
+                    )
+                } else {
+                    fadeIn(animationSpec = tween(300))
+                        .togetherWith(fadeOut(animationSpec = tween(300)))
+                }
+            },
+            label = "screenTransition"
+        ) { targetScreen ->
+            when (targetScreen) {
+                is Screen.Home -> {
+                    HomeScreen(
+                        viewModel = homeViewModel,
+                        navigationManager = navigationManager,
+                        modifier = modifier.then(scaffoldModifier)
+                    )
+                }
 
-            is Screen.Statistics -> {
-                StatisticsScreen(
-                    statisticsScreenState = StatisticsScreenState(
-                        results = results,
-                        bestWpm = bestWpm,
-                        totalTests = totalTests,
-                        dailyActivity = dailyActivity,
-                    ),
-                    modifier = modifier.then(scaffoldModifier),
-                    refreshData = { storageManager.refreshStats() }
-                )
-            }
+                is Screen.Statistics -> {
+                    StatisticsScreen(
+                        viewModel = statisticsViewModel,
+                        modifier = modifier.then(scaffoldModifier)
+                    )
+                }
 
-            is Screen.Settings -> {
-                SettingsScreen(
-                    action = { action ->
-                        when (action) {
-                            is SettingsScreenAction.Back -> navigationManager.navigateBack()
-                            is SettingsScreenAction.ClearAllData -> storageManager.clearAllData()
-                            is SettingsScreenAction.SaveSettings -> {
-                                storageManager.saveSettings(action.settings)
-                            }
+                is Screen.Settings -> {
+                    SettingsScreen(
+                        viewModel = settingsViewModel,
+                        onBack = { navigationManager.navigateBack() },
+                        audioPlayer = audioPlayer,
+                        modifier = modifier.then(scaffoldModifier)
+                    )
+                }
+
+                is Screen.About -> {
+                    AboutScreen(
+                        navigationManager = navigationManager,
+                        modifier = modifier.then(scaffoldModifier)
+                    )
+                }
+
+                is Screen.Login -> {
+                    LoginScreen(
+                        onSignInClick = { _, _ -> },
+                        onForgotPasswordClick = {},
+                        onGuestClick = {
+                            navigationManager.navigateTo(Screen.Home)
+                        },
+                        onSignUpClick = {
+                            navigationManager.navigateTo(Screen.Register)
                         }
-                    },
-                    appSettings = appSettings,
-                    audioPlayer = audioPlayer,
-                    modifier = modifier.then(scaffoldModifier)
-                )
-            }
+                    )
+                }
 
-            is Screen.About -> {
-                AboutScreen(
-                    navigationManager = navigationManager,
-                    modifier = modifier.then(scaffoldModifier)
-                )
-            }
+                is Screen.Register -> {
+                    CreateAccountScreen(
+                        onSignInClick = { _, _ -> },
+                        onSignUpClick = {
+                            navigationManager.navigateTo(Screen.Register)
+                        }
+                    )
+                }
 
-            is Screen.Login -> {
-                LoginScreen(
-                    onSignInClick = { _, _ -> },
-                    onForgotPasswordClick = {},
-                    onGuestClick = {
-                        navigationManager.navigateTo(Screen.Home)
-                    },
-                    onSignUpClick = {
-                        navigationManager.navigateTo(Screen.Register)
-                    }
-                )
-            }
+                is Screen.Profile -> {
+                    ProfileScreen(
+                        viewModel = profileViewModel,
+                        onEditProfileClicked = { navigationManager.navigateTo(Screen.EditProfile) },
+                        modifier = modifier.then(scaffoldModifier),
+                        onViewMoreAchievements = {
+                            navigationManager.navigateTo(Screen.Achievements)
+                        },
+                        onLoginClicked = {
+                            navigationManager.navigateTo(Screen.Login)
+                        }
+                    )
+                }
 
-            is Screen.Register -> {
-                CreateAccountScreen(
-                    onSignInClick = { _, _ -> },
-                    onSignUpClick = {
-                        navigationManager.navigateTo(Screen.Register)
-                    }
-                )
-            }
+                is Screen.EditProfile -> {
+                    EditProfileScreen(
+                        viewModel = editProfileViewModel,
+                        audioPlayer = audioPlayer,
+                        onSaveClicked = {
+                            navigationManager.navigateTo(Screen.Profile)
+                        },
+                        onBackClicked = {
+                            navigationManager.navigateTo(Screen.Profile)
+                        },
+                        onNavigateToSelectAvatar = {
+                            navigationManager.navigateTo(Screen.SelectAvatar)
+                        }
+                    )
+                }
 
-            is Screen.Profile -> {
-                ProfileScreen(
-                    onEditProfileClicked = { navigationManager.navigateTo(Screen.EditProfile) },
-                    profileScreenState = ProfileScreenState(
-                        userProfile = userProfile,
-                        recentTestResult = results,
-                        bestWpm = bestWpm,
-                        totalTests = totalTests,
-                        achievements = achievements,
-                    ),
-                    modifier = modifier.then(scaffoldModifier),
-                    onViewMoreAchievements = {
-                        navigationManager.navigateTo(Screen.Achievements)
-                    },
-                    onLoginClicked = {
-                        navigationManager.navigateTo(Screen.Login)
-                    },
-                    refreshData = { storageManager.refreshStats() }
-                )
-            }
+                is Screen.SelectAvatar -> {
+                    SelectAvatarScreen(
+                        currentAvatarId = storageManager.getUserProfile().avatarId,
+                        onAvatarSelected = { newId ->
+                            val userProfile = storageManager.getUserProfile()
+                            storageManager.saveUserProfile(userProfile.copy(avatarId = newId))
+                            navigationManager.navigateTo(Screen.EditProfile)
+                        },
+                        onBackClicked = {
+                            navigationManager.navigateTo(Screen.EditProfile)
+                        }
+                    )
+                }
 
-            is Screen.EditProfile -> {
-                EditProfileScreen(
-                    audioPlayer = audioPlayer,
-                    userProfile = userProfile,
-                    onSaveClicked = { updatedProfile ->
-                        storageManager.saveUserProfile(updatedProfile)
-                        navigationManager.navigateTo(Screen.Profile)
-                    },
-                    onBackClicked = {
-                        navigationManager.navigateTo(Screen.Profile)
-                    },
-                    onNavigateToSelectAvatar = {
-                        navigationManager.navigateTo(Screen.SelectAvatar)
-                    }
-                )
-            }
+                is Screen.LeaderBoard -> {
+                    LeaderboardScreen(
+                        modifier = modifier.then(scaffoldModifier)
+                    )
+                }
 
-            is Screen.SelectAvatar -> {
-                SelectAvatarScreen(
-                    currentAvatarId = userProfile.avatarId,
-                    onAvatarSelected = { newId ->
-                        storageManager.saveUserProfile(userProfile.copy(avatarId = newId))
-                        navigationManager.navigateTo(Screen.EditProfile)
-                    },
-                    onBackClicked = {
-                        navigationManager.navigateTo(Screen.EditProfile)
-                    }
-                )
-            }
-
-            is Screen.LeaderBoard -> {
-                LeaderboardScreen(
-                    modifier = modifier.then(scaffoldModifier)
-                )
-            }
-
-            is Screen.Achievements -> {
-                AchievementsScreen(
-                    achievements = achievements,
-                    onBackClicked = {
-                        navigationManager.navigateBack()
-                    },
-                    modifier = modifier
-                )
+                is Screen.Achievements -> {
+                    AchievementsScreen(
+                        viewModel = achievementsViewModel,
+                        onBackClicked = {
+                            navigationManager.navigateBack()
+                        },
+                        modifier = modifier
+                    )
+                }
             }
         }
     }
 }
+
+private fun Screen.isFullScreenOverlay(): Boolean =
+    this is Screen.EditProfile || this is Screen.Login || this is Screen.Register || this is Screen.SelectAvatar || this is Screen.Achievements

@@ -24,34 +24,45 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mobiletypist.composeapp.generated.resources.*
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.ui.ActivityHeatmap
 import org.example.project.ui.shimmerEffect
+import org.example.project.viewModel.StatisticsUiState
+import org.example.project.viewModel.StatisticsViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-data class StatisticsScreenState(
-    val results: List<TypingTestResult> = emptyList(),
-    val bestWpm: Int = 0,
-    val totalTests: Int = 0,
-    val dailyActivity: Map<String, Int> = emptyMap(),
-    val isLoading: Boolean = false
-)
-
 @Composable
 fun StatisticsScreen(
-    statisticsScreenState: StatisticsScreenState,
+    viewModel: StatisticsViewModel,
     modifier: Modifier = Modifier,
-    refreshData: () -> Unit = {},
 ) {
-    val results = statisticsScreenState.results
-    val bestWpm = statisticsScreenState.bestWpm
-    val totalTests = statisticsScreenState.totalTests
-    val dailyActivity = statisticsScreenState.dailyActivity
-    val isLoading = statisticsScreenState.isLoading
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshData()
+    }
+
+    StatisticsScreenContent(
+        uiState = uiState,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun StatisticsScreenContent(
+    uiState: StatisticsUiState,
+    modifier: Modifier = Modifier,
+) {
+    val results = uiState.results
+    val bestWpm = uiState.bestWpm
+    val totalTests = uiState.totalTests
+    val dailyActivity = uiState.dailyActivity
+    val isLoading = uiState.isLoading
 
     val avgWpm = if (results.isNotEmpty()) results.map { it.wpm }.average().toInt() else 0
     val totalSeconds = results.sumOf { it.duration }
@@ -62,10 +73,6 @@ fun StatisticsScreen(
     var startAnimation by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         startAnimation = true
-    }
-
-    LaunchedEffect(Unit) {
-        refreshData.invoke()
     }
 
     Surface(
@@ -106,7 +113,7 @@ fun StatisticsScreen(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 // Activity Heatmap
-                item {
+                item(key = "activity_heatmap") {
                     Spacer(Modifier.height(20.dp))
                     StatSectionLabel(stringResource(Res.string.statistics_activity_title).uppercase())
                     Spacer(Modifier.height(16.dp))
@@ -416,73 +423,91 @@ private fun StatSectionLabel(text: String) {
         style = TextStyle(
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF646669),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontFamily = FontFamily.Monospace,
             letterSpacing = 1.sp
         )
     )
 }
 
-@Preview(
-    heightDp = 1300
-)
+@Preview(heightDp = 1400)
 @Composable
 private fun StatisticsScreenPreview() {
-    val dummyProfileScreenState = StatisticsScreenState(
+    val dummyState = StatisticsUiState(
         results = listOf(
             TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 70,
-                timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
+                wpm = 65,
+                accuracy = 98,
+                duration = 30,
+                mode = TypingMode.TIME,
+                correctChars = 100,
+                errorCount = 2
             ),
             TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 90,
-                timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
+                wpm = 72,
+                accuracy = 95,
+                duration = 30,
+                mode = TypingMode.TIME,
+                correctChars = 110,
+                errorCount = 5
             ),
             TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 80,
-                timestamp = 1000L,
-                correctChars = 0,
-                errorCount = 0,
-                duration = 0,
-            )
+                wpm = 80,
+                accuracy = 99,
+                duration = 30,
+                mode = TypingMode.TIME,
+                correctChars = 120,
+                errorCount = 1
+            ),
         ),
-        bestWpm = 50,
-        totalTests = 25,
-        dailyActivity = mapOf(
-            "2026-07-01" to 2,
-            "2026-07-05" to 10,
-        ),
+        bestWpm = 80,
+        totalTests = 3,
+        dailyActivity = mapOf("2024-01-01" to 5),
         isLoading = false
     )
 
     MobileTypistTheme(darkTheme = false) {
-        StatisticsScreen(
-            statisticsScreenState = dummyProfileScreenState
-        )
+        StatisticsScreenContent(uiState = dummyState)
     }
 }
 
-@Preview
+@Preview(heightDp = 1400)
 @Composable
-private fun StatisticsScreenLoadingPreview() {
+private fun StatisticsScreenDarkPreview() {
+    val dummyState = StatisticsUiState(
+        results = listOf(
+            TypingTestResult(
+                wpm = 65,
+                accuracy = 98,
+                duration = 30,
+                mode = TypingMode.TIME,
+                correctChars = 100,
+                errorCount = 2
+            ),
+            TypingTestResult(
+                wpm = 72,
+                accuracy = 95,
+                duration = 30,
+                mode = TypingMode.TIME,
+                correctChars = 110,
+                errorCount = 5
+            ),
+            TypingTestResult(
+                wpm = 80,
+                accuracy = 99,
+                duration = 30,
+                mode = TypingMode.TIME,
+                correctChars = 120,
+                errorCount = 1
+            ),
+        ),
+        bestWpm = 80,
+        totalTests = 3,
+        dailyActivity = mapOf("2024-01-01" to 5),
+        isLoading = false
+    )
+
     MobileTypistTheme(darkTheme = true) {
-        StatisticsScreen(
-            statisticsScreenState = StatisticsScreenState(isLoading = true)
-        )
+        StatisticsScreenContent(uiState = dummyState)
     }
 }

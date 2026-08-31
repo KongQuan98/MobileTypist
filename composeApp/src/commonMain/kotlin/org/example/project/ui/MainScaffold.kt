@@ -23,10 +23,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.example.project.MobileTypistTheme
+import org.example.project.data.model.AppSettings
 import org.example.project.navigation.NavigationManager
 import org.example.project.navigation.model.BottomNavigationTab
 import org.example.project.navigation.model.Screen
-import org.example.project.screens.SettingsScreen
+import org.example.project.screens.SettingsScreenContent
 import org.example.project.utils.AudioPlayer
 import org.example.project.utils.LocalHaptics
 import org.example.project.utils.PreviewCompositionLocals
@@ -124,9 +125,11 @@ private fun MainScaffoldDarkThemePreview() {
             MainScaffold(
                 navigationManager = NavigationManager(),
                 content = {
-                    SettingsScreen(
-                        action = {},
-                        modifier = Modifier
+                    SettingsScreenContent(
+                        appSettings = AppSettings(),
+                        onBack = {},
+                        onSaveSettings = {},
+                        onClearAllData = {}
                     )
                 }
             )

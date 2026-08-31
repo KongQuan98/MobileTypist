@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowLeft
 import compose.icons.feathericons.Star
@@ -50,11 +52,27 @@ import mobiletypist.composeapp.generated.resources.profile_unlocked_label
 import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
 import org.example.project.ui.TooltipHint
+import org.example.project.viewModel.AchievementsViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AchievementsScreen(
+    viewModel: AchievementsViewModel,
+    onBackClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val achievements by viewModel.achievements.collectAsStateWithLifecycle()
+
+    AchievementsScreenContent(
+        achievements = achievements,
+        onBackClicked = onBackClicked,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun AchievementsScreenContent(
     achievements: List<Achievement>,
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
@@ -252,7 +270,7 @@ fun AchievementGridItem(achievement: Achievement) {
 @Composable
 private fun AchievementsScreenPreview() {
     MobileTypistTheme(darkTheme = false) {
-        AchievementsScreen(
+        AchievementsScreenContent(
             achievements = listOf(
                 Achievement(
                     id = "first_game",
@@ -330,7 +348,7 @@ private fun AchievementsScreenPreview() {
 @Composable
 private fun AchievementsScreenDarkPreview() {
     MobileTypistTheme(darkTheme = true) {
-        AchievementsScreen(
+        AchievementsScreenContent(
             achievements = listOf(
                 Achievement(
                     id = "first_game",

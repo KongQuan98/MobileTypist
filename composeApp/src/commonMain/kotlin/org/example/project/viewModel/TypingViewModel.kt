@@ -4,7 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,11 +27,10 @@ sealed class TypingScreenAction {
 
 @OptIn(ExperimentalTime::class)
 class TypingViewModel(
-    private val coroutineScope: CoroutineScope,
     private val audioPlayer: AudioPlayerApi? = null,
     private val hapticFeedback: Haptics? = null,
     private val storageManager: StorageManager? = null,
-) {
+) : ViewModel() {
 
     var timeLeft by mutableStateOf(0)
         private set
@@ -182,7 +182,7 @@ class TypingViewModel(
     }
 
     private fun startDataTracking() {
-        coroutineScope.launch {
+        viewModelScope.launch {
             while (isRunning) {
                 delay(1000)
                 updateLiveStats()
@@ -211,7 +211,7 @@ class TypingViewModel(
     }
 
     private fun startTimer() {
-        timerJob = coroutineScope.launch {
+        timerJob = viewModelScope.launch {
             while (timeLeft > 0 && isRunning) {
                 delay(1000)
                 timeLeft--
@@ -231,7 +231,7 @@ class TypingViewModel(
         timerJob?.cancel()
         updateLiveStats()
 
-        coroutineScope.launch {
+        viewModelScope.launch {
             isProcessing = true
 
             // Artificial delay to prevent misclicks and allow calculations to "settle"

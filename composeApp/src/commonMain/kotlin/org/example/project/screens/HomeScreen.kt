@@ -65,12 +65,9 @@ import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.app_icon
 import mobiletypist.composeapp.generated.resources.app_name
 import mobiletypist.composeapp.generated.resources.home_start_description
-import org.example.project.MobileTypistTheme
 import org.example.project.achievements.events.AchievementEvent
 import org.example.project.achievements.model.Achievement
-import org.example.project.dailystreak.repository.StreakRepositoryImpl
 import org.example.project.data.model.TypingMode
-import org.example.project.data.storage.StorageManager
 import org.example.project.di.LocalAppContainer
 import org.example.project.navigation.NavigationManager
 import org.example.project.ui.AchievementUnlockPopup
@@ -80,36 +77,24 @@ import org.example.project.utils.AudioPlayer
 import org.example.project.utils.Haptics
 import org.example.project.utils.LocalAudioPlayer
 import org.example.project.utils.LocalHaptics
-import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.SoundEffect
-import org.example.project.utils.previewStorageManager
 import org.example.project.utils.wrap
 import org.example.project.viewModel.HomeViewModel
 import org.example.project.viewModel.TypingScreenAction
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
-    audioPlayer: AudioPlayer? = null,
+    viewModel: HomeViewModel,
     navigationManager: NavigationManager,
-    storageManager: StorageManager,
     modifier: Modifier = Modifier
 ) {
-    val streakRepository = LocalAppContainer.current.streakRepository
-    val achievementRepository = LocalAppContainer.current.achievementRepository
+    val appContainer = LocalAppContainer.current
+    val achievementRepository = appContainer.achievementRepository
     val audioPlayer = LocalAudioPlayer.current
 
     val coroutineScope = rememberCoroutineScope()
-    val viewModel = remember {
-        HomeViewModel(
-            storageManager = storageManager,
-            streakRepository = streakRepository,
-            coroutineScope = coroutineScope,
-        )
-    }
-    val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
     var unlockedAchievement by remember { mutableStateOf<Achievement?>(null) }
     val streakEvent by viewModel.streakEvent.collectAsStateWithLifecycle()
 
@@ -117,7 +102,7 @@ fun HomeScreen(
         achievementRepository.events.collectLatest { event ->
             if (event is AchievementEvent.Unlocked) {
                 unlockedAchievement = event.achievement
-                audioPlayer.play(SoundEffect.NEW_RECORD) // Or a specific achievement sound if added
+                audioPlayer.play(SoundEffect.NEW_RECORD)
             }
         }
     }
@@ -143,11 +128,8 @@ fun HomeScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         HomeScreenContent(
             viewModel = viewModel,
-            pagerState = pagerState,
-            coroutineScope = coroutineScope,
             modifier = modifier,
             navigationManager = navigationManager,
-            audioPlayer = audioPlayer,
         )
 
         AchievementUnlockPopup(
@@ -176,14 +158,16 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     viewModel: HomeViewModel,
-    pagerState: PagerState,
-    coroutineScope: CoroutineScope,
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager,
-    audioPlayer: AudioPlayer? = null,
 ) {
     val haptics = LocalHaptics.current
+    val audioPlayer = LocalAudioPlayer.current
     val showContent by viewModel.showContent.collectAsStateWithLifecycle()
+    val selectedTime by viewModel.selectedTime.collectAsStateWithLifecycle()
+    val selectedWords by viewModel.selectedWords.collectAsStateWithLifecycle()
+
+    val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
 
     LaunchedEffect(Unit) {
         viewModel.onHomeScreenVisible()
@@ -217,11 +201,12 @@ fun HomeScreenContent(
 
             TypingModeBar(
                 viewModel = viewModel,
-                coroutineScope = coroutineScope,
                 pagerState = pagerState,
                 haptics = haptics,
                 audioPlayer = audioPlayer,
                 showContent = showContent,
+                selectedTime = selectedTime,
+                selectedWords = selectedWords
             )
 
             Box(
@@ -234,12 +219,12 @@ fun HomeScreenContent(
                     val mode = viewModel.modes[page]
                     val textForPage = viewModel.typingTexts.getOrNull(page) ?: ""
 
-                    key(mode, textForPage, viewModel.selectedTime, viewModel.selectedWords) {
+                    key(mode, textForPage, selectedTime, selectedWords) {
                         TypingScreen(
                             mode = mode,
                             targetText = textForPage,
-                            timeOptions = listOf(viewModel.selectedTime),
-                            wordOptions = listOf(viewModel.selectedWords),
+                            timeOptions = listOf(selectedTime),
+                            wordOptions = listOf(selectedWords),
                             action = {
                                 when (it) {
                                     is TypingScreenAction.OnTestComplete -> {
@@ -282,31 +267,9 @@ private fun StartPlayButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-//    val infiniteTransition = rememberInfiniteTransition(label = "playButtonGlow")
-//    val glowAlpha by infiniteTransition.animateFloat(
-//        initialValue = 0.6f,
-//        targetValue = 0.8f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
-//            repeatMode = RepeatMode.Reverse,
-//        ),
-//        label = "glowAlpha",
-//    )
-//    val pulseScale by infiniteTransition.animateFloat(
-//        initialValue = 0.95f,
-//        targetValue = 1f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(durationMillis = 2200, easing = FastOutSlowInEasing),
-//            repeatMode = RepeatMode.Reverse,
-//        ),
-//        label = "pulseScale",
-//    )
-
     Box(
         modifier = modifier
             .size(180.dp),
-//            .alpha(glowAlpha)
-//            .scale(pulseScale),
         contentAlignment = Alignment.Center,
     ) {
         Box(
@@ -385,12 +348,15 @@ private fun TitleSection(
 @Composable
 private fun TypingModeBar(
     viewModel: HomeViewModel,
-    coroutineScope: CoroutineScope,
     pagerState: PagerState,
     haptics: Haptics,
     audioPlayer: AudioPlayer?,
     showContent: Boolean,
+    selectedTime: Int,
+    selectedWords: Int,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    
     AnimatedVisibility(
         visible = showContent,
         enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -436,10 +402,10 @@ private fun TypingModeBar(
                             ChildSelectionButton(
                                 modifier = Modifier.weight(1f),
                                 title = "${time}s",
-                                isSelected = viewModel.selectedTime == time,
+                                isSelected = selectedTime == time,
                                 onClick = {
                                     haptics.wrap(audioPlayer = audioPlayer) {
-                                        viewModel.selectedTime = time
+                                        viewModel.setSelectedTime(time)
                                     }
                                 }
                             )
@@ -449,10 +415,10 @@ private fun TypingModeBar(
                             ChildSelectionButton(
                                 modifier = Modifier.weight(1f),
                                 title = count.toString(),
-                                isSelected = viewModel.selectedWords == count,
+                                isSelected = selectedWords == count,
                                 onClick = {
                                     haptics.wrap(audioPlayer) {
-                                        viewModel.selectedWords = count
+                                        viewModel.setSelectedWords(count)
                                     }
                                 }
                             )
@@ -521,55 +487,5 @@ private fun ChildSelectionButton(
             ),
             modifier = Modifier.padding(vertical = 4.dp),
         )
-    }
-}
-
-@Preview
-@Composable
-private fun HomeScreenPreview() {
-    val coroutineScope = rememberCoroutineScope()
-    val storageManager = previewStorageManager()
-    val streakRepository = StreakRepositoryImpl(storageManager)
-    val viewModel = HomeViewModel(
-        storageManager,
-        streakRepository,
-        coroutineScope
-    )
-    val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
-
-    PreviewCompositionLocals {
-        MobileTypistTheme(darkTheme = false) {
-            HomeScreenContent(
-                viewModel = viewModel,
-                pagerState = pagerState,
-                coroutineScope = coroutineScope,
-                navigationManager = NavigationManager(),
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun HomeScreenDarkPreview() {
-    val coroutineScope = rememberCoroutineScope()
-    val storageManager = previewStorageManager()
-    val streakRepository = StreakRepositoryImpl(storageManager)
-    val viewModel = HomeViewModel(
-        storageManager,
-        streakRepository,
-        coroutineScope
-    )
-    val pagerState = rememberPagerState(pageCount = { viewModel.modes.size })
-
-    PreviewCompositionLocals {
-        MobileTypistTheme(darkTheme = true) {
-            HomeScreenContent(
-                viewModel = viewModel,
-                pagerState = pagerState,
-                coroutineScope = coroutineScope,
-                navigationManager = NavigationManager(),
-            )
-        }
     }
 }

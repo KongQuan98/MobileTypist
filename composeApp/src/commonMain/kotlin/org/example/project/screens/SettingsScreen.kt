@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mobiletypist.composeapp.generated.resources.Res
 import mobiletypist.composeapp.generated.resources.app_name
 import mobiletypist.composeapp.generated.resources.cancel
@@ -72,14 +73,9 @@ import org.example.project.utils.LocalHaptics
 import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.hapticClickable
 import org.example.project.utils.wrap
+import org.example.project.viewModel.SettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-sealed interface SettingsScreenAction {
-    object Back : SettingsScreenAction
-    object ClearAllData : SettingsScreenAction
-    data class SaveSettings(val settings: AppSettings) : SettingsScreenAction
-}
 
 private enum class SettingsPicker {
     Theme,
@@ -109,8 +105,29 @@ private sealed interface SettingsListItem {
 
 @Composable
 fun SettingsScreen(
-    action: (SettingsScreenAction) -> Unit = {},
-    appSettings: AppSettings = AppSettings(),
+    viewModel: SettingsViewModel,
+    onBack: () -> Unit,
+    audioPlayer: AudioPlayer? = null,
+    modifier: Modifier = Modifier,
+) {
+    val appSettings by viewModel.appSettings.collectAsStateWithLifecycle()
+
+    SettingsScreenContent(
+        appSettings = appSettings,
+        onBack = onBack,
+        onSaveSettings = { viewModel.saveSettings(it) },
+        onClearAllData = { viewModel.clearAllData() },
+        audioPlayer = audioPlayer,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun SettingsScreenContent(
+    appSettings: AppSettings,
+    onBack: () -> Unit,
+    onSaveSettings: (AppSettings) -> Unit,
+    onClearAllData: () -> Unit,
     audioPlayer: AudioPlayer? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -175,7 +192,7 @@ fun SettingsScreen(
                 label = darkThemeLabel,
                 checked = appSettings.darkTheme,
                 onCheckedChange = {
-                    action(SettingsScreenAction.SaveSettings(appSettings.copy(darkTheme = it)))
+                    onSaveSettings(appSettings.copy(darkTheme = it))
                 },
             ),
             SettingsListItem.Spacer40,
@@ -184,14 +201,14 @@ fun SettingsScreen(
                 label = soundEffectsLabel,
                 checked = appSettings.soundEnabled,
                 onCheckedChange = {
-                    action(SettingsScreenAction.SaveSettings(appSettings.copy(soundEnabled = it)))
+                    onSaveSettings(appSettings.copy(soundEnabled = it))
                 },
             ),
             SettingsListItem.Toggle(
                 label = hapticFeedbackLabel,
                 checked = appSettings.vibrationEnabled,
                 onCheckedChange = {
-                    action(SettingsScreenAction.SaveSettings(appSettings.copy(vibrationEnabled = it)))
+                    onSaveSettings(appSettings.copy(vibrationEnabled = it))
                 },
             ),
             SettingsListItem.Spacer40,
@@ -331,7 +348,7 @@ fun SettingsScreen(
         optionLabel = { stringResource(it.labelRes) },
         optionLeading = { ThemeColorSwatch(it.previewColor) },
         onSelect = { theme ->
-            action(SettingsScreenAction.SaveSettings(appSettings.copy(colorTheme = theme)))
+            onSaveSettings(appSettings.copy(colorTheme = theme))
         },
     )
 
@@ -343,7 +360,7 @@ fun SettingsScreen(
         onDismiss = { activePicker = null },
         optionLabel = { stringResource(it.labelRes) },
         onSelect = { size ->
-            action(SettingsScreenAction.SaveSettings(appSettings.copy(typingFontSize = size)))
+            onSaveSettings(appSettings.copy(typingFontSize = size))
         },
     )
 
@@ -355,7 +372,7 @@ fun SettingsScreen(
         onDismiss = { activePicker = null },
         optionLabel = { stringResource(it.labelRes) },
         onSelect = { family ->
-            action(SettingsScreenAction.SaveSettings(appSettings.copy(typingFontFamily = family)))
+            onSaveSettings(appSettings.copy(typingFontFamily = family))
         },
     )
 
@@ -380,7 +397,7 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        action(SettingsScreenAction.ClearAllData)
+                        onClearAllData()
                         showResetDialog = false
                     }
                 ) {
@@ -530,7 +547,12 @@ private fun SettingToggleRow(
 private fun SettingsScreenPreview() {
     PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = false) {
-            SettingsScreen()
+            SettingsScreenContent(
+                appSettings = AppSettings(),
+                onBack = {},
+                onSaveSettings = {},
+                onClearAllData = {}
+            )
         }
     }
 }
@@ -540,7 +562,12 @@ private fun SettingsScreenPreview() {
 private fun SettingsScreenPreviewDarkTheme() {
     PreviewCompositionLocals {
         MobileTypistTheme(darkTheme = true) {
-            SettingsScreen()
+            SettingsScreenContent(
+                appSettings = AppSettings(),
+                onBack = {},
+                onSaveSettings = {},
+                onClearAllData = {}
+            )
         }
     }
 }

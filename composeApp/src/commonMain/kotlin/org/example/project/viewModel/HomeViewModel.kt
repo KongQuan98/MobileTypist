@@ -1,17 +1,11 @@
 package org.example.project.viewModel
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.example.project.dailystreak.model.StreakEvent
 import org.example.project.dailystreak.repository.StreakRepository
@@ -24,16 +18,18 @@ import org.example.project.data.storage.StorageManager
 
 class HomeViewModel(
     private val storageManager: StorageManager,
-    private val streakRepository: StreakRepository,
-    private val coroutineScope: CoroutineScope,
+    private val streakRepository: StreakRepository
 ) : ViewModel() {
 
     val modes = listOf(TypingMode.TIME, TypingMode.WORDS, TypingMode.QUOTES)
     val timeOptions = listOf(15, 30, 60)
     val wordOptions = listOf(25, 50, 100)
 
-    var selectedTime by mutableStateOf(30)
-    var selectedWords by mutableStateOf(25)
+    private val _selectedTime = MutableStateFlow(30)
+    val selectedTime = _selectedTime.asStateFlow()
+
+    private val _selectedWords = MutableStateFlow(25)
+    val selectedWords = _selectedWords.asStateFlow()
 
     val typingTexts = mutableStateListOf<String>()
 
@@ -44,21 +40,25 @@ class HomeViewModel(
         modes.forEach { _ -> typingTexts.add("") }
         refreshAllTexts()
 
-        coroutineScope.launch {
-            snapshotFlow { selectedWords }
-                .drop(1)
-                .collectLatest {
-                    loadTextsForMode(TypingMode.WORDS)
-                }
+        viewModelScope.launch {
+            selectedWords.collectLatest {
+                loadTextsForMode(TypingMode.WORDS)
+            }
         }
 
-        coroutineScope.launch {
-            snapshotFlow { selectedTime }
-                .drop(1)
-                .collectLatest {
-                    loadTextsForMode(TypingMode.TIME)
-                }
+        viewModelScope.launch {
+            selectedTime.collectLatest {
+                loadTextsForMode(TypingMode.TIME)
+            }
         }
+    }
+
+    fun setSelectedTime(time: Int) {
+        _selectedTime.value = time
+    }
+
+    fun setSelectedWords(words: Int) {
+        _selectedWords.value = words
     }
 
     fun onHomeScreenVisible() {
@@ -79,12 +79,15 @@ class HomeViewModel(
         val index = modes.indexOf(mode)
         if (index == -1) return
 
-        coroutineScope.launch {
+        viewModelScope.launch {
             val text = when (mode) {
                 TypingMode.TIME -> WordsRepository.getRandomWords(Difficulty.EASY, 200)
                     .joinToString(" ")
 
-                TypingMode.WORDS -> WordsRepository.getRandomWords(Difficulty.EASY, selectedWords)
+                TypingMode.WORDS -> WordsRepository.getRandomWords(
+                    Difficulty.EASY,
+                    selectedWords.value
+                )
                     .joinToString(" ")
 
                 TypingMode.QUOTES -> QuotesRepository.getRandomQuote()

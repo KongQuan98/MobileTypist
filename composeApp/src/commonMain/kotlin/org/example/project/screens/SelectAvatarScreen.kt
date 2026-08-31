@@ -58,6 +58,7 @@ import mobiletypist.composeapp.generated.resources.choose_avatar_title
 import org.example.project.MobileTypistTheme
 import org.example.project.data.repo.Avatar
 import org.example.project.data.repo.AvatarRepository
+import org.example.project.utils.PreviewCompositionLocals
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -325,23 +326,27 @@ private fun AvatarGridItem(
 @Preview
 @Composable
 private fun SelectAvatarScreenPreview() {
-    MobileTypistTheme(darkTheme = false) {
-        SelectAvatarScreen(
-            currentAvatarId = "monkey",
-            onAvatarSelected = {},
-            onBackClicked = {}
-        )
+    PreviewCompositionLocals {
+        MobileTypistTheme(darkTheme = false) {
+            SelectAvatarScreen(
+                currentAvatarId = "monkey",
+                onAvatarSelected = {},
+                onBackClicked = {}
+            )
+        }
     }
 }
 
 @Preview
 @Composable
 private fun SelectAvatarScreenDarkPreview() {
-    MobileTypistTheme(darkTheme = true) {
-        SelectAvatarScreen(
-            currentAvatarId = "monkey",
-            onAvatarSelected = {},
-            onBackClicked = {}
-        )
+    PreviewCompositionLocals {
+        MobileTypistTheme(darkTheme = true) {
+            SelectAvatarScreen(
+                currentAvatarId = "monkey",
+                onAvatarSelected = {},
+                onBackClicked = {}
+            )
+        }
     }
 }

@@ -22,10 +22,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -35,6 +33,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.StopCircle
 import mobiletypist.composeapp.generated.resources.Res
@@ -68,14 +67,12 @@ fun TypingScreen(
     modifier: Modifier = Modifier,
     isStarted: Boolean = false,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val audioPlayer = LocalAudioPlayer.current
     val hapticFeedback = LocalHaptics.current
     val storageManager = LocalAppContainer.current.storageManager
 
     val viewModel = remember {
         TypingViewModel(
-            coroutineScope = coroutineScope,
             audioPlayer = audioPlayer,
             hapticFeedback = hapticFeedback,
             storageManager = storageManager
@@ -112,8 +109,8 @@ fun TypingScreenContent(
 ) {
     val focusRequester = remember { FocusRequester() }
     val appContainer = LocalAppContainer.current
-    val userProfile by appContainer.storageManager.userProfileFlow.collectAsState()
-    val streakData by appContainer.storageManager.streakFlow.collectAsState()
+    val userProfile by appContainer.storageManager.userProfileFlow.collectAsStateWithLifecycle()
+    val streakData by appContainer.storageManager.streakFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(isStarted) {
         if (isStarted) {
