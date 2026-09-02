@@ -5,7 +5,6 @@ import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.example.project.achievements.model.AchievementProgress
 import org.example.project.dailystreak.model.StreakData
@@ -65,10 +64,24 @@ class StorageManager(private val settings: Settings) {
         val results = getResults().toMutableList()
         results.add(0, result)
         val limitedResults = results.take(100)
-        settings[KEY_RESULTS] = json.encodeToString(limitedResults)
+        saveAllResults(limitedResults)
+    }
 
-        // Trigger reactive updates for the current instance
-        refreshStats()
+    fun saveAllResults(results: List<TypingTestResult>) {
+        val sortedResults = results.sortedByDescending { it.timestamp }.take(100)
+        settings[KEY_RESULTS] = json.encodeToString(sortedResults)
+        _resultsFlow.value = sortedResults
+    }
+
+    fun updateStats(bestWpm: Int, totalTests: Int) {
+        if (bestWpm > getBestWpm()) {
+            settings[KEY_BEST_WPM] = bestWpm
+            _bestWpmFlow.value = bestWpm
+        }
+        if (totalTests > getTotalTests()) {
+            settings[KEY_TOTAL_TESTS] = totalTests
+            _totalTestsFlow.value = totalTests
+        }
     }
 
     /**
