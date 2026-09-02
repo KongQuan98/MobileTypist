@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -55,6 +56,10 @@ kotlin {
             implementation(libs.multiplatform.settings.test)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
+            implementation(project.dependencies.platform(libs.supabase.bom))
+            implementation(libs.supabase.kt)
+            implementation(libs.supabase.auth)
+            implementation(libs.ktor.client.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -90,6 +95,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
     buildFeatures {
         compose = true
@@ -98,5 +104,62 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    coreLibraryDesugaring(libs.android.desugar.jdk.libs)
 }
+
+val localProperties = Properties().apply {
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) {
+        localFile.inputStream().use { load(it) }
+    }
+}
+
+fun String.escapeForKotlinString(): String =
+    replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+        .replace("\$", "\${'\$'}")
+        .replace("\n", " ")
+
+val supabaseUrl = (
+        System.getenv("SUPABASE_URL")
+            ?: localProperties.getProperty("SUPABASE_URL")
+            ?: ""
+        ).trim().escapeForKotlinString()
+
+val supabasePublishableKey = (
+        System.getenv("SUPABASE_PUBLISHABLE_KEY")
+            ?: localProperties.getProperty("SUPABASE_PUBLISHABLE_KEY")
+            ?: ""
+        ).trim().escapeForKotlinString()
+
+val generateSupabaseConfig by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated/supabase/kotlin").get().asFile
+    val url = supabaseUrl
+    val key = supabasePublishableKey
+
+    outputs.dir(outputDir)
+    inputs.property("supabaseUrl", url)
+    inputs.property("supabasePublishableKey", key)
+
+    doLast {
+        val packageDir = outputDir.resolve("org/example/project/auth")
+        packageDir.mkdirs()
+        packageDir.resolve("SupabaseConfig.kt").writeText(
+            """
+            package org.example.project.auth
+
+            internal object SupabaseConfig {
+                const val url: String = "$url"
+                const val publishableKey: String = "$key"
+                val isConfigured: Boolean = url.isNotBlank() && publishableKey.isNotBlank()
+            }
+
+            """.trimIndent() + "\n"
+        )
+    }
+}
+
+kotlin.sourceSets.getByName("commonMain").kotlin.srcDir(
+    generateSupabaseConfig.map { it.outputs.files.singleFile }
+)
 

@@ -58,13 +58,14 @@ import mobiletypist.composeapp.generated.resources.sign_in_arrow_button
 import mobiletypist.composeapp.generated.resources.username_header
 import mobiletypist.composeapp.generated.resources.username_placeholder
 import org.example.project.MobileTypistTheme
+import org.example.project.auth.AuthModule
+import org.example.project.auth.AuthViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun CreateAccountScreen(
-    onSignInClick: (String, String) -> Unit = { _, _ -> },
-    onSignUpClick: () -> Unit = {}
+    viewModel: AuthViewModel = AuthModule.viewModel,
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -261,7 +262,14 @@ fun CreateAccountScreen(
 
             // Sign In Button
             Button(
-                onClick = { onSignInClick(email, password) },
+                onClick = {
+                    viewModel.signUp(
+                        username = email,
+                        email = email,
+                        password = password,
+                        confirmPassword = password
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
@@ -298,7 +306,14 @@ fun CreateAccountScreen(
                 )
                 Text(
                     text = stringResource(Res.string.sign_in_arrow_button),
-                    modifier = Modifier.clickable { onSignUpClick() },
+                    modifier = Modifier.clickable {
+                        viewModel.signUp(
+                            username = "me",
+                            email = email,
+                            password = password,
+                            confirmPassword = password,
+                        )
+                    },
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.primary,

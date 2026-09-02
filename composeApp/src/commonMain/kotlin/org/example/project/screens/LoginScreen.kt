@@ -62,13 +62,14 @@ import mobiletypist.composeapp.generated.resources.password_placeholder
 import mobiletypist.composeapp.generated.resources.sign_in_button
 import mobiletypist.composeapp.generated.resources.sign_up_arrow_button
 import org.example.project.MobileTypistTheme
+import org.example.project.auth.AuthModule
+import org.example.project.auth.AuthViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun LoginScreen(
-    onSignInClick: (String, String) -> Unit = { _, _ -> },
-    onForgotPasswordClick: () -> Unit = {},
+    viewModel: AuthViewModel = AuthModule.viewModel,
     onGuestClick: () -> Unit = {},
     onSignUpClick: () -> Unit = {}
 ) {
@@ -233,7 +234,7 @@ fun LoginScreen(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                 Text(
                     text = stringResource(Res.string.forgot_password),
-                    modifier = Modifier.clickable { onForgotPasswordClick() },
+                    modifier = Modifier.clickable { viewModel.sendPasswordReset(email) },
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -246,7 +247,7 @@ fun LoginScreen(
 
             // Sign In Button
             Button(
-                onClick = { onSignInClick(email, password) },
+                onClick = { viewModel.signIn(email, password) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),

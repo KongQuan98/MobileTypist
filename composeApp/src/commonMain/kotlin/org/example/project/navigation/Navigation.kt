@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.example.project.auth.AuthModule
 import org.example.project.data.model.AppSettings
 import org.example.project.data.storage.StorageManager
 import org.example.project.di.LocalAppContainer
@@ -54,6 +55,7 @@ fun Navigation(
     val homeViewModel = remember { HomeViewModel(storageManager, appContainer.streakRepository) }
     val achievementsViewModel = remember { AchievementsViewModel(achievementRepository) }
     val editProfileViewModel = remember { EditProfileViewModel(storageManager) }
+    val authViewModel = remember { AuthModule.viewModel }
 
     // Handle platform back button (Android) - no-op on iOS
     BackHandler(
@@ -137,8 +139,7 @@ fun Navigation(
 
                 is Screen.Login -> {
                     LoginScreen(
-                        onSignInClick = { _, _ -> },
-                        onForgotPasswordClick = {},
+                        viewModel = authViewModel,
                         onGuestClick = {
                             navigationManager.navigateTo(Screen.Home)
                         },
@@ -149,12 +150,7 @@ fun Navigation(
                 }
 
                 is Screen.Register -> {
-                    CreateAccountScreen(
-                        onSignInClick = { _, _ -> },
-                        onSignUpClick = {
-                            navigationManager.navigateTo(Screen.Register)
-                        }
-                    )
+                    CreateAccountScreen(viewModel = authViewModel)
                 }
 
                 is Screen.Profile -> {

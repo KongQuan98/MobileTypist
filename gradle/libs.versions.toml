@@ -16,8 +16,8 @@ composeMultiplatform = "1.9.3"
 feather = "1.1.1"
 junit = "4.13.2"
 kamelImage = "1.0.8"
-kotlin = "2.2.10"
-kotlinStdlib = "2.2.0"
+kotlin = "2.3.0"
+kotlinStdlib = "2.3.0"
 ktorClientOkhttp = "3.3.1"
 lottieCompose = "6.6.10"
 lottieComposeMultiplatform = "1.6.1"
@@ -26,6 +26,8 @@ core = "1.5.0"
 multiplatformSettings = "1.2.0"
 kotlinxSerialization = "1.7.3"
 kotlinxDatetime = "0.6.2"
+supabase = "3.7.0"
+desugarJdkLibs = "2.1.5"
 
 [libraries]
 backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
@@ -57,6 +59,10 @@ multiplatform-settings-no-arg = { module = "com.russhwolf:multiplatform-settings
 multiplatform-settings-test = { module = "com.russhwolf:multiplatform-settings-test", version.ref = "multiplatformSettings" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase" }
+supabase-kt = { module = "io.github.jan-tennert.supabase:supabase-kt" }
+supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
+android-desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
