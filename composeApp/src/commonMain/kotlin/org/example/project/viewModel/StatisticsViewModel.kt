@@ -13,7 +13,7 @@ data class StatisticsUiState(
     val results: List<TypingTestResult> = emptyList(),
     val bestWpm: Int = 0,
     val totalTests: Int = 0,
-    val dailyActivity: Map<String, Int> = emptyMap(),
+    val dailyActivity: Map<String, org.example.project.data.model.DailyActivity> = emptyMap(),
     val isLoading: Boolean = false
 )
 

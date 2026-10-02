@@ -1,8 +1,11 @@
 package org.example.project.data.model
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class UserAchievement(
     @SerialName("user_id")
@@ -14,5 +17,7 @@ data class UserAchievement(
     @SerialName("unlocked")
     val unlocked: Boolean,
     @SerialName("unlocked_at")
+    @JsonNames("unlockedAt", "unlocked_at")
+    @Serializable(with = NullableTimestampSerializer::class)
     val unlockedAt: Long?
 )

@@ -20,9 +20,9 @@ sealed class AuthError {
 
     val userMessage: String
         get() = when (this) {
-            InvalidCredentials -> "Incorrect email or password."
-            EmailAlreadyRegistered -> "An account with this email already exists."
-            EmailNotVerified -> "Please verify your email before signing in."
+            InvalidCredentials -> "That email or password doesn't look right."
+            EmailAlreadyRegistered -> "This email is already registered. Try signing in instead."
+            EmailNotVerified -> "Please verify your email from your inbox."
             ExpiredVerification -> "This verification link has expired. Request a new one."
             InvalidVerification -> "This verification link is invalid."
             PasswordResetFailed -> "We couldn't reset your password. Try again."

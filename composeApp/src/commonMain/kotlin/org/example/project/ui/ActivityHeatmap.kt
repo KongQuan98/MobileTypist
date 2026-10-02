@@ -21,11 +21,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -65,6 +63,7 @@ import mobiletypist.composeapp.generated.resources.heatmap_more
 import mobiletypist.composeapp.generated.resources.heatmap_no_activity
 import mobiletypist.composeapp.generated.resources.heatmap_tests_on
 import org.example.project.MobileTypistTheme
+import org.example.project.data.model.DailyActivity
 import org.example.project.data.repo.ActivityHeatmapRepository
 import org.example.project.data.repo.HeatmapCell
 import org.example.project.data.repo.MonthHeatmapData
@@ -75,24 +74,33 @@ import org.example.project.utils.heatmapMonthYearLabel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityHeatmap(
-    dailyActivity: Map<String, Int>,
+    dailyActivity: Map<String, DailyActivity>,
     isVisible: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val availableMonths = remember(dailyActivity) {
         ActivityHeatmapRepository.availableMonths(dailyActivity)
     }
+    val initialIndex = (availableMonths.lastIndex).coerceAtLeast(0)
     val pagerState = rememberPagerState(
-        initialPage = (availableMonths.lastIndex).coerceAtLeast(0),
+        initialPage = initialIndex,
         pageCount = { availableMonths.size.coerceAtLeast(1) },
     )
     val coroutineScope = rememberCoroutineScope()
     var monthMenuExpanded by remember { mutableStateOf(false) }
     var selectedCell by remember { mutableStateOf<HeatmapCell?>(null) }
     var animationEpoch by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(availableMonths.size) {
+        if (availableMonths.isNotEmpty()) {
+            val targetPage = availableMonths.lastIndex
+            if (pagerState.currentPage != targetPage && pagerState.currentPage == 0) {
+                pagerState.scrollToPage(targetPage)
+            }
+        }
+    }
 
     val currentMonth = availableMonths.getOrElse(pagerState.currentPage) {
         availableMonths.lastOrNull() ?: YearMonth(2026, 7)
@@ -137,25 +145,50 @@ fun ActivityHeatmap(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            ExposedDropdownMenuBox(
-                expanded = monthMenuExpanded,
-                onExpandedChange = { monthMenuExpanded = it },
-                modifier = Modifier.fillMaxWidth(),
+            // Header with Navigation Controls (Previous Month, Current Month Dropdown, Next Month)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Surface(
-                    onClick = { monthMenuExpanded = true },
-                    modifier = Modifier
-                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                // Previous Month Button
+                IconButton(
+                    onClick = {
+                        if (pagerState.currentPage > 0) {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        }
+                    },
+                    enabled = pagerState.currentPage > 0,
                 ) {
+                    Text(
+                        text = "‹",
+                        style = TextStyle(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (pagerState.currentPage > 0) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            },
+                        ),
+                    )
+                }
+
+                // Month Dropdown Picker
+                Box {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { monthMenuExpanded = true }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         Text(
                             text = heatmapMonthYearLabel(currentMonth),
@@ -166,30 +199,63 @@ fun ActivityHeatmap(
                                 color = MaterialTheme.colorScheme.onSurface,
                             ),
                         )
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = monthMenuExpanded)
+                        Text(
+                            text = "▾",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = monthMenuExpanded,
+                        onDismissRequest = { monthMenuExpanded = false },
+                    ) {
+                        availableMonths.forEachIndexed { index, yearMonth ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = heatmapMonthYearLabel(yearMonth),
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = if (index == pagerState.currentPage) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (index == pagerState.currentPage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                    )
+                                },
+                                onClick = {
+                                    monthMenuExpanded = false
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                            )
+                        }
                     }
                 }
 
-                ExposedDropdownMenu(
-                    expanded = monthMenuExpanded,
-                    onDismissRequest = { monthMenuExpanded = false },
+                // Next Month Button
+                IconButton(
+                    onClick = {
+                        if (pagerState.currentPage < availableMonths.lastIndex) {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            }
+                        }
+                    },
+                    enabled = pagerState.currentPage < availableMonths.lastIndex,
                 ) {
-                    availableMonths.forEachIndexed { index, yearMonth ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = heatmapMonthYearLabel(yearMonth),
-                                    fontFamily = FontFamily.Monospace,
-                                )
+                    Text(
+                        text = "›",
+                        style = TextStyle(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (pagerState.currentPage < availableMonths.lastIndex) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                             },
-                            onClick = {
-                                monthMenuExpanded = false
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                        )
-                    }
+                        ),
+                    )
                 }
             }
 
@@ -524,12 +590,9 @@ private fun heatmapFireTint(intensity: Float, heatmapColors: List<Color>): Color
 @Composable
 private fun ActivityHeatmapPreview() {
     val sampleActivity = mapOf(
-        "2026-07-01" to 2,
-        "2026-07-02" to 5,
-        "2026-07-03" to 1,
-        "2026-07-05" to 10,
-        "2026-07-10" to 15,
-        "2026-07-15" to 4,
+        "2026-07-01" to DailyActivity(date = "2026-07-01", testsCompleted = 2),
+        "2026-07-02" to DailyActivity(date = "2026-07-02", testsCompleted = 5),
+        "2026-07-03" to DailyActivity(date = "2026-07-03", testsCompleted = 1),
     )
 
     MobileTypistTheme(darkTheme = false) {
@@ -544,9 +607,7 @@ private fun ActivityHeatmapPreview() {
 @Composable
 private fun ActivityHeatmapDarkPreview() {
     val sampleActivity = mapOf(
-        "2026-07-01" to 2,
-        "2026-07-05" to 10,
-        "2026-07-10" to 15,
+        "2026-07-01" to DailyActivity(date = "2026-07-01", testsCompleted = 2),
     )
 
     MobileTypistTheme(darkTheme = true) {

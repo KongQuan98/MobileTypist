@@ -2,6 +2,7 @@ package org.example.project.data.repo
 
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import org.example.project.data.model.DailyActivity
 import org.example.project.data.model.TypingTestResult
 import org.example.project.utils.currentDateKey
 import org.example.project.utils.timestampToDateKey
@@ -32,23 +33,37 @@ object ActivityHeatmapRepository {
         return timestampToDateKey(timestamp)
     }
 
-    fun aggregateFromResults(results: List<TypingTestResult>): Map<String, Int> {
+    fun aggregateFromResults(results: List<TypingTestResult>): Map<String, DailyActivity> {
         return results
             .groupBy { dateKeyFromTimestamp(it.timestamp) }
-            .mapValues { (_, dayResults) -> dayResults.size }
+            .mapValues { (date, dayResults) ->
+                DailyActivity(
+                    date = date,
+                    testsCompleted = dayResults.size,
+                    wordsTyped = dayResults.sumOf { it.wordsTyped },
+                    charactersTyped = dayResults.sumOf { it.characterCount },
+                    playTime = dayResults.sumOf { it.duration },
+                    updatedAt = dayResults.maxOf { it.timestamp }
+                )
+            }
     }
 
-    fun availableMonths(dailyActivity: Map<String, Int>): List<YearMonth> {
+    fun availableMonths(dailyActivity: Map<String, DailyActivity>): List<YearMonth> {
         val today = currentLocalDate()
         val end = YearMonth(today.year, today.monthNumber)
 
-        if (dailyActivity.isEmpty()) {
-            return listOf(end)
+        val dates = dailyActivity.keys.mapNotNull {
+            try {
+                LocalDate.parse(it)
+            } catch (e: Exception) {
+                null
+            }
         }
 
-        val earliestKey = dailyActivity.keys.min()
-        val earliestDate = LocalDate.parse(earliestKey)
-        val start = YearMonth(earliestDate.year, earliestDate.monthNumber)
+        val earliestDate = dates.minOrNull()
+        val dataStart = earliestDate?.let { YearMonth(it.year, it.monthNumber) }
+        val defaultStart = previousMonths(end, 11)
+        val start = if (dataStart != null && dataStart < defaultStart) dataStart else defaultStart
 
         val months = mutableListOf<YearMonth>()
         var cursor = start
@@ -56,13 +71,18 @@ object ActivityHeatmapRepository {
             months.add(cursor)
             cursor = nextMonth(cursor)
         }
-        return months
+
+        if (!months.contains(end)) {
+            months.add(end)
+        }
+
+        return months.sorted()
     }
 
     fun buildMonthGrid(
         year: Int,
         month: Int,
-        dailyActivity: Map<String, Int>,
+        dailyActivity: Map<String, DailyActivity>,
     ): MonthHeatmapData {
         val firstDay = LocalDate(year, month, 1)
         val daysInMonth = daysInMonth(year, month)
@@ -79,10 +99,10 @@ object ActivityHeatmapRepository {
                     val day = position - leadingPadding + 1
                     val date = LocalDate(year, month, day)
                     val dateKey = date.toString()
-                    val count = dailyActivity[dateKey] ?: 0
+                    val activity = dailyActivity[dateKey]
                     HeatmapCell(
                         day = day,
-                        testCount = count,
+                        testCount = activity?.testsCompleted ?: 0,
                         dateKey = dateKey,
                     )
                 }
@@ -138,5 +158,21 @@ object ActivityHeatmapRepository {
         } else {
             YearMonth(yearMonth.year, yearMonth.month + 1)
         }
+    }
+
+    private fun previousMonth(yearMonth: YearMonth): YearMonth {
+        return if (yearMonth.month == 1) {
+            YearMonth(yearMonth.year - 1, 12)
+        } else {
+            YearMonth(yearMonth.year, yearMonth.month - 1)
+        }
+    }
+
+    private fun previousMonths(yearMonth: YearMonth, count: Int): YearMonth {
+        var cursor = yearMonth
+        repeat(count) {
+            cursor = previousMonth(cursor)
+        }
+        return cursor
     }
 }

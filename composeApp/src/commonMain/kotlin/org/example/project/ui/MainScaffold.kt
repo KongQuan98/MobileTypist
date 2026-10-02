@@ -129,7 +129,8 @@ private fun MainScaffoldDarkThemePreview() {
                         appSettings = AppSettings(),
                         onBack = {},
                         onSaveSettings = {},
-                        onClearAllData = {}
+                        onClearAllData = {},
+                        onSignOut = {}
                     )
                 }
             )

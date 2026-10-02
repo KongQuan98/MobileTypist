@@ -50,12 +50,28 @@ fun Navigation(
     val achievementRepository = appContainer.achievementRepository
 
     val statisticsViewModel = remember { StatisticsViewModel(storageManager) }
-    val profileViewModel = remember { ProfileViewModel(storageManager, achievementRepository) }
+    val profileViewModel = remember {
+        ProfileViewModel(
+            storageManager,
+            achievementRepository,
+            appContainer.syncRepository,
+            appContainer.userRepository
+        )
+    }
     val settingsViewModel = remember { SettingsViewModel(storageManager) }
-    val homeViewModel = remember { HomeViewModel(storageManager, appContainer.streakRepository) }
+    val homeViewModel = remember {
+        HomeViewModel(
+            storageManager,
+            appContainer.streakRepository,
+            appContainer.userRepository,
+            appContainer.syncRepository
+        )
+    }
     val achievementsViewModel = remember { AchievementsViewModel(achievementRepository) }
-    val editProfileViewModel = remember { EditProfileViewModel(storageManager) }
+    val editProfileViewModel =
+        remember { EditProfileViewModel(storageManager, appContainer.userRepository) }
     val authViewModel = remember { AuthModule.viewModel }
+    val userViewModel = remember { appContainer.userViewModel }
 
     // Handle platform back button (Android) - no-op on iOS
     BackHandler(
@@ -124,7 +140,11 @@ fun Navigation(
                 is Screen.Settings -> {
                     SettingsScreen(
                         viewModel = settingsViewModel,
+                        authViewModel = authViewModel,
                         onBack = { navigationManager.navigateBack() },
+                        onSignOut = {
+                            navigationManager.navigateTo(Screen.Home)
+                        },
                         audioPlayer = audioPlayer,
                         modifier = modifier.then(scaffoldModifier)
                     )
@@ -145,17 +165,35 @@ fun Navigation(
                         },
                         onSignUpClick = {
                             navigationManager.navigateTo(Screen.Register)
+                        },
+                        onLoginSuccess = {
+                            navigationManager.navigateTo(Screen.Home)
+                        },
+                        onBack = {
+                            navigationManager.navigateBack()
                         }
                     )
                 }
 
                 is Screen.Register -> {
-                    CreateAccountScreen(viewModel = authViewModel)
+                    CreateAccountScreen(
+                        viewModel = authViewModel,
+                        onSignInClick = {
+                            navigationManager.navigateTo(Screen.Login)
+                        },
+                        onStartTyping = {
+                            navigationManager.navigateTo(Screen.Home)
+                        },
+                        onBack = {
+                            navigationManager.navigateBack()
+                        }
+                    )
                 }
 
                 is Screen.Profile -> {
                     ProfileScreen(
                         viewModel = profileViewModel,
+                        authViewModel = authViewModel,
                         onEditProfileClicked = { navigationManager.navigateTo(Screen.EditProfile) },
                         modifier = modifier.then(scaffoldModifier),
                         onViewMoreAchievements = {
@@ -163,6 +201,9 @@ fun Navigation(
                         },
                         onLoginClicked = {
                             navigationManager.navigateTo(Screen.Login)
+                        },
+                        onLogoutClicked = {
+                            navigationManager.navigateTo(Screen.Home)
                         }
                     )
                 }

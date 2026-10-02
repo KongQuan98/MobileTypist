@@ -38,7 +38,7 @@ CREATE POLICY "Users can view their own stats." ON public.user_stats
 CREATE POLICY "Users can update their own stats." ON public.user_stats
     FOR ALL USING (auth.uid() = user_id);
 
--- Achievements table
+-- Achievements table (definitions)
 CREATE TABLE IF NOT EXISTS public.achievements (
     id text PRIMARY KEY,
     key text UNIQUE,
@@ -94,6 +94,27 @@ CREATE POLICY "Users can view their own typing results." ON public.typing_result
 
 CREATE POLICY "Users can insert their own typing results." ON public.typing_results
     FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Daily Activity table
+CREATE TABLE IF NOT EXISTS public.daily_activity (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id uuid REFERENCES auth.users ON DELETE CASCADE,
+    activity_date date NOT NULL,
+    tests_completed integer DEFAULT 0,
+    words_typed integer DEFAULT 0,
+    characters_typed integer DEFAULT 0,
+    play_time integer DEFAULT 0,
+    updated_at timestamp with time zone DEFAULT now(),
+    UNIQUE(user_id, activity_date)
+);
+
+ALTER TABLE public.daily_activity ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own daily activity." ON public.daily_activity
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own daily activity." ON public.daily_activity
+    FOR ALL USING (auth.uid() = user_id);
 
 -- Trigger to create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()

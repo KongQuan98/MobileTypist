@@ -26,9 +26,15 @@ class NavigationManager(
             is Screen.Settings,
             is Screen.About,
             is Screen.LeaderBoard,
-            is Screen.Statistics -> {
+            is Screen.Statistics,
+            is Screen.Login -> {
                 currentScreen = Screen.Home
                 showBottomBar = true
+            }
+
+            is Screen.Register -> {
+                currentScreen = Screen.Login
+                showBottomBar = false
             }
             is Screen.Achievements -> {
                 currentScreen = Screen.Profile

@@ -10,6 +10,8 @@ import org.example.project.achievements.model.Achievement
 import org.example.project.achievements.repository.AchievementRepository
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
+import org.example.project.data.repo.SyncRepository
+import org.example.project.data.repo.UserRepository
 import org.example.project.data.storage.StorageManager
 
 data class ProfileUiState(
@@ -24,23 +26,33 @@ data class ProfileUiState(
 
 class ProfileViewModel(
     private val storageManager: StorageManager,
-    private val achievementRepository: AchievementRepository
+    private val achievementRepository: AchievementRepository,
+    private val syncRepository: SyncRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     val uiState: StateFlow<ProfileUiState> = combine(
-        storageManager.userProfileFlow,
+        userRepository.userProfile,
         storageManager.resultsFlow,
         storageManager.bestWpmFlow,
         storageManager.totalTestsFlow,
-        achievementRepository.achievements
-    ) { userProfile, results, bestWpm, totalTests, achievements ->
+        achievementRepository.achievements,
+        syncRepository.isSyncing
+    ) { flowArray ->
+        val userProfile = flowArray[0] as UserProfile
+        val results = flowArray[1] as List<TypingTestResult>
+        val bestWpm = flowArray[2] as Int
+        val totalTests = flowArray[3] as Int
+        val achievements = flowArray[4] as List<Achievement>
+        val isSyncing = flowArray[5] as Boolean
+
         ProfileUiState(
             userProfile = userProfile,
             recentTestResult = results,
             bestWpm = bestWpm,
             totalTests = totalTests,
             achievements = achievements,
-            isLoading = false
+            isLoading = isSyncing
         )
     }.stateIn(
         scope = viewModelScope,

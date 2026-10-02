@@ -7,11 +7,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.example.project.data.model.UserProfile
+import org.example.project.data.repo.UserRepository
 import org.example.project.data.storage.StorageManager
 
 class EditProfileViewModel(
-    private val storageManager: StorageManager
+    private val storageManager: StorageManager,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _username = MutableStateFlow("")
@@ -23,7 +26,7 @@ class EditProfileViewModel(
     private val _bio = MutableStateFlow("")
     val bio = _bio.asStateFlow()
 
-    private val _userProfile = storageManager.userProfileFlow
+    private val _userProfile = userRepository.userProfile
     val userProfile: StateFlow<UserProfile> = _userProfile.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -56,7 +59,9 @@ class EditProfileViewModel(
             email = _email.value.ifBlank { null },
             bio = _bio.value
         )
-        storageManager.saveUserProfile(updatedProfile)
-        onSuccess()
+        viewModelScope.launch {
+            userRepository.updateProfile(updatedProfile)
+            onSuccess()
+        }
     }
 }

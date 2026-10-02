@@ -1,6 +1,12 @@
 package org.example.project.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -44,6 +50,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -56,7 +63,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import compose.icons.FeatherIcons
+import compose.icons.feathericons.HelpCircle
 import compose.icons.feathericons.Play
+import compose.icons.feathericons.RefreshCw
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -197,7 +206,11 @@ fun HomeScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            TitleSection(showTitleBar = showContent)
+            TitleSection(
+                showTitleBar = showContent,
+                viewModel = viewModel,
+                navigationManager = navigationManager
+            )
 
             TypingModeBar(
                 viewModel = viewModel,
@@ -298,49 +311,128 @@ private fun StartPlayButton(
 @Composable
 private fun TitleSection(
     showTitleBar: Boolean,
+    viewModel: HomeViewModel,
+    navigationManager: NavigationManager
 ) {
+    val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
+    val isSyncing by viewModel.isSyncing.collectAsStateWithLifecycle()
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
     AnimatedVisibility(
         modifier = Modifier
-            .padding(top = 40.dp),
+            .padding(top = 40.dp)
+            .fillMaxWidth(),
         visible = showTitleBar,
         enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
     ) {
-        // Logo Row
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .border(
-                        2.dp,
-                        MaterialTheme.colorScheme.primary,
-                        RoundedCornerShape(8.dp)
-                    ),
-                contentAlignment = Alignment.Center
+            // App Icon and Name Centered
+            Row(
+                modifier = Modifier.align(Alignment.Center),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    stringResource(Res.string.app_icon),
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.MiddleEllipsis,
+                Box(
                     modifier = Modifier
-                        .padding(6.dp)
+                        .border(
+                            2.dp,
+                            MaterialTheme.colorScheme.primary,
+                            RoundedCornerShape(8.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        stringResource(Res.string.app_icon),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.MiddleEllipsis,
+                        modifier = Modifier.padding(6.dp)
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = stringResource(Res.string.app_name),
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily.Monospace
+                    ),
+                    textAlign = TextAlign.Center
                 )
             }
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = stringResource(Res.string.app_name),
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontFamily = FontFamily.Monospace
-                ),
-                textAlign = TextAlign.Center
-            )
+
+            // Avatar at top right
+            Box(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    onClick = { navigationManager.navigateTo(org.example.project.navigation.model.Screen.Profile) }
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        if (userProfile.isGuest) {
+                            Icon(
+                                imageVector = FeatherIcons.HelpCircle,
+                                contentDescription = "Guest",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            val avatar = remember(userProfile.avatarId) {
+                                org.example.project.data.repo.AvatarRepository.getAvatarById(
+                                    userProfile.avatarId
+                                )
+                            }
+                            Icon(
+                                imageVector = avatar.icon,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(24.dp)
+                            )
+
+                            // Logged in indicator
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .size(10.dp)
+                                    .background(Color(0xFF4CAF50), CircleShape)
+                                    .border(1.dp, MaterialTheme.colorScheme.background, CircleShape)
+                            )
+                        }
+                    }
+                }
+
+                // Rotating Sync Icon overlay
+                if (isSyncing) {
+                    Icon(
+                        imageVector = FeatherIcons.RefreshCw,
+                        contentDescription = "Syncing",
+                        modifier = Modifier
+                            .size(48.dp) // Slightly larger than avatar to encircle it or just sit next to it
+                            .rotate(rotation),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                    )
+                }
+            }
         }
     }
 }

@@ -105,6 +105,7 @@ class SupabaseAuthRepository constructor(
     override suspend fun signOut() {
         pendingPasswordRecovery = false
         supabase.auth.signOut()
+        _authState.value = AuthState.Unauthenticated
     }
 
     override fun onDeepLinkReceived(url: String) {
@@ -168,6 +169,18 @@ internal fun UserInfo.toAuthUser(): AuthUser {
 }
 
 object AuthModule {
+    private var syncRepository: org.example.project.data.repo.SyncRepository? = null
+
+    fun initialize(syncRepository: org.example.project.data.repo.SyncRepository) {
+        this.syncRepository = syncRepository
+    }
+
     val repository: AuthRepository by lazy { SupabaseAuthRepository() }
-    val viewModel: AuthViewModel by lazy { AuthViewModel(repository) }
+    val viewModel: AuthViewModel by lazy {
+        AuthViewModel(
+            repository,
+            syncRepository
+                ?: throw IllegalStateException("AuthModule must be initialized with syncRepository")
+        )
+    }
 }

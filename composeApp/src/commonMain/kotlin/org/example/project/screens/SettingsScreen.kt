@@ -106,7 +106,9 @@ private sealed interface SettingsListItem {
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    authViewModel: org.example.project.auth.AuthViewModel,
     onBack: () -> Unit,
+    onSignOut: () -> Unit,
     audioPlayer: AudioPlayer? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -117,6 +119,10 @@ fun SettingsScreen(
         onBack = onBack,
         onSaveSettings = { viewModel.saveSettings(it) },
         onClearAllData = { viewModel.clearAllData() },
+        onSignOut = {
+            authViewModel.signOut()
+            onSignOut()
+        },
         audioPlayer = audioPlayer,
         modifier = modifier
     )
@@ -128,6 +134,7 @@ fun SettingsScreenContent(
     onBack: () -> Unit,
     onSaveSettings: (AppSettings) -> Unit,
     onClearAllData: () -> Unit,
+    onSignOut: () -> Unit,
     audioPlayer: AudioPlayer? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -227,7 +234,7 @@ fun SettingsScreenContent(
             SettingsListItem.ActionRow(
                 label = signOutLabel,
                 isDestructive = true,
-                onClick = { },
+                onClick = onSignOut,
             ),
             SettingsListItem.Spacer40,
             SettingsListItem.Footer,
@@ -551,7 +558,8 @@ private fun SettingsScreenPreview() {
                 appSettings = AppSettings(),
                 onBack = {},
                 onSaveSettings = {},
-                onClearAllData = {}
+                onClearAllData = {},
+                onSignOut = {}
             )
         }
     }
@@ -566,7 +574,8 @@ private fun SettingsScreenPreviewDarkTheme() {
                 appSettings = AppSettings(),
                 onBack = {},
                 onSaveSettings = {},
-                onClearAllData = {}
+                onClearAllData = {},
+                onSignOut = {}
             )
         }
     }

@@ -9,10 +9,13 @@ import kotlinx.serialization.json.Json
 import org.example.project.achievements.model.AchievementProgress
 import org.example.project.dailystreak.model.StreakData
 import org.example.project.data.model.AppSettings
+import org.example.project.data.model.DailyActivity
 import org.example.project.data.model.DailyActivityDurations
 import org.example.project.data.model.TypingTestResult
 import org.example.project.data.model.UserProfile
+import org.example.project.data.model.UserStats
 import org.example.project.data.repo.ActivityHeatmapRepository
+import kotlin.time.Clock
 
 class StorageManager(private val settings: Settings) {
     private val json = Json { ignoreUnknownKeys = true }
@@ -27,6 +30,7 @@ class StorageManager(private val settings: Settings) {
         private const val KEY_ACHIEVEMENT_PROGRESS = "achievement_progress"
         private const val KEY_SOCIAL_SHARES = "social_shares"
         private const val KEY_STREAK = "streak_data"
+        private const val KEY_SYNC_PENDING = "sync_pending"
     }
 
     private val _settingsFlow = MutableStateFlow(getSettings())
@@ -47,6 +51,9 @@ class StorageManager(private val settings: Settings) {
 
     private val _dailyActivityFlow = MutableStateFlow(getDailyActivity())
     val dailyActivityFlow = _dailyActivityFlow.asStateFlow()
+
+    private val _syncPendingFlow = MutableStateFlow(isSyncPending())
+    val syncPendingFlow = _syncPendingFlow.asStateFlow()
 
     private val _achievementProgressFlow = MutableStateFlow(getAchievementProgress())
     val achievementProgressFlow = _achievementProgressFlow.asStateFlow()
@@ -130,10 +137,33 @@ class StorageManager(private val settings: Settings) {
     private fun getResults(): List<TypingTestResult> {
         val jsonString = settings.getStringOrNull(KEY_RESULTS) ?: return emptyList()
         return try {
-            json.decodeFromString<List<TypingTestResult>>(jsonString)
+            val decoded = json.decodeFromString<List<TypingTestResult>>(jsonString)
+            ensureDistinctTimestamps(decoded)
         } catch (e: Exception) {
             emptyList()
         }
+    }
+
+    private fun ensureDistinctTimestamps(results: List<TypingTestResult>): List<TypingTestResult> {
+        if (results.isEmpty()) return results
+        var modified = false
+        val sorted = results.toMutableList()
+        val seenTimestamps = mutableSetOf<Long>()
+        for (i in sorted.indices) {
+            var ts = sorted[i].timestamp
+            if (seenTimestamps.contains(ts)) {
+                while (seenTimestamps.contains(ts)) {
+                    ts -= 1000L
+                }
+                sorted[i] = sorted[i].copy(timestamp = ts)
+                modified = true
+            }
+            seenTimestamps.add(ts)
+        }
+        if (modified) {
+            saveAllResults(sorted)
+        }
+        return sorted
     }
 
     fun getBestWpm(): Int {
@@ -149,6 +179,18 @@ class StorageManager(private val settings: Settings) {
 
     fun getTotalTests(): Int {
         return settings.getIntOrNull(KEY_TOTAL_TESTS) ?: 0
+    }
+
+    fun getUserStats(userId: String): UserStats {
+        val streak = getStreakData()
+        return UserStats(
+            userId = userId,
+            bestWpm = getBestWpm(),
+            totalTests = getTotalTests(),
+            currentStreak = streak.currentStreak,
+            longestStreak = streak.longestStreak,
+            updatedAt = Clock.System.now().toEpochMilliseconds()
+        )
     }
 
     private fun incrementTotalTests() {
@@ -184,20 +226,38 @@ class StorageManager(private val settings: Settings) {
         _userProfileFlow.value = profile
     }
 
-    fun getDailyActivity(): Map<String, Int> {
+    fun getDailyActivity(): Map<String, DailyActivity> {
         val stored = readDailyActivity()
-        if (stored.isNotEmpty()) {
+        val resultsAggregated = ActivityHeatmapRepository.aggregateFromResults(getResults())
+        if (stored.isEmpty()) {
+            if (resultsAggregated.isNotEmpty()) {
+                persistDailyActivity(resultsAggregated)
+            }
+            return resultsAggregated
+        }
+        if (resultsAggregated.isEmpty()) {
             return stored
         }
-
-        val migrated = ActivityHeatmapRepository.aggregateFromResults(getResults())
-        if (migrated.isNotEmpty()) {
-            writeDailyActivity(migrated)
+        val merged = resultsAggregated.toMutableMap()
+        for ((date, activity) in stored) {
+            val existing = merged[date]
+            if (existing == null) {
+                merged[date] = activity
+            } else {
+                merged[date] = DailyActivity(
+                    date = date,
+                    testsCompleted = maxOf(existing.testsCompleted, activity.testsCompleted),
+                    wordsTyped = maxOf(existing.wordsTyped, activity.wordsTyped),
+                    charactersTyped = maxOf(existing.charactersTyped, activity.charactersTyped),
+                    playTime = maxOf(existing.playTime, activity.playTime),
+                    updatedAt = maxOf(existing.updatedAt ?: 0, activity.updatedAt ?: 0)
+                )
+            }
         }
-        return migrated
+        return merged
     }
 
-    private fun readDailyActivity(): Map<String, Int> {
+    private fun readDailyActivity(): Map<String, DailyActivity> {
         val jsonString = settings.getStringOrNull(KEY_DAILY_ACTIVITY) ?: return emptyMap()
         return try {
             json.decodeFromString<DailyActivityDurations>(jsonString).durations
@@ -206,15 +266,37 @@ class StorageManager(private val settings: Settings) {
         }
     }
 
-    private fun writeDailyActivity(activity: Map<String, Int>) {
+    private fun persistDailyActivity(activity: Map<String, DailyActivity>) {
         settings[KEY_DAILY_ACTIVITY] = json.encodeToString(DailyActivityDurations(activity))
+    }
+
+    fun writeDailyActivity(activity: Map<String, DailyActivity>) {
+        persistDailyActivity(activity)
+        _dailyActivityFlow.value = activity
     }
 
     private fun addDailyActivity(result: TypingTestResult) {
         val activity = getDailyActivity().toMutableMap()
         val dateKey = ActivityHeatmapRepository.dateKeyFromTimestamp(result.timestamp)
-        activity[dateKey] = (activity[dateKey] ?: 0) + 1
+        val current = activity[dateKey] ?: DailyActivity(date = dateKey)
+
+        activity[dateKey] = current.copy(
+            testsCompleted = current.testsCompleted + 1,
+            wordsTyped = current.wordsTyped + result.wordsTyped,
+            charactersTyped = current.charactersTyped + result.characterCount,
+            playTime = current.playTime + result.duration,
+            updatedAt = result.timestamp
+        )
         writeDailyActivity(activity)
+    }
+
+    fun isSyncPending(): Boolean {
+        return settings.getBoolean(KEY_SYNC_PENDING, false)
+    }
+
+    fun setSyncPending(pending: Boolean) {
+        settings[KEY_SYNC_PENDING] = pending
+        _syncPendingFlow.value = pending
     }
 
     fun getStreakData(): StreakData {
@@ -241,6 +323,7 @@ class StorageManager(private val settings: Settings) {
         settings.remove(KEY_ACHIEVEMENT_PROGRESS)
         settings.remove(KEY_SOCIAL_SHARES)
         settings.remove(KEY_STREAK)
+        settings.remove(KEY_USER_PROFILE)
         refreshStats()
     }
 

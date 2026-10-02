@@ -4,22 +4,45 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.example.project.dailystreak.model.StreakEvent
 import org.example.project.dailystreak.repository.StreakRepository
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
+import org.example.project.data.model.UserProfile
 import org.example.project.data.repo.Difficulty
 import org.example.project.data.repo.QuotesRepository
+import org.example.project.data.repo.UserRepository
 import org.example.project.data.repo.WordsRepository
 import org.example.project.data.storage.StorageManager
 
 class HomeViewModel(
     private val storageManager: StorageManager,
-    private val streakRepository: StreakRepository
+    private val streakRepository: StreakRepository,
+    private val userRepository: UserRepository,
+    private val syncRepository: org.example.project.data.repo.SyncRepository
 ) : ViewModel() {
+
+    val userProfile: StateFlow<UserProfile> = userRepository.userProfile
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserProfile())
+
+    val isSyncing: StateFlow<Boolean> = syncRepository.isSyncing
+
+    val bestWpm: StateFlow<Int> = storageManager.bestWpmFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val currentStreak: StateFlow<Int> = storageManager.streakFlow
+        .map { it.currentStreak }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val totalTests: StateFlow<Int> = storageManager.totalTestsFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val modes = listOf(TypingMode.TIME, TypingMode.WORDS, TypingMode.QUOTES)
     val timeOptions = listOf(15, 30, 60)
@@ -106,8 +129,8 @@ class HomeViewModel(
     }
 
     fun onTestComplete(result: TypingTestResult) {
-        storageManager.saveResult(result)
         viewModelScope.launch {
+            userRepository.saveResult(result)
             streakRepository.recordPlay()
             val event = streakRepository.getPendingEvent()
 

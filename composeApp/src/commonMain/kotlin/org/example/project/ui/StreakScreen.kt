@@ -383,7 +383,7 @@ fun StreakScreen(
 @OptIn(ExperimentalTime::class)
 @Composable
 private fun WeeklyView(
-    dailyActivity: Map<String, Int>,
+    dailyActivity: Map<String, org.example.project.data.model.DailyActivity>,
     themeColor: Color
 ) {
     val days = listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")

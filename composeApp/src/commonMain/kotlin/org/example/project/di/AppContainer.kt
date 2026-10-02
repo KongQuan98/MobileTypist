@@ -6,7 +6,9 @@ import org.example.project.auth.AuthModule
 import org.example.project.auth.SupabaseProvider
 import org.example.project.dailystreak.repository.StreakRepository
 import org.example.project.dailystreak.repository.StreakRepositoryImpl
+import org.example.project.data.repo.SupabaseSyncManager
 import org.example.project.data.repo.SupabaseUserRepository
+import org.example.project.data.repo.SyncRepository
 import org.example.project.data.repo.UserRepository
 import org.example.project.data.storage.StorageManager
 import org.example.project.viewModel.UserViewModel
@@ -23,6 +25,15 @@ class AppContainer(settings: Settings) {
         )
     }
 
+    val syncRepository: SyncRepository by lazy {
+        SupabaseSyncManager(
+            supabase = SupabaseProvider.client,
+            storageManager = storageManager
+        ).also {
+            AuthModule.initialize(it)
+        }
+    }
+
     val streakRepository: StreakRepository by lazy {
         StreakRepositoryImpl(storageManager = storageManager)
     }
@@ -34,7 +45,8 @@ class AppContainer(settings: Settings) {
     val userViewModel: UserViewModel by lazy {
         UserViewModel(
             authRepository = AuthModule.repository,
-            userRepository = userRepository
+            userRepository = userRepository,
+            syncRepository = syncRepository
         )
     }
 }

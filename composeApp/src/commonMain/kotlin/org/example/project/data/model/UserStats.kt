@@ -1,11 +1,12 @@
 package org.example.project.data.model
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class UserStats(
     @SerialName("user_id")
@@ -27,5 +28,7 @@ data class UserStats(
     @SerialName("longest_streak")
     val longestStreak: Int = 0,
     @SerialName("updated_at")
+    @JsonNames("updatedAt", "updated_at")
+    @Serializable(with = TimestampSerializer::class)
     val updatedAt: Long = Clock.System.now().toEpochMilliseconds()
 )

@@ -11,6 +11,10 @@ import kotlinx.coroutines.launch
 
 data class AuthUiState(
     val isLoading: Boolean = false,
+    val isSyncing: Boolean = false,
+    val isRegistrationSuccess: Boolean = false,
+    val isSignInSuccess: Boolean = false,
+    val needsVerification: Boolean = false,
     val errorMessage: String? = null,
     val infoMessage: String? = null,
     val pendingEmail: String? = null,
@@ -18,6 +22,7 @@ data class AuthUiState(
 
 class AuthViewModel(
     private val repository: AuthRepository,
+    private val syncRepository: org.example.project.data.repo.SyncRepository
 ) : ViewModel() {
 
     val authState: StateFlow<AuthState> = repository.authState
@@ -29,6 +34,10 @@ class AuthViewModel(
         if (!validateEmail(email)) return
         launchAuth(AuthOperation.SignIn) {
             repository.signIn(email.trim(), password)
+            // After successful sign in, perform cloud sync
+            _uiState.update { it.copy(isSyncing = true) }
+            syncRepository.syncAll()
+            _uiState.update { it.copy(isSyncing = false, isSignInSuccess = true) }
         }
     }
 
@@ -45,6 +54,10 @@ class AuthViewModel(
         _uiState.update { it.copy(pendingEmail = email.trim()) }
         launchAuth(AuthOperation.SignUp) {
             repository.signUp(email.trim(), password, username.trim().ifBlank { null })
+            // After sign up, sync local data to cloud
+            _uiState.update { it.copy(isSyncing = true) }
+            syncRepository.syncAll()
+            _uiState.update { it.copy(isSyncing = false, isRegistrationSuccess = true) }
         }
     }
 

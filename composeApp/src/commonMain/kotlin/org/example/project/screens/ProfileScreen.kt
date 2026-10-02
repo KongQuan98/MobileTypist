@@ -59,10 +59,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Edit3
 import compose.icons.feathericons.LogIn
-import compose.icons.feathericons.Star
+import compose.icons.feathericons.LogOut
 import mobiletypist.composeapp.generated.resources.Res
-import mobiletypist.composeapp.generated.resources.achievement_speed_demon_desc
-import mobiletypist.composeapp.generated.resources.achievement_speed_demon_title
 import mobiletypist.composeapp.generated.resources.profile_achievements
 import mobiletypist.composeapp.generated.resources.profile_avg_wpm
 import mobiletypist.composeapp.generated.resources.profile_best
@@ -82,27 +80,24 @@ import mobiletypist.composeapp.generated.resources.profile_view_less
 import mobiletypist.composeapp.generated.resources.profile_view_more_achievements
 import mobiletypist.composeapp.generated.resources.profile_view_more_tests
 import mobiletypist.composeapp.generated.resources.wpm
-import org.example.project.MobileTypistTheme
 import org.example.project.achievements.model.Achievement
-import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
-import org.example.project.data.model.UserProfile
 import org.example.project.data.repo.AvatarRepository
 import org.example.project.ui.TooltipHint
-import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.formatDate
 import org.example.project.utils.hapticClickable
 import org.example.project.viewModel.ProfileUiState
 import org.example.project.viewModel.ProfileViewModel
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
+    authViewModel: org.example.project.auth.AuthViewModel,
     onEditProfileClicked: () -> Unit,
     onViewMoreAchievements: () -> Unit,
     onLoginClicked: () -> Unit = {},
+    onLogoutClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -116,6 +111,10 @@ fun ProfileScreen(
         onEditProfileClicked = onEditProfileClicked,
         onViewMoreAchievements = onViewMoreAchievements,
         onLoginClicked = onLoginClicked,
+        onLogoutClicked = {
+            authViewModel.signOut()
+            onLogoutClicked()
+        },
         modifier = modifier
     )
 }
@@ -126,6 +125,7 @@ fun ProfileScreenContent(
     onEditProfileClicked: () -> Unit,
     onViewMoreAchievements: () -> Unit,
     onLoginClicked: () -> Unit = {},
+    onLogoutClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val results = uiState.recentTestResult
@@ -148,11 +148,9 @@ fun ProfileScreenContent(
 
     var isRecentTestsExpanded by remember { mutableStateOf(false) }
 
-    // Click border highlight effect
     val editProfileInteractionSource = remember { MutableInteractionSource() }
     val viewMoreAchievementInteractionSource = remember { MutableInteractionSource() }
 
-    // Button click
     val isEditProfilePressed by editProfileInteractionSource.collectIsPressedAsState()
     val isViewMoreAchievementPressed by viewMoreAchievementInteractionSource.collectIsPressedAsState()
 
@@ -205,6 +203,17 @@ fun ProfileScreenContent(
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(50.dp)
                     )
+
+                    // Logged in indicator
+                    if (userProfile.isLoggedIn) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .size(12.dp)
+                                .background(Color(0xFF4CAF50), CircleShape)
+                                .border(1.dp, MaterialTheme.colorScheme.background, CircleShape)
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(16.dp))
@@ -214,7 +223,7 @@ fun ProfileScreenContent(
                         text = userProfile.username,
                         style = TextStyle(
                             fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold, // Duolingo style
                             color = MaterialTheme.colorScheme.onSurface,
                             fontFamily = FontFamily.Monospace
                         )
@@ -310,6 +319,37 @@ fun ProfileScreenContent(
                         LoginPromptCard(onLoginClicked)
                         Spacer(Modifier.height(32.dp))
                     }
+                } else {
+                    item {
+                        Spacer(Modifier.height(16.dp))
+                        Button(
+                            onClick = onLogoutClicked,
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = FeatherIcons.LogOut,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                Text(
+                                    text = "Sign Out",
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(32.dp))
+                    }
                 }
 
                 // Summary Stats Cards
@@ -373,8 +413,7 @@ fun ProfileScreenContent(
                                     letterSpacing = 1.sp
                                 )
                             )
-                            val unlockedCount =
-                                achievements.count { it.unlocked }
+                            val unlockedCount = achievements.count { it.unlocked }
                             Text(
                                 text = stringResource(
                                     Res.string.profile_unlocked_label,
@@ -391,7 +430,6 @@ fun ProfileScreenContent(
 
                         Spacer(Modifier.height(16.dp))
 
-                        // Showcase top 3 achievements
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -403,7 +441,6 @@ fun ProfileScreenContent(
                                     modifier = Modifier.weight(1f)
                                 )
                             }
-                            // Maintain 1/3 width per card by adding empty slots if less than 3
                             repeat(3 - unlockedShowcase.size) {
                                 Box(modifier = Modifier.weight(1f))
                             }
@@ -805,7 +842,6 @@ private fun ProfileResultItem(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Mode box (e.g., 30s)
         Box(
             modifier = Modifier
                 .border(
@@ -827,7 +863,6 @@ private fun ProfileResultItem(
 
         Spacer(Modifier.width(16.dp))
 
-        // WPM and Time Ago
         Column(modifier = Modifier.weight(1f)) {
             Row(
                 modifier = Modifier.padding(bottom = 4.dp),
@@ -862,7 +897,6 @@ private fun ProfileResultItem(
             )
         }
 
-        // Accuracy and Dot
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "${result.accuracy}%",
@@ -879,96 +913,6 @@ private fun ProfileResultItem(
                     .size(6.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primary)
-            )
-        }
-    }
-}
-
-@Preview(heightDp = 1000)
-@Composable
-private fun ProfileScreenPreviewDark() {
-    val dummyUiState = ProfileUiState(
-        userProfile = UserProfile(username = "johndoe"),
-        recentTestResult = listOf(
-            TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 90,
-                timestamp = 1000L,
-                correctChars = 500,
-                errorCount = 50,
-                duration = 60,
-            )
-        ),
-        bestWpm = 105,
-        totalTests = 42,
-        achievements = listOf(
-            Achievement(
-                id = "1",
-                title = Res.string.achievement_speed_demon_title,
-                description = Res.string.achievement_speed_demon_desc,
-                icon = FeatherIcons.Star,
-                hidden = false,
-                progress = 100,
-                target = 100,
-                unlocked = true,
-                unlockedAt = null
-            )
-        )
-    )
-
-    PreviewCompositionLocals {
-        MobileTypistTheme(darkTheme = true) {
-            ProfileScreenContent(
-                uiState = dummyUiState,
-                onEditProfileClicked = {},
-                onViewMoreAchievements = {}
-            )
-        }
-    }
-}
-
-@Preview(heightDp = 1000)
-@Composable
-private fun ProfileScreenPreviewLight() {
-    val dummyUiState = ProfileUiState(
-        userProfile = UserProfile(username = "johndoe"),
-        recentTestResult = listOf(
-            TypingTestResult(
-                id = "",
-                mode = TypingMode.WORDS,
-                wpm = 100,
-                accuracy = 90,
-                timestamp = 1000L,
-                correctChars = 500,
-                errorCount = 50,
-                duration = 60,
-            )
-        ),
-        bestWpm = 105,
-        totalTests = 42,
-        achievements = listOf(
-            Achievement(
-                id = "1",
-                title = Res.string.achievement_speed_demon_title,
-                description = Res.string.achievement_speed_demon_desc,
-                icon = FeatherIcons.Star,
-                hidden = false,
-                progress = 100,
-                target = 100,
-                unlocked = true,
-                unlockedAt = null
-            )
-        )
-    )
-
-    PreviewCompositionLocals {
-        MobileTypistTheme(darkTheme = false) {
-            ProfileScreenContent(
-                uiState = dummyUiState,
-                onEditProfileClicked = {},
-                onViewMoreAchievements = {}
             )
         }
     }

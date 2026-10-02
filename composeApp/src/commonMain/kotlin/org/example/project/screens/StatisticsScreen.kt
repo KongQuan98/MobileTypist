@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mobiletypist.composeapp.generated.resources.*
 import org.example.project.MobileTypistTheme
+import org.example.project.data.model.DailyActivity
 import org.example.project.data.model.TypingMode
 import org.example.project.data.model.TypingTestResult
 import org.example.project.ui.ActivityHeatmap
@@ -462,7 +463,12 @@ private fun StatisticsScreenPreview() {
         ),
         bestWpm = 80,
         totalTests = 3,
-        dailyActivity = mapOf("2024-01-01" to 5),
+        dailyActivity = mapOf(
+            "2024-01-01" to DailyActivity(
+                date = "2024-01-01",
+                testsCompleted = 5
+            )
+        ),
         isLoading = false
     )
 
@@ -503,7 +509,12 @@ private fun StatisticsScreenDarkPreview() {
         ),
         bestWpm = 80,
         totalTests = 3,
-        dailyActivity = mapOf("2024-01-01" to 5),
+        dailyActivity = mapOf(
+            "2024-01-01" to DailyActivity(
+                date = "2024-01-01",
+                testsCompleted = 5
+            )
+        ),
         isLoading = false
     )
 

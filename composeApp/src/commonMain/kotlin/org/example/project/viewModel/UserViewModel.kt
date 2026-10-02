@@ -15,28 +15,33 @@ import org.example.project.data.repo.UserRepository
 
 class UserViewModel(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val syncRepository: org.example.project.data.repo.SyncRepository
 ) : ViewModel() {
 
     val userProfile: StateFlow<UserProfile> = userRepository.userProfile
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserProfile())
 
+    val isSyncing = syncRepository.isSyncing
+
     init {
+        var previousState: AuthState = AuthState.Loading
         // Automatically sync data when user becomes authenticated
         authRepository.authState
             .onEach { state ->
-                if (state is AuthState.Authenticated) {
+                if (state is AuthState.Authenticated && previousState !is AuthState.Authenticated) {
                     sync()
-                } else if (state is AuthState.Unauthenticated) {
+                } else if (state is AuthState.Unauthenticated && previousState is AuthState.Authenticated) {
                     userRepository.clearData()
                 }
+                previousState = state
             }
             .launchIn(viewModelScope)
     }
 
     fun sync() {
         viewModelScope.launch {
-            userRepository.syncData()
+            syncRepository.syncAll()
         }
     }
 

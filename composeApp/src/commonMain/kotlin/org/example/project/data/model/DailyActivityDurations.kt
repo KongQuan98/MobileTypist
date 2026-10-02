@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DailyActivityDurations(
-    val durations: Map<String, Int> = emptyMap(),
+    val durations: Map<String, DailyActivity> = emptyMap(),
 )
