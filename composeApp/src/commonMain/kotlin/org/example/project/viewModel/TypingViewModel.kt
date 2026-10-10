@@ -117,12 +117,7 @@ class TypingViewModel(
                     input = new // Keep input sync
                 } else {
                     // Normal character process
-                    val randomKeySound = when ((0..2).random()) {
-                        0 -> SoundEffect.KEY_PRESS_1
-                        1 -> SoundEffect.KEY_PRESS_2
-                        else -> SoundEffect.KEY_PRESS_3
-                    }
-                    audioPlayer?.play(randomKeySound)
+                    audioPlayer?.play(SoundEffect.KEY_PRESS_1)
 
                     if (newChar == targetChar) {
                         charStatuses[currentCharIndex] = CharStatus.Correct

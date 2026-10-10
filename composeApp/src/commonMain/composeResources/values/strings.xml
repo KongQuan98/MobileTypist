@@ -293,11 +293,11 @@
     <string name="streak_subheadline_broken">Start again today and beat your previous record.</string>
     <string name="streak_subheadline_welcome">You have been away for %1$d days. Let\'s get typing again!</string>
     <string name="streak_subheadline_milestone">Amazing achievement! You\'re among the top typists.</string>
-    <string name="streak_button_new">START A NEW STREAK</string>
-    <string name="streak_button_keep">KEEP MY STREAK ALIVE</string>
-    <string name="streak_button_secured">STREAK SECURED</string>
-    <string name="streak_next_milestone">NEXT MILESTONE</string>
-    <string name="streak_milestones_title">STREAK MILESTONES</string>
+    <string name="streak_button_new">start a new streak</string>
+    <string name="streak_button_keep">keep my streak alive</string>
+    <string name="streak_button_secured">streak secured</string>
+    <string name="streak_next_milestone">next milestone</string>
+    <string name="streak_milestones_title">streak milestones</string>
     <string name="streak_more_days">%1$d more days</string>
     <string name="streak_milestone_progress">%1$d / %2$d days</string>
 

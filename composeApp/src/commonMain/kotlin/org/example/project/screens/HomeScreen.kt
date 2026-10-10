@@ -76,6 +76,7 @@ import mobiletypist.composeapp.generated.resources.app_name
 import mobiletypist.composeapp.generated.resources.home_start_description
 import org.example.project.achievements.events.AchievementEvent
 import org.example.project.achievements.model.Achievement
+import org.example.project.dailystreak.model.StreakEvent
 import org.example.project.data.model.TypingMode
 import org.example.project.di.LocalAppContainer
 import org.example.project.navigation.NavigationManager
@@ -119,11 +120,11 @@ fun HomeScreen(
     LaunchedEffect(streakEvent) {
         streakEvent?.let { event ->
             when (event) {
-                is org.example.project.dailystreak.model.StreakEvent.StreakBroken -> {
+                is StreakEvent.StreakBroken -> {
                     audioPlayer.play(SoundEffect.GAME_FAIL)
                 }
 
-                is org.example.project.dailystreak.model.StreakEvent.WelcomeBack -> {
+                is StreakEvent.WelcomeBack -> {
                     audioPlayer.play(SoundEffect.BUTTON_CLICK)
                 }
 
