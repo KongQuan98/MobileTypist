@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.MobileTypist" parent="@android:style/Theme.Material.Light.NoActionBar">
+
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+
+        <!-- Android 12+ Splash Screen support -->
+        <item name="android:windowSplashScreenBackground">@color/splash_background_color</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_app_logo_splash</item>
+
+    </style>
+
+</resources>
