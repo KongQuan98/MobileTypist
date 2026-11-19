@@ -123,8 +123,7 @@ fun StreakScreen(
 
     val themeColor = when (event) {
         is StreakEvent.StreakBroken -> MaterialTheme.colorScheme.error
-        is StreakEvent.WelcomeBack -> Color(0xFFFF6B35) // Orange is not in standard M3, keeping for brand consistency or using secondary?
-        else -> MaterialTheme.colorScheme.primary // Gold/Yellow
+        else -> MaterialTheme.colorScheme.primary
     }
 
     val badgeText = when (event) {
@@ -361,7 +360,7 @@ fun StreakScreen(
             Spacer(Modifier.height(24.dp))
 
             // All Milestones
-            StreakMilestonesSection(currentStreak = currentStreak)
+            StreakMilestonesSection(currentStreak = currentStreak, themeColor = themeColor)
 
             Spacer(Modifier.height(24.dp)) // Space for button
 
@@ -592,7 +591,10 @@ private fun MilestoneCard(
 }
 
 @Composable
-private fun StreakMilestonesSection(currentStreak: Int) {
+private fun StreakMilestonesSection(
+    currentStreak: Int,
+    themeColor: Color = MaterialTheme.colorScheme.primary
+) {
     val milestones = listOf(7, 14, 30, 50, 100)
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -622,12 +624,12 @@ private fun StreakMilestonesSection(currentStreak: Int) {
                         .aspectRatio(1f)
                         .clip(RoundedCornerShape(14.dp))
                         .background(
-                            if (isReached) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                            if (isReached) themeColor.copy(alpha = 0.15f)
                             else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                         )
                         .border(
                             width = 1.dp,
-                            color = if (isReached) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                            color = if (isReached) themeColor.copy(alpha = 0.4f)
                             else MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(14.dp)
                         ),
@@ -638,7 +640,7 @@ private fun StreakMilestonesSection(currentStreak: Int) {
                             Icon(
                                 imageVector = FeatherIcons.Check,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = themeColor,
                                 modifier = Modifier.size(16.dp)
                             )
                         } else {

@@ -11,16 +11,10 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.example.project.MobileTypistTheme
 import org.example.project.data.model.AppSettings
@@ -33,7 +27,6 @@ import org.example.project.utils.LocalHaptics
 import org.example.project.utils.PreviewCompositionLocals
 import org.example.project.utils.isIOS
 import org.example.project.utils.wrap
-import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,12 +39,7 @@ fun MainScaffold(
     val currentScreen = navigationManager.currentScreen
     val shouldShowComposeBottomBar = navigationManager.showBottomBar && !isIOS()
     Scaffold(
-        contentWindowInsets = WindowInsets(
-            0,
-            0,
-            0,
-            0
-        ), // Remove default insets to handle them manually
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             AnimatedVisibility(
                 visible = shouldShowComposeBottomBar,
@@ -66,7 +54,6 @@ fun MainScaffold(
             }
         }
     ) { innerPadding ->
-        // When hidden, we don't want to keep the bottom padding
         val bottomPadding =
             if (shouldShowComposeBottomBar) innerPadding.calculateBottomPadding() else 0.dp
         Box(
@@ -87,33 +74,29 @@ private fun BottomNavigation(
 ) {
     val haptics = LocalHaptics.current
 
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        windowInsets = WindowInsets.navigationBars // Ensure it handles system nav bar correctly
-    ) {
-        BottomNavigationTab.tabList.forEach { tab ->
-            NavigationBarItem(
-                modifier = Modifier.padding(horizontal = 6.dp),
-                selected = currentScreen == tab.screenRoute,
-                onClick = { haptics.wrap(audioPlayer) { navigationManager.navigateTo(tab.screenRoute) } },
-                icon = { Icon(tab.icon, contentDescription = stringResource(tab.title)) },
-                label = {
-                    Text(
-                        text = stringResource(tab.title),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    indicatorColor = Color.Transparent
-                )
+    val navItems = remember {
+        BottomNavigationTab.tabList.map { tab ->
+            LimelightNavItem(
+                id = tab.screenRoute.toString(),
+                icon = { Icon(tab.icon, contentDescription = null) },
+                label = "",
+                screenRoute = tab.screenRoute
             )
         }
+    }
+
+    Box(
+        modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+    ) {
+        LimelightNav(
+            items = navItems,
+            currentScreen = currentScreen,
+            onTabSelected = { route ->
+                haptics.wrap(audioPlayer) {
+                    navigationManager.navigateTo(route)
+                }
+            }
+        )
     }
 }
 
