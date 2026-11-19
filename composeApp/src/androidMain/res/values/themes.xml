@@ -3,8 +3,8 @@
 
     <style name="Theme.MobileTypist" parent="@android:style/Theme.Material.Light.NoActionBar">
 
-        <!-- Launch background -->
-        <item name="android:windowBackground">#000000</item>
+        <!-- Launch background for pre-v31 -->
+        <item name="android:windowBackground">@drawable/splash_screen</item>
 
     </style>
 
