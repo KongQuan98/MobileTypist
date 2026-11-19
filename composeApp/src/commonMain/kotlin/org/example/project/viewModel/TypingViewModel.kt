@@ -102,7 +102,6 @@ class TypingViewModel(
                 hapticFeedback?.typingKey()
                 if (newChar == ' ' && targetChar != ' ') {
                     // Standard logic: Jump to next word on space press
-                    audioPlayer?.play(SoundEffect.KEY_PRESS_3) // Space often has a deeper sound
                     while (currentCharIndex < targetText.length && targetText[currentCharIndex] != ' ') {
                         charStatuses[currentCharIndex] = CharStatus.Incorrect
                         errorCount++
@@ -116,9 +115,6 @@ class TypingViewModel(
                     }
                     input = new // Keep input sync
                 } else {
-                    // Normal character process
-                    audioPlayer?.play(SoundEffect.KEY_PRESS_1)
-
                     if (newChar == targetChar) {
                         charStatuses[currentCharIndex] = CharStatus.Correct
                         correctCount++
